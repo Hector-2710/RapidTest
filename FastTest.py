@@ -1,32 +1,26 @@
 from requests import get
-from faker import Faker
 from utils import print_report
 
-fake = Faker()
-
 class FastTest:
-    def __init__(self, url):
+    def __init__(self, url: str):
         self.url = url
 
     def get(self, endpoint: str, expected_status: int = 200, params: dict = None, headers: dict = None, **kwargs):
-        full_url = f"{self.url}{endpoint}"
+        url = f"{self.url}{endpoint}"
         
         try:
-            response = get(full_url, params=params, headers=headers, **kwargs)
-            status = response.status_code
-            body = response.json()
+            response = get(url, params=params, headers=headers, **kwargs)
             actual_url = response.url
 
-            if status == expected_status:
-                print_report("PASSED", actual_url, status, body)
+            if response.status_code == expected_status:
+                print_report("PASSED", actual_url, response.status_code, response.json())
             else:
-                msg = f"Expected {expected_status}, but got {status}"
-                print_report("FAILED", actual_url, status, body, error_msg=msg)
+                print_report("FAILED", actual_url, response.status_code, response.json(), error_msg=f"Expected {expected_status}, but got {response.status_code}")
             
             return response
 
         except Exception as e:
-            print(f"\n❌ CRITICAL ERROR connecting to {full_url}:")
+            print(f"\n❌ CRITICAL ERROR connecting to {url}:")
             return None
    
 
