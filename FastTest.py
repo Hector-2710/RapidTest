@@ -10,27 +10,25 @@ class FastTest:
         
         try:
             response = get(url, params=params, headers=headers, **kwargs)
-            actual_url = response.url
-            actual_status = response.status_code
-            actual_body = response.json()
-
-            status_ok = actual_status == expected_status
+            status_ok = response.status_code == expected_status
             body_ok = True
             error_msg = None
 
             if expected_body is not None:
-                if actual_body != expected_body:
+                if response.json() != expected_body:
                     body_ok = False
-                    error_msg = f"Expected status {expected_status}, but got {actual_status}. " if not status_ok else ""
-                    error_msg += f"Body mismatch."
+                    if status_ok:
+                        error_msg = f"Body mismatch."
+                    else:
+                        error_msg = f"Expected status {expected_status}, but got {response.status_code} and body mismatch."
 
             if not status_ok and not error_msg:
-                error_msg = f"Expected status {expected_status}, but got {actual_status}"
+                error_msg = f"Expected status {expected_status}, but got {response.status_code}"
 
             if status_ok and body_ok:
-                print_report("PASSED", actual_url, actual_status, actual_body)
+                print_report("PASSED", response.url, response.status_code, response.json())
             else:
-                print_report("FAILED", actual_url, actual_status, actual_body, error_msg=error_msg)
+                print_report("FAILED", response.url, response.status_code, response.json(), error_msg=error_msg)
 
             return response
             
