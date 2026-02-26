@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rapidtest"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
   { name="Hector Rosales", email="h.rosales01@ufromail.cl" },
 ]
