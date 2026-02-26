@@ -2,7 +2,7 @@ from faker import Faker
 
 fake = Faker()
 
-class FastData:
+class Data:
 
     @staticmethod
     def generate_auth_user():

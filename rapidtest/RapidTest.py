@@ -2,7 +2,7 @@ import requests
 from rapidtest.Utils import print_report
 
 
-class FastTest:
+class Test:
     def __init__(self, url: str):
         self.url = url.rstrip('/')
 
