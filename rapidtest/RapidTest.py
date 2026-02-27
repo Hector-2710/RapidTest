@@ -61,9 +61,9 @@ class Test:
                 if response_json != expected_body:
                     body_ok = False
                     if status_ok:
-                        error_msg = "Body mismatch."
+                        error_msg = "The expected body is not the correct"
                     else:
-                        error_msg = f"Expected status {expected_status}, but got {response.status_code} and body mismatch."
+                        error_msg = f"Expected status {expected_status}, but got {response.status_code} and the expected body is not the correct"
 
             if not status_ok and not error_msg:
                 error_msg = f"Expected status {expected_status}, but got {response.status_code}"
