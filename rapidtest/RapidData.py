@@ -68,11 +68,6 @@ class Data:
         return fake.country()
 
     @staticmethod
-    def generate_company() -> str:
-        """Genera el nombre de una empresa ficticia."""
-        return fake.company()
-
-    @staticmethod
     def generate_job() -> str:
         """Genera un título de trabajo aleatorio."""
         return fake.job()
@@ -81,11 +76,6 @@ class Data:
     def generate_text() -> str:
         """Genera un texto aleatorio (párrafo corto)."""
         return fake.text()
-
-    @staticmethod
-    def generate_sentence() -> str:
-        """Genera una oración aleatoria."""
-        return fake.sentence()
 
     @staticmethod
     def generate_paragraph() -> str:
@@ -106,9 +96,3 @@ class Data:
     def generate_time() -> str:
         """Genera una hora aleatoria."""
         return str(fake.time())
-
-    @staticmethod
-    def generate_url() -> str:
-        """Genera una URL aleatoria."""
-        return fake.url()
-
