@@ -5,6 +5,7 @@ from rich.table import Table
 from rich.json import JSON
 from rich.text import Text
 from rich import box
+import traceback
 
 console = Console()
 
@@ -100,5 +101,34 @@ def print_report(result: str, url: str, status: int, body: Any, error_msg: Optio
     console.print("") # Espacio final
 
 
-
-
+def show_connection_error(url: str, exception: Exception) -> None:
+    """
+    Muestra un error de conexión detallado usando Rich.
+    
+    Args:
+        url (str): La URL que falló
+        exception (Exception): La excepción que ocurrió
+    """
+    error_text = Text()
+    error_text.append("🔥 CRITICAL API ERROR\n", style="bold red")
+    error_text.append(f"URL: ", style="bold")
+    error_text.append(f"{url}\n", style="blue underline")
+    error_text.append(f"Error Type: ", style="bold")
+    error_text.append(f"{type(exception).__name__}\n", style="yellow")
+    error_text.append(f"Error Message: ", style="bold")
+    error_text.append(f"{str(exception)}\n", style="red")
+    
+    if hasattr(exception, 'response') and exception.response is not None:
+        error_text.append(f"\nHTTP Status: ", style="bold")
+        error_text.append(f"{exception.response.status_code}\n", style="red bold")
+        error_text.append(f"Response Headers: ", style="bold")
+        error_text.append(f"{dict(exception.response.headers)}\n", style="dim")
+    
+    panel = Panel(
+        error_text,
+        title="[bold red]❌ API CONNECTION FAILED[/bold red]",
+        border_style="red",
+        expand=False
+    )
+    
+    console.print(panel)
