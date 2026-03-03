@@ -1,18 +1,9 @@
 from typing import Any, Optional
-from rich.console import Console, Group
-from rich.panel import Panel
-from rich.table import Table
-from rich.json import JSON
-from rich.text import Text
-from rich import box
-import traceback
-
-console = Console()
+import json
 
 def print_report(result: str, url: str, status: int, body: Any, error_msg: Optional[str] = None) -> None:
     """
-    Imprime un reporte visual de alta calidad del resultado de una prueba en la consola
-    utilizando la librería 'rich'. Soporta layouts responsivos para consolas pequeñas.
+    Imprime un reporte simple y rápido del resultado de una prueba.
 
     Args:
         result (str): El resultado de la prueba ('PASSED' o 'FAILED').
@@ -22,113 +13,134 @@ def print_report(result: str, url: str, status: int, body: Any, error_msg: Optio
         error_msg (str, optional): Mensaje detallado del error si la prueba falló.
     """
     
-    # Sensibilidad al ancho de la consola
-    width = console.width
-    is_narrow = width < 60
+    # Códigos de color ANSI
+    GREEN = '\033[92m'  # Verde
+    RED = '\033[91m'    # Rojo
+    BLUE = '\033[96m'   # Cian
+    YELLOW = '\033[93m' # Amarillo
+    BOLD = '\033[1m'    # Negrita
+    RESET = '\033[0m'   # Reset
     
-    # Configuración de colores y estilo según el resultado
+    # Configuración según el resultado
     if result == "PASSED":
-        main_color = "spring_green3"
-        header_style = "bold white on spring_green3"
-        border_style = "spring_green3"
+        color = GREEN
         icon = "✅"
     else:
-        main_color = "bright_red"
-        header_style = "bold white on bright_red"
-        border_style = "bright_red"
+        color = RED
         icon = "❌"
-
-    # Encabezado principal (más corto si es estrecho)
-    title_text = f" {icon} {result} " if is_narrow else f" {icon} TEST {result} "
-    header_text = Text(title_text, style=header_style)
     
-    # Tabla de metadatos (optimizada para espacio)
-    metadata_table = Table(show_header=False, box=None, padding=(0, 1 if is_narrow else 2))
-    metadata_table.add_row(Text("URL:", style="bold cyan"), Text(url, overflow="fold"))
+    # Status color
+    if 200 <= status < 300:
+        status_color = GREEN
+    elif 400 <= status < 500:
+        status_color = YELLOW  
+    else:
+        status_color = RED
     
-    # Status color logic
-    status_style = "bold green" if 200 <= status < 300 else "bold yellow" if status >= 400 else "bold red"
-    metadata_table.add_row(Text("Status:", style="bold cyan"), Text(str(status), style=status_style))
-
-    # Construcción del reporte
-    console.print("") # Espacio inicial
-    
-    # Panel principal
-    content = []
-    content.append(metadata_table)
+    print()
+    print(f"{color}{BOLD}{icon} TEST {result}{RESET}")
+    print(f"{BLUE}URL:{RESET} {url}")
+    print(f"{BLUE}Status:{RESET} {status_color}{status}{RESET}")
     
     if error_msg:
-        content.append(Panel(
-            Text(error_msg, style="bold white"), 
-            title="[bold white]Error[/]" if is_narrow else "[bold white]Error Detail[/]", 
-            border_style="bright_red", 
-            box=box.ROUNDED,
-            padding=(0, 1)
-        ))
-
-    if body:
-        # Si el body es un dict o list, usamos rich.json.JSON
-        if isinstance(body, (dict, list)):
-            json_renderable = JSON.from_data(body)
-            content.append(Panel(
-                json_renderable, 
-                title="[bold cyan]Body[/]" if is_narrow else "[bold cyan]Response Body[/]", 
-                border_style="cyan", 
-                box=box.ROUNDED, 
-                expand=True if is_narrow else False,
-                padding=(0, 1) if is_narrow else (1, 2)
-            ))
-        else:
-            content.append(Panel(
-                str(body), 
-                title="[bold cyan]Body[/]" if is_narrow else "[bold cyan]Response Body[/]", 
-                border_style="cyan", 
-                box=box.ROUNDED,
-                padding=(0, 1)
-            ))
-
-    # Renderizamos todo dentro de un panel contenedor con bordes pesados
-    # Usamos padding dinámico según el ancho
-    main_panel = Panel(
-        Group(*content),
-        title=header_text,
-        border_style=border_style,
-        box=box.HEAVY_EDGE,
-        padding=(0, 1) if is_narrow else (1, 2)
-    )
+        print(f"{RED}{BOLD}Error:{RESET} {error_msg}")
     
-    console.print(main_panel)
-    console.print("") # Espacio final
+    if body:
+        print(f"{BLUE}Response Body:{RESET}")
+        if isinstance(body, (dict, list)):
+            print(json.dumps(body, indent=2))
+        else:
+            print(str(body))
+    
+    print("="*60)
 
 
 def show_connection_error(url: str, exception: Exception) -> None:
     """
-    Muestra un error de conexión detallado usando Rich.
+    Muestra un error de conexión simple y claro.
     
     Args:
         url (str): La URL que falló
         exception (Exception): La excepción que ocurrió
     """
-    error_text = Text()
-    error_text.append("🔥 CRITICAL API ERROR\n", style="bold red")
-    error_text.append(f"URL: ", style="bold")
-    error_text.append(f"{url}\n", style="blue underline")
-    error_text.append(f"Error Type: ", style="bold")
-    error_text.append(f"{type(exception).__name__}\n", style="yellow")
-    error_text.append(f"Error Message: ", style="bold")
-    error_text.append(f"{str(exception)}\n", style="red")
+    # Códigos de color ANSI
+    RED = '\033[91m'    # Rojo
+    BLUE = '\033[96m'   # Cian
+    YELLOW = '\033[93m' # Amarillo
+    BOLD = '\033[1m'    # Negrita
+    RESET = '\033[0m'   # Reset
+    
+    print()
+    print(f"{RED}{BOLD}🔥 CRITICAL API ERROR{RESET}")
+    print(f"{BOLD}URL:{RESET} {BLUE}{url}{RESET}")
+    print(f"{BOLD}Error Type:{RESET} {YELLOW}{type(exception).__name__}{RESET}")
+    print(f"{BOLD}Error Message:{RESET} {RED}{str(exception)}{RESET}")
     
     if hasattr(exception, 'response') and exception.response is not None:
-        error_text.append(f"\nHTTP Status: ", style="bold")
-        error_text.append(f"{exception.response.status_code}\n", style="red bold")
-        error_text.append(f"Response Headers: ", style="bold")
-        error_text.append(f"{dict(exception.response.headers)}\n", style="dim")
+        print(f"{BOLD}HTTP Status:{RESET} {RED}{exception.response.status_code}{RESET}")
+        print(f"{BOLD}Response Headers:{RESET} {dict(exception.response.headers)}")
     
-    panel = Panel(
-        error_text,
-        title="[bold red]❌ API CONNECTION FAILED[/bold red]",
-        border_style="red",
-        expand=False
-    )
+    print()
     
-    console.print(panel)
+    def _calculate_results(results, duration, users) -> Dict[str, Any]:
+        """Calculate and display test results."""
+        if not results:
+            print("❌ No results collected")
+            return {}
+            
+        # Calculate statistics
+        total_requests = len(results)
+        successful_requests = sum(1 for r in results if r['success'])
+        failed_requests = total_requests - successful_requests
+        
+        response_times = [r['response_time'] for r in results if r['success']]
+        
+        if response_times:
+            avg_response_time = statistics.mean(response_times)
+            min_response_time = min(response_times)
+            max_response_time = max(response_times)
+        else:
+            avg_response_time = min_response_time = max_response_time = 0
+            
+        rps = total_requests / duration if duration > 0 else 0
+        success_rate = (successful_requests / total_requests * 100) if total_requests > 0 else 0
+        
+        # Create results dictionary
+        results = {
+            'total_requests': total_requests,
+            'successful_requests': successful_requests,
+            'failed_requests': failed_requests,
+            'success_rate': round(success_rate, 2),
+            'avg_response_time': round(avg_response_time, 2),
+            'min_response_time': round(min_response_time, 2),
+            'max_response_time': round(max_response_time, 2),
+            'requests_per_second': round(rps, 2),
+            'duration': duration,
+            'users': users
+        }
+        
+        # Display results
+        print("\n" + "="*60)
+        print("📊 PERFORMANCE TEST RESULTS")
+        print("="*60)
+        print(f"🎯 Total Requests:      {results['total_requests']}")
+        print(f"✅ Successful:          {results['successful_requests']}")
+        print(f"❌ Failed:              {results['failed_requests']}")
+        print(f"📈 Success Rate:        {results['success_rate']}%")
+        print(f"⚡ Requests/sec:        {results['requests_per_second']}")
+        print(f"⏱️  Avg Response Time:   {results['avg_response_time']}ms")
+        print(f"🐌 Min Response Time:   {results['min_response_time']}ms")
+        print(f"🐇 Max Response Time:   {results['max_response_time']}ms")
+        print(f"👥 Concurrent Users:    {results['users']}")
+        print(f"⏰ Test Duration:       {results['duration']}s")
+        print("="*60)
+        
+        # Status indicator
+        if results['success_rate'] >= 95:
+            print("🟢 Excellent performance!")
+        elif results['success_rate'] >= 80:
+            print("🟡 Good performance")
+        else:
+            print("🔴 Poor performance - check server")
+            
+        return results
