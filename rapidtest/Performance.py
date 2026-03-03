@@ -1,7 +1,7 @@
 import time
 import threading
 import requests
-from typing import Dict, Any, List, Optional, Annotated
+from typing import Dict, Any, Annotated
 import statistics
 
 
