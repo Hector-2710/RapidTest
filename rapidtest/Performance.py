@@ -7,9 +7,9 @@ import statistics
 
 class Performance:
     """
-    Simple performance testing module using requests and threading.
+    Simple performance testing module.
     
-    Provides basic load testing functionality without external dependencies.
+    Provides basic load testing functionality.
     """
 
     def __init__(self, *, 

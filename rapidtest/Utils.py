@@ -1,5 +1,6 @@
-from typing import Any, Optional
+from typing import Any, Optional, Dict
 import json
+import statistics
 
 def print_report(result: str, url: str, status: int, body: Any, error_msg: Optional[str] = None) -> None:
     """

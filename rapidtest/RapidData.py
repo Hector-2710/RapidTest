@@ -1,9 +1,9 @@
 from faker import Faker
-from typing import Dict
+from typing import Dict, Annotated
 
 fake = Faker()
 
-class Data:
+class data:
     """
     Fake data provider for testing.
     
@@ -17,6 +17,24 @@ class Data:
         user = {"username": fake.user_name(), "password": fake.password()}
         return user   
 
+    @staticmethod
+    def generate_user(*, name: Annotated[bool, "Whether to generate a name"] = False, username: Annotated[bool, "Whether to generate a username"] = False, password: Annotated[bool, "Whether to generate a password"] = False, email: Annotated[bool, "Whether to generate an email"] = False, age: Annotated[bool, "Whether to generate an age"] = False, address: Annotated[bool, "Whether to generate an address"] = False) -> Dict[str, str]:
+        """Generates a dictionary with random user information."""
+        user = {}
+        if name:
+            user["name"] = fake.name()
+        if username:
+            user["username"] = fake.user_name()
+        if password:
+            user["password"] = fake.password()
+        if email:
+            user["email"] = fake.email()
+        if age:
+            user["age"] = str(fake.random_int(min=18, max=80))
+        if address:
+            user["address"] = fake.address()
+        return user
+       
     @staticmethod
     def generate_name() -> str:
         """Generates a random full name."""

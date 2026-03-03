@@ -22,10 +22,10 @@ class Test:
 
     def _request(
         self, 
-        method: Annotated[str, "HTTP method (GET, POST, etc.)"], 
-        endpoint: Annotated[str, "Endpoint path (e.g., '/users')"], 
-        expected_status: Annotated[int, "Expected HTTP status code"] = 200, 
-        expected_body: Optional[Dict[str, Any]] = None,
+        method: str, 
+        endpoint: str, 
+        expected_status: int = 200, 
+        expected_json: Optional[Dict[str, Any]] = None,
         json: Optional[Union[Dict[str, Any], list, str, int, float, bool]] = None,
         data: Optional[Union[str, bytes, Dict[str, Any]]] = None,
         params: Optional[Dict[str, Any]] = None,
@@ -34,21 +34,6 @@ class Test:
     ) -> Optional[requests.Response]:
         """
         Internal method to make requests and validate results.
-
-        Args:
-            method (str): HTTP method (GET, POST, etc.).
-            endpoint (str): Endpoint path (e.g., '/users').
-            expected_status (int): Expected HTTP status code.
-            expected_body (dict, optional): Expected JSON body in response.
-            json (dict/list/str/int/float/bool, optional): JSON data to send in request body.
-            data (str/bytes/dict, optional): Request body data.
-            params (dict, optional): Query parameters for the URL.
-            headers (dict, optional): Additional HTTP headers.
-            **kwargs: Additional arguments for requests (timeout, cookies, etc.).
-
-        Returns:
-            requests.Response: The response object if connection was successful.
-            None: If a critical connection error occurred.
         """
         url = f"{self.url}/{endpoint.lstrip('/')}"
         method_func = getattr(requests, method.lower())
@@ -78,13 +63,13 @@ class Test:
                 response_json = {"raw_content": response.text}
             
         
-            if expected_body is not None:
-                if response_json != expected_body:
+            if expected_json is not None:
+                if response_json != expected_json:
                     body_ok = False
                     if status_ok:
-                        error_msg = "The expected body is not the correct"
+                        error_msg = "The expected JSON is not the correct"
                     else:
-                        error_msg = f"Expected status {expected_status}, but got {response.status_code} and the expected body is not the correct"
+                        error_msg = f"Expected status {expected_status}, but got {response.status_code} and the expected JSON is not the correct"
 
             if not status_ok and not error_msg:
                 error_msg = f"Expected status {expected_status}, but got {response.status_code}"
@@ -101,66 +86,66 @@ class Test:
             return None
 
     def get(self, *, 
-            endpoint: str, 
-            expected_status: int = 200, 
-            expected_body: Optional[Dict[str, Any]] = None,
-            params: Optional[Dict[str, Any]] = None,
-            headers: Optional[Dict[str, str]] = None,
+            endpoint: Annotated[str, "The API endpoint to call"],
+            expected_status: Annotated[int, "The expected HTTP status code"] = 200, 
+            expected_json: Annotated[Optional[Dict[str, Any]], "The expected JSON in response"] = None,
+            params: Annotated[Optional[Dict[str, Any]], "The query parameters for the request"] = None,
+            headers: Annotated[Optional[Dict[str, str]], "The headers for the request"] = None,
             **kwargs) -> Optional[requests.Response]:
-        """Performs a GET request and validates the result."""
-        return self._request("GET", endpoint, expected_status, expected_body, 
+        """Performs a GET request and validates status code and response body."""
+        return self._request("GET", endpoint, expected_status, expected_json, 
                            params=params, headers=headers, **kwargs)
 
     def post(self, *, 
-             endpoint: str, 
-             expected_status: int = 201, 
-             expected_body: Optional[Dict[str, Any]] = None,
-             json: Optional[Union[Dict[str, Any], list, str, int, float, bool]] = None,
-             data: Optional[Union[str, bytes, Dict[str, Any]]] = None,
-             params: Optional[Dict[str, Any]] = None,
-             headers: Optional[Dict[str, str]] = None,
+             endpoint: Annotated[str, "The API endpoint to call"],
+             expected_status: Annotated[int, "The expected HTTP status code"] = 201, 
+             expected_json: Annotated[Optional[Dict[str, Any]], "The expected JSON in response"] = None,
+             json: Annotated[Optional[Union[Dict[str, Any], list, str, int, float, bool]], "The JSON data for the request"] = None,
+             data: Annotated[Optional[Union[str, bytes, Dict[str, Any]]], "The data for the request"] = None,
+             params: Annotated[Optional[Dict[str, Any]], "The query parameters for the request"] = None,
+             headers: Annotated[Optional[Dict[str, str]], "The headers for the request"] = None,
              **kwargs) -> Optional[requests.Response]:
-        """Performs a POST request and validates the result."""
-        return self._request("POST", endpoint, expected_status, expected_body, 
+        """Performs a POST request and validates status code and response body."""
+        return self._request("POST", endpoint, expected_status, expected_json, 
                            json=json, data=data, params=params, headers=headers, **kwargs)
 
     def put(self, *, 
-            endpoint: str, 
-            expected_status: int = 200, 
-            expected_body: Optional[Dict[str, Any]] = None,
-            json: Optional[Union[Dict[str, Any], list, str, int, float, bool]] = None,
-            data: Optional[Union[str, bytes, Dict[str, Any]]] = None,
-            params: Optional[Dict[str, Any]] = None,
-            headers: Optional[Dict[str, str]] = None,
+            endpoint: Annotated[str, "The API endpoint to call"], 
+            expected_status: Annotated[int, "The expected HTTP status code"] = 200, 
+            expected_json: Annotated[Optional[Dict[str, Any]], "The expected JSON in response"] = None,
+            json: Annotated[Optional[Union[Dict[str, Any], list, str, int, float, bool]], "The JSON data for the request"] = None,
+            data: Annotated[Optional[Union[str, bytes, Dict[str, Any]]], "The data for the request"] = None,
+            params: Annotated[Optional[Dict[str, Any]], "The query parameters for the request"] = None,
+            headers: Annotated[Optional[Dict[str, str]], "The headers for the request"] = None,
             **kwargs) -> Optional[requests.Response]:
-        """Performs a PUT request and validates the result."""
-        return self._request("PUT", endpoint, expected_status, expected_body, 
+        """Performs a PUT request and validates status code and response body."""
+        return self._request("PUT", endpoint, expected_status, expected_json, 
                            json=json, data=data, params=params, headers=headers, **kwargs)
 
     def patch(self, *, 
-              endpoint: str, 
-              expected_status: int = 200, 
-              expected_body: Optional[Dict[str, Any]] = None,
-              json: Optional[Union[Dict[str, Any], list, str, int, float, bool]] = None,
-              data: Optional[Union[str, bytes, Dict[str, Any]]] = None,
-              params: Optional[Dict[str, Any]] = None,
-              headers: Optional[Dict[str, str]] = None,
+              endpoint: Annotated[str, "The API endpoint to call"], 
+              expected_status: Annotated[int, "The expected HTTP status code"] = 200, 
+              expected_json: Annotated[Optional[Dict[str, Any]], "The expected JSON in response"] = None,
+              json: Annotated[Optional[Union[Dict[str, Any], list, str, int, float, bool]], "The JSON data for the request"] = None,
+              data: Annotated[Optional[Union[str, bytes, Dict[str, Any]]], "The data for the request"] = None,
+              params: Annotated[Optional[Dict[str, Any]], "The query parameters for the request"] = None,
+              headers: Annotated[Optional[Dict[str, str]], "The headers for the request"] = None,
               **kwargs) -> Optional[requests.Response]:
-        """Performs a PATCH request and validates the result."""
-        return self._request("PATCH", endpoint, expected_status, expected_body, 
+        """Performs a PATCH request and validates status code and response body."""
+        return self._request("PATCH", endpoint, expected_status, expected_json, 
                            json=json, data=data, params=params, headers=headers, **kwargs)
 
     def delete(self, *, 
-               endpoint: str, 
-               expected_status: int = 204, 
-               expected_body: Optional[Dict[str, Any]] = None,
-               json: Optional[Union[Dict[str, Any], list, str, int, float, bool]] = None,
-               data: Optional[Union[str, bytes, Dict[str, Any]]] = None,
-               params: Optional[Dict[str, Any]] = None,
-               headers: Optional[Dict[str, str]] = None,
+               endpoint: Annotated[str, "The API endpoint to call"], 
+               expected_status: Annotated[int, "The expected HTTP status code"] = 204, 
+               expected_json: Annotated[Optional[Dict[str, Any]], "The expected JSON in response"] = None,
+               json: Annotated[Optional[Union[Dict[str, Any], list, str, int, float, bool]], "The JSON data for the request"] = None,
+               data: Annotated[Optional[Union[str, bytes, Dict[str, Any]]], "The data for the request"] = None,
+               params: Annotated[Optional[Dict[str, Any]], "The query parameters for the request"] = None,
+               headers: Annotated[Optional[Dict[str, str]], "The headers for the request"] = None,
                **kwargs) -> Optional[requests.Response]:
-        """Performs a DELETE request and validates the result."""
-        return self._request("DELETE", endpoint, expected_status, expected_body, 
+        """Performs a DELETE request and validates status code and response body."""
+        return self._request("DELETE", endpoint, expected_status, expected_json, 
                            json=json, data=data, params=params, headers=headers, **kwargs)
 
 
