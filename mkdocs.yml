@@ -66,18 +66,21 @@ markdown_extensions:
 
 # Navigation
 nav:
-  - Home: index.md
+  - RapidTest: index.md
   - Getting Started:
     - Installation: getting-started/installation.md
     - Quick Start: getting-started/quick-start.md
+  - Learn:
+    - About Threadings: learn/threadings.md
   - Tutorial:
     - Basic Usage: tutorial/basic-usage.md
-    - Advanced Examples: tutorial/advanced-examples.md
   - API Reference:
     - RapidTest Class: api/rapidtest.md
     - Performance Testing: api/performance.md
     - Data Generation: api/rapiddata.md
-  - Examples: examples/index.md
+  - Examples:
+    - Basic Example: examples/basic.md
+    - Performance Testing Example: examples/performance.md
 
 # Extra
 extra:
