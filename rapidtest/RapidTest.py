@@ -34,6 +34,9 @@ class Test:
     ) -> Optional[requests.Response]:
         """
         Internal method to make requests and validate results.
+        
+        Returns:
+            requests.Response: The HTTP response object if successful, None if connection fails.
         """
         url = f"{self.url}/{endpoint.lstrip('/')}"
         method_func = getattr(requests, method.lower())
@@ -96,15 +99,24 @@ class Test:
         Performs a GET request and validates status code and response body.
         
         Args:
-            endpoint: The API endpoint to call
+            endpoint: The API endpoint to call (relative to base URL)
             expected_status: The expected HTTP status code (default: 200)
-            expected_json: The expected JSON in response (optional)
-            params: The query parameters for the request (optional)
-            headers: The headers for the request (optional)
-            **kwargs: Additional arguments passed to requests
-            
+            expected_json: The expected JSON response body for validation (optional)
+            params: The query parameters to append to the request URL
+            headers: The HTTP headers to include in the request
+            **kwargs: Additional arguments passed to the underlying requests.get()
+        
         Returns:
-            requests.Response: The response object, or None if request failed
+            requests.Response: The complete HTTP response object containing:
+                - status_code: HTTP status code
+                - json(): Parsed JSON response (if valid JSON)
+                - text: Raw response text
+                - headers: Response headers
+                - url: Final request URL
+                Returns None if connection fails.
+        
+        Note:
+            Prints test results (PASSED/FAILED) with response details to console.
         """
         return self._request("GET", endpoint, expected_status, expected_json, 
                            params=params, headers=headers, **kwargs)
@@ -122,17 +134,27 @@ class Test:
         Performs a POST request and validates status code and response body.
         
         Args:
-            endpoint: The API endpoint to call
+            endpoint: The API endpoint to call (relative to base URL)
             expected_status: The expected HTTP status code (default: 201)
-            expected_json: The expected JSON in response (optional)
-            json: The JSON data for the request (optional)
-            data: The data for the request (optional)
-            params: The query parameters for the request (optional)
-            headers: The headers for the request (optional)
-            **kwargs: Additional arguments passed to requests
-            
+            expected_json: The expected JSON response body for validation (optional)
+            json: JSON data to send in the request body
+            data: Raw data to send in the request body (alternative to json)
+            params: Query parameters to append to the request URL
+            headers: HTTP headers to include in the request
+            **kwargs: Additional arguments passed to the underlying requests.post()
+        
         Returns:
-            requests.Response: The response object, or None if request failed
+            requests.Response: The complete HTTP response object containing:
+                - status_code: HTTP status code
+                - json(): Parsed JSON response (if valid JSON)
+                - text: Raw response text
+                - headers: Response headers
+                - url: Final request URL
+                Returns None if connection fails.
+        
+        Note:
+            Prints test results (PASSED/FAILED) with response details to console.
+            Use either 'json' or 'data' parameter, not both.
         """
         return self._request("POST", endpoint, expected_status, expected_json, 
                            json=json, data=data, params=params, headers=headers, **kwargs)
@@ -150,17 +172,27 @@ class Test:
         Performs a PUT request and validates status code and response body.
         
         Args:
-            endpoint: The API endpoint to call
+            endpoint: The API endpoint to call (relative to base URL)
             expected_status: The expected HTTP status code (default: 200)
-            expected_json: The expected JSON in response (optional)
-            json: The JSON data for the request (optional)
-            data: The data for the request (optional)
-            params: The query parameters for the request (optional)
-            headers: The headers for the request (optional)
-            **kwargs: Additional arguments passed to requests
-            
+            expected_json: The expected JSON response body for validation (optional)
+            json: JSON data to send in the request body
+            data: Raw data to send in the request body (alternative to json)
+            params: Query parameters to append to the request URL
+            headers: HTTP headers to include in the request
+            **kwargs: Additional arguments passed to the underlying requests.put()
+        
         Returns:
-            requests.Response: The response object, or None if request failed
+            requests.Response: The complete HTTP response object containing:
+                - status_code: HTTP status code
+                - json(): Parsed JSON response (if valid JSON)
+                - text: Raw response text
+                - headers: Response headers
+                - url: Final request URL
+                Returns None if connection fails.
+        
+        Note:
+            Prints test results (PASSED/FAILED) with response details to console.
+            Use either 'json' or 'data' parameter, not both.
         """
         return self._request("PUT", endpoint, expected_status, expected_json, 
                            json=json, data=data, params=params, headers=headers, **kwargs)
@@ -179,16 +211,15 @@ class Test:
         
         Args:
             endpoint: The API endpoint to call
-            expected_status: The expected HTTP status code (default: 200)
-            expected_json: The expected JSON in response (optional)
-            json: The JSON data for the request (optional)
-            data: The data for the request (optional)
-            params: The query parameters for the request (optional)
-            headers: The headers for the request (optional)
-            **kwargs: Additional arguments passed to requests
-            
+            expected_status: The expected HTTP status code
+            expected_json: The expected JSON in response
+            json: The JSON data for the request
+            data: The data for the request
+            params: The query parameters for the request
+            headers: The headers for the request
+        
         Returns:
-            requests.Response: The response object, or None if request failed
+            requests.Response: The HTTP response object if successful, None if connection fails.
         """
         return self._request("PATCH", endpoint, expected_status, expected_json, 
                            json=json, data=data, params=params, headers=headers, **kwargs)
@@ -207,16 +238,15 @@ class Test:
         
         Args:
             endpoint: The API endpoint to call
-            expected_status: The expected HTTP status code (default: 204)
-            expected_json: The expected JSON in response (optional)
-            json: The JSON data for the request (optional)
-            data: The data for the request (optional)
-            params: The query parameters for the request (optional)
-            headers: The headers for the request (optional)
-            **kwargs: Additional arguments passed to requests
-            
+            expected_status: The expected HTTP status code
+            expected_json: The expected JSON in response
+            json: The JSON data for the request
+            data: The data for the request
+            params: The query parameters for the request
+            headers: The headers for the request
+        
         Returns:
-            requests.Response: The response object, or None if request failed
+            requests.Response: The HTTP response object if successful, None if connection fails.
         """
         return self._request("DELETE", endpoint, expected_status, expected_json, 
                            json=json, data=data, params=params, headers=headers, **kwargs)
