@@ -22,7 +22,7 @@ class Test:
 
     def _request(
         self, 
-        method: str, 
+        method:str,
         endpoint: str, 
         expected_status: int = 200, 
         expected_json: Optional[Dict[str, Any]] = None,
@@ -92,7 +92,20 @@ class Test:
             params: Annotated[Optional[Dict[str, Any]], "The query parameters for the request"] = None,
             headers: Annotated[Optional[Dict[str, str]], "The headers for the request"] = None,
             **kwargs) -> Optional[requests.Response]:
-        """Performs a GET request and validates status code and response body."""
+        """
+        Performs a GET request and validates status code and response body.
+        
+        Args:
+            endpoint: The API endpoint to call
+            expected_status: The expected HTTP status code (default: 200)
+            expected_json: The expected JSON in response (optional)
+            params: The query parameters for the request (optional)
+            headers: The headers for the request (optional)
+            **kwargs: Additional arguments passed to requests
+            
+        Returns:
+            requests.Response: The response object, or None if request failed
+        """
         return self._request("GET", endpoint, expected_status, expected_json, 
                            params=params, headers=headers, **kwargs)
 
@@ -105,7 +118,22 @@ class Test:
              params: Annotated[Optional[Dict[str, Any]], "The query parameters for the request"] = None,
              headers: Annotated[Optional[Dict[str, str]], "The headers for the request"] = None,
              **kwargs) -> Optional[requests.Response]:
-        """Performs a POST request and validates status code and response body."""
+        """
+        Performs a POST request and validates status code and response body.
+        
+        Args:
+            endpoint: The API endpoint to call
+            expected_status: The expected HTTP status code (default: 201)
+            expected_json: The expected JSON in response (optional)
+            json: The JSON data for the request (optional)
+            data: The data for the request (optional)
+            params: The query parameters for the request (optional)
+            headers: The headers for the request (optional)
+            **kwargs: Additional arguments passed to requests
+            
+        Returns:
+            requests.Response: The response object, or None if request failed
+        """
         return self._request("POST", endpoint, expected_status, expected_json, 
                            json=json, data=data, params=params, headers=headers, **kwargs)
 
@@ -118,7 +146,22 @@ class Test:
             params: Annotated[Optional[Dict[str, Any]], "The query parameters for the request"] = None,
             headers: Annotated[Optional[Dict[str, str]], "The headers for the request"] = None,
             **kwargs) -> Optional[requests.Response]:
-        """Performs a PUT request and validates status code and response body."""
+        """
+        Performs a PUT request and validates status code and response body.
+        
+        Args:
+            endpoint: The API endpoint to call
+            expected_status: The expected HTTP status code (default: 200)
+            expected_json: The expected JSON in response (optional)
+            json: The JSON data for the request (optional)
+            data: The data for the request (optional)
+            params: The query parameters for the request (optional)
+            headers: The headers for the request (optional)
+            **kwargs: Additional arguments passed to requests
+            
+        Returns:
+            requests.Response: The response object, or None if request failed
+        """
         return self._request("PUT", endpoint, expected_status, expected_json, 
                            json=json, data=data, params=params, headers=headers, **kwargs)
 
@@ -131,7 +174,22 @@ class Test:
               params: Annotated[Optional[Dict[str, Any]], "The query parameters for the request"] = None,
               headers: Annotated[Optional[Dict[str, str]], "The headers for the request"] = None,
               **kwargs) -> Optional[requests.Response]:
-        """Performs a PATCH request and validates status code and response body."""
+        """
+        Performs a PATCH request and validates status code and response body.
+        
+        Args:
+            endpoint: The API endpoint to call
+            expected_status: The expected HTTP status code (default: 200)
+            expected_json: The expected JSON in response (optional)
+            json: The JSON data for the request (optional)
+            data: The data for the request (optional)
+            params: The query parameters for the request (optional)
+            headers: The headers for the request (optional)
+            **kwargs: Additional arguments passed to requests
+            
+        Returns:
+            requests.Response: The response object, or None if request failed
+        """
         return self._request("PATCH", endpoint, expected_status, expected_json, 
                            json=json, data=data, params=params, headers=headers, **kwargs)
 
@@ -144,7 +202,22 @@ class Test:
                params: Annotated[Optional[Dict[str, Any]], "The query parameters for the request"] = None,
                headers: Annotated[Optional[Dict[str, str]], "The headers for the request"] = None,
                **kwargs) -> Optional[requests.Response]:
-        """Performs a DELETE request and validates status code and response body."""
+        """
+        Performs a DELETE request and validates status code and response body.
+        
+        Args:
+            endpoint: The API endpoint to call
+            expected_status: The expected HTTP status code (default: 204)
+            expected_json: The expected JSON in response (optional)
+            json: The JSON data for the request (optional)
+            data: The data for the request (optional)
+            params: The query parameters for the request (optional)
+            headers: The headers for the request (optional)
+            **kwargs: Additional arguments passed to requests
+            
+        Returns:
+            requests.Response: The response object, or None if request failed
+        """
         return self._request("DELETE", endpoint, expected_status, expected_json, 
                            json=json, data=data, params=params, headers=headers, **kwargs)
 
