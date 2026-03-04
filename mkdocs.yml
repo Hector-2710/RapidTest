@@ -10,6 +10,8 @@ repo_url: https://github.com/yourusername/rapidtest
 # Theme
 theme:
   name: material
+  logo: images/RapidTest-logo.png
+  favicon: images/RapidTest-logo.png
 
   palette:
     # Primary colors
@@ -38,7 +40,8 @@ theme:
 
   icon:
     repo: fontawesome/brands/github
-    logo: material/rocket
+    # Using custom logo instead of material icon
+    # logo: material/rocket
 
   language: en
 
