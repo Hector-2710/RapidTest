@@ -18,9 +18,11 @@ class data:
         return user   
 
     @staticmethod
-    def generate_user(*, name: Annotated[bool, "Whether to generate a name"] = False, username: Annotated[bool, "Whether to generate a username"] = False, password: Annotated[bool, "Whether to generate a password"] = False, email: Annotated[bool, "Whether to generate an email"] = False, age: Annotated[bool, "Whether to generate an age"] = False, address: Annotated[bool, "Whether to generate an address"] = False) -> Dict[str, str]:
+    def generate_user(*, id : Annotated[bool, "Whether to generate an ID"] = False, name: Annotated[bool, "Whether to generate a name"] = False, username: Annotated[bool, "Whether to generate a username"] = False, password: Annotated[bool, "Whether to generate a password"] = False, email: Annotated[bool, "Whether to generate an email"] = False, age: Annotated[bool, "Whether to generate an age"] = False, address: Annotated[bool, "Whether to generate an address"] = False) -> Dict[str, str]:
         """Generates a dictionary with random user information."""
         user = {}
+        if id:
+            user["id"] = fake.uuid4()
         if name:
             user["name"] = fake.name()
         if username:
