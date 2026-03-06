@@ -1,3 +1,5 @@
+![RapidTest Logo](images/RapidTest-logo.png)
+
 # RapidTest 🚀
 
 A **super lightweight** and fast library to simplify REST API testing. Designed to be intuitive, fast to implement, and with clear colorized reports.
