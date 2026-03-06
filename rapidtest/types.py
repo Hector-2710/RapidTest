@@ -1,4 +1,4 @@
-from typing import Union, Optional, Any
+from typing import Union, Any
 import requests
 
 """
@@ -8,16 +8,17 @@ This module contains all custom type aliases used throughout
 the library for better code readability and maintainability.
 """
 
-# HTTP-related types
-URL = str
-JsonDict = dict[str, Any]
-Headers = dict[str, str]
-QueryParams = dict[str, Any]
-JsonData = Union[dict[str, Any], list, str, int, float, bool]
-RawData = Union[str, bytes, dict[str, Any]]
-HttpMethod = str
-StatusCode = int
-Endpoint = str
-Response = Union[requests.Response, None]
-Results = dict[str, Any]
+type URL = str
+type JsonDict = dict[str, Any]
+type Headers = dict[str, str]
+type QueryParams = dict[str, Any]
+type JsonData = Union[dict[str, Any], list, str, int, float, bool]
+type RawData = Union[str, bytes, dict[str, Any]]
+type HttpMethod = str
+type StatusCode = int
+type Endpoint = str
+type Response = Union[requests.Response, None]
+type Results = dict[str, Any]
+
+
 
