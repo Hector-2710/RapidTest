@@ -3,7 +3,7 @@ import threading
 import requests
 from typing import Dict, Any, Annotated
 import statistics
-from rapidtest.types import Endpoint, Results, JsonData, RawData, QueryParams, Headers, ResponseJson, HttpMethod, URL
+from rapidtest.types import Endpoint, Results, URL
 
 
 class Performance:
