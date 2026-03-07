@@ -3,8 +3,7 @@ import threading
 import requests
 from typing import Dict, Any, Annotated
 import statistics
-from rapidtest.types import Endpoint, Results, URL
-
+from rapidtest.types import Endpoint, Results, URL, Seconds
 
 class Performance:
     """
@@ -16,16 +15,16 @@ class Performance:
     def __init__(self, *, 
                  base_url: Annotated[URL, "Base URL to test"],
                  users: Annotated[int, "Number of concurrent users to simulate (default: 10)"] = 10,
-                 duration: Annotated[int, "Test duration in seconds (default: 10)"] = 10,
-                 timeout: Annotated[int, "Max request timeout in seconds (default: 10)"] = 10):
+                 duration: Annotated[Seconds, "Test duration in seconds (default: 10)"] = 10,
+                 timeout: Annotated[Seconds, "Max request timeout in seconds (default: 10)"] = 10):
         """
         Initialize the performance test.
 
         Args:
-            base_url (URL): The base URL to test
+            base_url (URL): Base URL to test
             users (int): Number of concurrent users to simulate
-            duration (int): Test duration in seconds
-            timeout (int): Request timeout in seconds
+            duration (Seconds): Test duration in seconds
+            timeout (Seconds): Request timeout in seconds
         """
         self.base_url = base_url.rstrip('/')
         self.users = users
@@ -35,15 +34,26 @@ class Performance:
         self.lock = threading.Lock()
         
     def add_get_task(self, *, endpoint: Annotated[Endpoint, "URL endpoint to test"]):
-        """Add a GET request task."""
+        """Add a GET request task.
+
+        Args:
+            endpoint (Endpoint): URL endpoint to test
+
+        Returns:
+            None 
+        """
+
         self.endpoint = endpoint
         
     def run(self) -> Results:
         """
         Run the performance test.
         
+        Args:
+            None
+
         Returns:
-            Results: Test results and statistics
+            Results: Test results and statistics.
         """
         if not hasattr(self, 'endpoint'):
             raise ValueError("No endpoint defined. Use add_get_task() before running.")
@@ -65,7 +75,6 @@ class Performance:
             threads.append(thread)
             thread.start()
             
-        print("\nWait while it finishes...")
         time.sleep(self.duration)
         self.stop_test = True
         
@@ -74,7 +83,7 @@ class Performance:
             
         return self._calculate_results()
     
-    def _worker(self, worker_id: Annotated[int, "Worker thread ID"]):
+    def _worker(self, worker_id: int):
         """Worker thread that makes HTTP requests."""
         session = requests.Session()
         url = f"{self.base_url}{self.endpoint}"
