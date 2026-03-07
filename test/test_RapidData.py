@@ -36,5 +36,10 @@ class TestData(unittest.TestCase):
             self.assertIn(key, result, f"The result should contain the key '{key}'.")
             self.assertTrue(result[key], f"The '{key}' value should not be empty.")
 
+    def test_create_user_with_no_fields(self):
+        result = data.generate_user()
+        self.assertIsInstance(result, dict, "The result should be a dictionary.")
+        self.assertEqual(len(result), 0, "The result should be an empty dictionary when no fields are requested.")
+
 if __name__ == '__main__':
     unittest.main()
