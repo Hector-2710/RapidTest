@@ -21,5 +21,6 @@ type Response = Union[requests.Response, None]
 type Results = dict[str, Any]
 type StatusCode = int
 
+type Seconds = int
 
 
