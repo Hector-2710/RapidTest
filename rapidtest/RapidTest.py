@@ -3,7 +3,6 @@ from typing import Optional, Dict, Any, Annotated, Union
 from rapidtest.Utils import print_report, show_connection_error
 from rapidtest.types import URL, JsonDict, Headers, QueryParams, JsonData, RawData, HttpMethod, StatusCode, Endpoint, Response
 
-
 class Test:
     """
     Main class for performing REST API integration tests.
@@ -36,12 +35,9 @@ class Test:
     ) -> Response:
         """
         Internal method to make requests and validate results.
-        
-        Returns:
-            requests.Response: The HTTP response object if successful, None if connection fails.
         """
         url = f"{self.url}/{endpoint.lstrip('/')}"
-        method_func = getattr(requests, method.lower())
+        method_func = getattr(requests,method.lower())
         
         request_kwargs = {}
         if json is not None:
@@ -91,68 +87,54 @@ class Test:
             return None
 
     def get(self, *, 
-            endpoint: Annotated[Endpoint, "The API endpoint to call (String)"],
-            expected_status: Annotated[StatusCode, "The expected HTTP status code"] = 200, 
+            endpoint: Annotated[Endpoint, "The API endpoint to call"],
+            expected_status: Annotated[StatusCode, "The expected HTTP status code (default: 200)"] = 200, 
             expected_json: Annotated[Optional[JsonDict], "The expected JSON in response"] = None,
             params: Annotated[Optional[QueryParams], "The query parameters for the request"] = None,
             headers: Annotated[Optional[Headers], "The headers for the request"] = None,
             **kwargs) -> Response:
         """
         Performs a GET request and validates status code and response body.
-        
+
         Args:
-            endpoint: The API endpoint to call (relative to base URL)
+            endpoint: The API endpoint to call 
             expected_status: The expected HTTP status code (default: 200)
             expected_json: The expected JSON response body for validation (optional)
-            params: The query parameters to append to the request URL
-            headers: The HTTP headers to include in the request
+            params: Query parameters to append to the request URL
+            headers: HTTP headers to include in the request
             **kwargs: Additional arguments passed to the underlying requests.get()
-        
+
         Returns:
-            requests.Response: The complete HTTP response object containing:
-                - status_code: HTTP status code
-                - json(): Parsed JSON response (if valid JSON)
-                - text: Raw response text
-                - headers: Response headers
-                - url: Final request URL
-                Returns None if connection fails.
+            Response: The complete HTTP response object.
         
-        Note:
-            Prints test results (PASSED/FAILED) with response details to console.
         """
         return self._request("GET", endpoint, expected_status, expected_json, 
                            params=params, headers=headers, **kwargs)
 
     def post(self, *, 
-             endpoint: Annotated[Endpoint, "The API endpoint to call (String)"],
-             expected_status: Annotated[StatusCode, "The expected HTTP status code"] = 201, 
+             endpoint: Annotated[Endpoint, "The API endpoint to call"],
+             expected_status: Annotated[StatusCode, "The expected HTTP status code (default: 201)"] = 201, 
+             input_json: Annotated[Optional[JsonData], "JSON data to send in the request body"] = None,
              expected_json: Annotated[Optional[JsonDict], "The expected JSON in response"] = None,
-             input_json: Annotated[Optional[JsonData], "The JSON data for the request"] = None,
-             data: Annotated[Optional[RawData], "The data for the request"] = None,
-             params: Annotated[Optional[QueryParams], "The query parameters for the request"] = None,
-             headers: Annotated[Optional[Headers], "The headers for the request"] = None,
+             data: Annotated[Optional[RawData], "Raw data to send in the request body (alternative to input_json)"] = None,
+             params: Annotated[Optional[QueryParams], "Query parameters to append to the request URL"] = None,
+             headers: Annotated[Optional[Headers], "HTTP headers to include in the request"] = None,
              **kwargs) -> Response:
         """
         Performs a POST request and validates status code and response body.
         
         Args:
-            endpoint: The API endpoint to call (relative to base URL)
+            endpoint: The API endpoint to call 
             expected_status: The expected HTTP status code (default: 201)
-            expected_json: The expected JSON response body for validation (optional)
             input_json: JSON data to send in the request body
+            expected_json: The expected JSON in response 
             data: Raw data to send in the request body (alternative to input_json)
             params: Query parameters to append to the request URL
             headers: HTTP headers to include in the request
             **kwargs: Additional arguments passed to the underlying requests.post()
         
         Returns:
-            requests.Response: The complete HTTP response object containing:
-                - status_code: HTTP status code
-                - json(): Parsed JSON response (if valid JSON)
-                - text: Raw response text
-                - headers: Response headers
-                - url: Final request URL
-                Returns None if connection fails.
+            Response: The complete HTTP response object.
         
         Note:
             Prints test results (PASSED/FAILED) with response details to console.
@@ -162,35 +144,29 @@ class Test:
                            json=input_json, data=data, params=params, headers=headers, **kwargs)
 
     def put(self, *, 
-            endpoint: Annotated[Endpoint, "The API endpoint to call (String)"], 
-            expected_status: Annotated[StatusCode, "The expected HTTP status code"] = 200, 
+            endpoint: Annotated[Endpoint, "The API endpoint to call"], 
+            expected_status: Annotated[StatusCode, "The expected HTTP status code (default: 200)"] = 200, 
+            input_json: Annotated[Optional[JsonData], "JSON data to send in the request body"] = None,
             expected_json: Annotated[Optional[JsonDict], "The expected JSON in response"] = None,
-            input_json: Annotated[Optional[JsonData], "The JSON data for the request"] = None,
-            data: Annotated[Optional[RawData], "The data for the request"] = None,
-            params: Annotated[Optional[QueryParams], "The query parameters for the request"] = None,
-            headers: Annotated[Optional[Headers], "The headers for the request"] = None,
+            data: Annotated[Optional[RawData], "Raw data to send in the request body (alternative to input_json)"] = None,
+            params: Annotated[Optional[QueryParams], "Query parameters to append to the request URL"] = None,
+            headers: Annotated[Optional[Headers], "HTTP headers to include in the request"] = None,
             **kwargs) -> Response:
         """
         Performs a PUT request and validates status code and response body.
         
         Args:
-            endpoint: The API endpoint to call (relative to base URL)
+            endpoint: The API endpoint to call 
             expected_status: The expected HTTP status code (default: 200)
-            expected_json: The expected JSON response body for validation (optional)
             input_json: JSON data to send in the request body
+            expected_json: The expected JSON response body for validation (optional)
             data: Raw data to send in the request body (alternative to input_json)
             params: Query parameters to append to the request URL
             headers: HTTP headers to include in the request
             **kwargs: Additional arguments passed to the underlying requests.put()
         
         Returns:
-            requests.Response: The complete HTTP response object containing:
-                - status_code: HTTP status code
-                - json(): Parsed JSON response (if valid JSON)
-                - text: Raw response text
-                - headers: Response headers
-                - url: Final request URL
-                Returns None if connection fails.
+            Response: The complete HTTP response object.
         
         Note:
             Prints test results (PASSED/FAILED) with response details to console.
@@ -200,13 +176,13 @@ class Test:
                            json=input_json, data=data, params=params, headers=headers, **kwargs)
 
     def patch(self, *, 
-              endpoint: Annotated[Endpoint, "The API endpoint to call (String)"], 
+              endpoint: Annotated[Endpoint, "The API endpoint to call"], 
               expected_status: Annotated[StatusCode, "The expected HTTP status code"] = 200, 
+              input_json: Annotated[Optional[JsonData], "JSON data to send in the request body"] = None,
               expected_json: Annotated[Optional[JsonDict], "The expected JSON in response"] = None,
-              input_json: Annotated[Optional[JsonData], "The JSON data for the request"] = None,
-              data: Annotated[Optional[RawData], "The data for the request"] = None,
-              params: Annotated[Optional[QueryParams], "The query parameters for the request"] = None,
-              headers: Annotated[Optional[Headers], "The headers for the request"] = None,
+              data: Annotated[Optional[RawData], "Raw data to send in the request body (alternative to input_json)"] = None,
+              params: Annotated[Optional[QueryParams], "Query parameters to append to the request URL"] = None,
+              headers: Annotated[Optional[Headers], "HTTP headers to include in the request"] = None,
               **kwargs) -> Response:
         """
         Performs a PATCH request and validates status code and response body.
@@ -214,26 +190,26 @@ class Test:
         Args:
             endpoint: The API endpoint to call
             expected_status: The expected HTTP status code
+            input_json: JSON data to send in the request body
             expected_json: The expected JSON in response
-            input_json: The JSON data for the request
-            data: The data for the request
-            params: The query parameters for the request
-            headers: The headers for the request
+            data: Raw data to send in the request body (alternative to input_json)
+            params: Query parameters to append to the request URL
+            headers: HTTP headers to include in the request
         
         Returns:
-            requests.Response: The HTTP response object if successful, None if connection fails.
+            Response: The complete HTTP response object.
         """
         return self._request("PATCH", endpoint, expected_status, expected_json, 
                            json=input_json, data=data, params=params, headers=headers, **kwargs)
 
     def delete(self, *, 
-               endpoint: Annotated[Endpoint, "The API endpoint to call (String)"], 
+               endpoint: Annotated[Endpoint, "The API endpoint to call"], 
                expected_status: Annotated[StatusCode, "The expected HTTP status code"] = 204, 
+               input_json: Annotated[Optional[JsonData], "JSON data to send in the request body"] = None,
                expected_json: Annotated[Optional[JsonDict], "The expected JSON in response"] = None,
-               input_json: Annotated[Optional[JsonData], "The JSON data for the request"] = None,
-               data: Annotated[Optional[RawData], "The data for the request"] = None,
-               params: Annotated[Optional[QueryParams], "The query parameters for the request"] = None,
-               headers: Annotated[Optional[Headers], "The headers for the request"] = None,
+               data: Annotated[Optional[RawData], "Raw data to send in the request body (alternative to input_json)"] = None,
+               params: Annotated[Optional[QueryParams], "Query parameters to append to the request URL"] = None,
+               headers: Annotated[Optional[Headers], "HTTP headers to include in the request"] = None,
                **kwargs) -> Response:
         """
         Performs a DELETE request and validates status code and response body.
@@ -242,13 +218,13 @@ class Test:
             endpoint: The API endpoint to call
             expected_status: The expected HTTP status code
             expected_json: The expected JSON in response
-            input_json: The JSON data for the request
-            data: The data for the request
-            params: The query parameters for the request
-            headers: The headers for the request
+            input_json: JSON data to send in the request body
+            data: Raw data to send in the request body (alternative to input_json)
+            params: Query parameters to append to the request URL
+            headers: HTTP headers to include in the request
         
         Returns:
-            requests.Response: The HTTP response object if successful, None if connection fails.
+            Response: The HTTP response object if successful.
         """
         return self._request("DELETE", endpoint, expected_status, expected_json, 
                            json=input_json, data=data, params=params, headers=headers, **kwargs)
