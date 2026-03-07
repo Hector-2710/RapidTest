@@ -19,21 +19,7 @@ type HttpMethod = str
 type Endpoint = str
 type Response = Union[requests.Response, None]
 type Results = dict[str, Any]
+type StatusCode = int
 
-class StatusCode(enum.IntEnum):
-    CONTINUE = 100
-    OK = 200
-    CREATED = 201
-    ACCEPTED = 202
-    NO_CONTENT = 204
-    MOVED_PERMANENTLY = 301
-    TEMPORARY_REDIRECT = 307
-    PERMANENT_REDIRECT = 308
-    BAD_REQUEST = 400
-    UNAUTHORIZED = 401
-    FORBIDDEN = 403
-    NOT_FOUND = 404
-    NOT_ACCEPTABLE = 406
-    REQUEST_TIMEOUT = 408
-    INTERNAL_SERVER_ERROR = 500
+
 
