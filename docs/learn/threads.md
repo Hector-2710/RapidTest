@@ -17,7 +17,7 @@ Threading enables concurrent execution of multiple requests, simulating real-wor
  - Stress testing endpoints
 
 
-### 🧪 Threading Best Practices with RapidTest
+### 🧪 Threading with RapidTest
 
 With RapidTest Performance module, threading is handled automatically. You just specify the number of concurrent users and duration - the threading complexity is abstracted away for simple, effective load testing. ✨
 
