@@ -48,7 +48,7 @@ data = {"name": "John", "email": "john@example.com"}
 response = test.post(
     "/users",
     json=data,  # RapidTest automatically sets Content-Type: application/json
-    headers={"Accept": "application/json"}
+    headers={"Content-Type": "application/json"}
 )
 ```
 ## 3. 🍪 Cookie Headers
