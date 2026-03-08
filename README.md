@@ -2,13 +2,12 @@
 
 # RapidTest 🚀
 
-A **super lightweight** and blazingly fast library to simplify REST API testing. Designed to be intuitive, fast to implement, and with clear colorized reports - **no heavy dependencies!**
+A **super lightweight** and blazingly fast library to simplify REST API testing. Designed to be intuitive, fast to implement.
 
 ## ✨ Features
 
 - **Simplicity**: Perform HTTP requests (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) in a single line with comprehensive response validation.
 - **Automatic Validation**: Automatically compare status codes and response bodies with detailed error reporting.
-- **Fast & Lightweight**: Minimal dependencies, maximum speed!
 - **Data Generator**: Integrated random data generator (using Faker) for dynamic testing with flexible user creation.
 - **Performance Testing**: Built-in load testing with threading - no external tools needed!
 
@@ -44,15 +43,6 @@ user_data = {"username": "Uziel", "password": "Mypass123"}
 tester.post(endpoint="/user", json=user_data, expected_status=201, expected_json=user_data)
 ```
 
-#### PATCH / PUT / DELETE
-```python
-# Update data
-tester.patch(endpoint="/user/hector", json={"password": "new_password"}, expected_status=200)
-
-# Delete resource  
-tester.delete(endpoint="/user/hector", expected_status=204)
-```
-
 ### Advanced Example with Dynamic Data
 
 ```python
@@ -66,15 +56,6 @@ user = data.generate_user(id=True, name=True, email=True, age=True, password=Tru
 
 # Test user creation
 tester.post(endpoint="/user", json=user, expected_status=201)
-
-# Test user retrieval 
-tester.get(endpoint=f"/users/{user['email']}", expected_status=200)
-
-# Test user update
-tester.put(endpoint=f"/user/{user['id']}", json=user, expected_status=200)
-
-# Test user deletion
-tester.delete(endpoint=f"/user/{user['id']}", expected_status=202)
 ```
 
 ### 3. Generate Random Data
@@ -83,10 +64,6 @@ Use the `data` class to create test data on the fly:
 
 ```python
 from rapidtest import data
-
-# Generate a complete user with all fields
-user = data.generate_user(id=True, name=True, email=True, age=True, password=True, username=True)
-print(user) # {'id': '...', 'name': '...', 'email': '...', 'age': '25', 'password': '...', 'username': '...'}
 
 # Generate specific data types
 auth_user = data.generate_auth_user()
@@ -107,13 +84,51 @@ tester.get(endpoint="/users", params={"page": 1, "limit": 10})
 
 # Custom headers
 tester.post(endpoint="/auth", json=user_data, headers={"Content-Type": "application/json"})
-
-# Form data
-tester.post(endpoint="/upload", data={"file": "content"})
-
-# Additional requests arguments
-tester.get(endpoint="/secure", timeout=30, verify=False)
 ```
+
+## ⚡ RapidTest vs FastAPI TestClient
+
+See the difference yourself! RapidTest dramatically simplifies your testing code:
+
+### 📋 FastAPI's TestClient Approach
+```python
+# Traditional FastAPI TestClient - More verbose
+from fastapi.testclient import TestClient
+from api import app
+
+client = TestClient(app)
+
+def test_read_item():
+    response = client.get("/items/foo")
+    assert response.status_code == 200
+    assert response.json() == {"id": "foo", "title": "Foo"}
+
+# Result: 4 lines for the test
+```
+
+### 🚀 RapidTest Approach  
+```python
+# RapidTest - Clean and concise
+from rapidtest import Test
+
+fastTest = Test(url="http://localhost:8000")
+fastTest.get(endpoint="/items/foo", expected_status=200, expected_json={"id": "foo", "title": "Foo"})
+
+# Result: 2 lines for the test
+```
+
+### 🎯 Key Advantages
+
+| Feature | FastAPI TestClient | RapidTest |
+|---------|-------------------|-----------|
+| **Lines of code** | 4+ lines | 2 lines |
+| **Assertions** | Manual `assert` statements | Built-in validation |
+| **Setup complexity** | Import app, create client | Simple URL configuration |
+| **Error reporting** | Basic assertion errors | Detailed, colored output |
+| **Data generation** | Manual or external tools | Built-in `data` class |
+| **Performance testing** | Requires additional tools | Built-in `Performance` class |
+
+**Result: 50% less code, 100% more clarity!** ✨
 
 ## 🚀 Performance Testing
 
@@ -136,15 +151,7 @@ perf.add_get_task(endpoint="/api/users")
 
 # Run the test and shown results in terminal)
 perf.run()
-
 ```
-
-### Simple Performance Testing Features
-
-- **No external dependencies**: Uses only `requests` and `threading`
-- **Real-time terminal output**: See results as they happen
-- **Basic load simulation**: Multiple concurrent users
-- **Essential metrics**: Response times, success rates, RPS
 
 ### Performance Test Output
 
@@ -162,12 +169,6 @@ See how your tests look with real colorized output:
 
 ### ❌ Failed Test
 ![Test Failed](docs/images/test_failed.png)
-
-**Colors:**
-- ✅ Green for PASSED tests
-- ❌ Red for FAILED tests  
-- 🔵 Blue for labels and info
-- 🟡 Yellow for warnings
 
 ## 📁 Project Structure
 
