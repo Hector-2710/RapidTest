@@ -190,7 +190,7 @@ See how your tests look with real colorized output:
 
 ## 📖 Project Information
 
-- **Version**: 0.3.2
+- **Version**: 0.3.3
 - **Author**: Hector Rosales
 - **License**: MIT
 - **Homepage**: https://github.com/hector-dev/rapidtest
