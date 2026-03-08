@@ -68,7 +68,7 @@ nav:
     - HTTP Headers: learn/http-headers.md
     - About Threads: learn/threads.md
   - Tutorial:
-    - Basic Usage: tutorial/usage.md
+    - Basic Usage: tutorial/basic.md
   - API Reference:
     - RapidTest Class: api/rapidtest.md
     - Performance Testing: api/performance.md
