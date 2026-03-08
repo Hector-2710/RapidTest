@@ -1,15 +1,15 @@
+![RapidTest Logo](images/RapidTest-logo.png)
+
 # RapidTest 🚀
 
-A **super lightweight** and fast library to simplify REST API testing. Designed to be intuitive, fast to implement, and with clear colorized reports.
+A **super lightweight** and fast library to simplify REST API testing. Designed to be intuitive and fast to implement.
 
 ## ✨ Features
 
-- **Simplicity**: Perform HTTP requests (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) in a single line.
-- **Automatic Validation**: Automatically compare status codes and response bodies.
-- **Fast & Lightweight**: Minimal dependencies, maximum speed!
-- **Colorized Reports**: Clean console output with ANSI colors to identify failures quickly.
-- **Data Generator**: Integrated random data generator (using Faker) for dynamic testing.
-- **Performance Testing**: Built-in load testing with threading - no external tools needed!
+- **Simplicity**: Perform HTTP requests (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) in a single line with comprehensive response validation.
+- **Automatic Validation**: Automatically compare status codes and response bodies with detailed error reporting.
+- **Data Generator**: Integrated random data generator (using Faker) for dynamic testing with flexible user creation.
+- **Performance Testing**: Built-in load testing with threading - no external tools neede
 
 ## Why RapidTest?
 
@@ -25,4 +25,4 @@ RapidTest eliminates the complexity of REST API testing by providing a simple, i
 
 ## Ready to Get Started?
 
-Check out our [Installation Guide](getting-started/installation.md) to begin using RapidTest in your projects.
+Check out our [Installation Guide](begin/installation.md) to begin using RapidTest in your projects.

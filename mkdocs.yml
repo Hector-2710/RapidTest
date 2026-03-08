@@ -1,30 +1,25 @@
-site_name: RapidTest Documentation
+site_name: Documentation
 site_description: A super lightweight and blazingly fast library to simplify REST API testing
 site_url: https://rapidtest.readthedocs.io/
 site_author: Hector Rosales
-
-# Repository
 repo_name: RapidTest
-repo_url: https://github.com/yourusername/rapidtest
+repo_url: https://github.com/Hector-2710/rapidtest
 
-# Theme
 theme:
   name: material
   logo: images/RapidTest-logo.png
   favicon: images/RapidTest-logo.png
 
   palette:
-    # Primary colors
     - scheme: default
-      primary: green
-      accent: green
+      primary: blue grey
+      accent: light blue
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-    # Dark mode
     - scheme: slate
-      primary: green
-      accent: green
+      primary: blue grey
+      accent: light blue
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -40,22 +35,19 @@ theme:
 
   icon:
     repo: fontawesome/brands/github
-    # Using custom logo instead of material icon
-    # logo: material/rocket
 
   language: en
 
-# Plugins
 plugins:
   - search
   - awesome-pages
+  
 
-# Extensions
 markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
-  - pymdownx.highlight:
+  - pymdownx.highlight: 
       anchor_linenums: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
@@ -67,28 +59,30 @@ markdown_extensions:
   - toc:
       permalink: true
 
-# Navigation
 nav:
   - RapidTest: index.md
-  - Getting Started:
-    - Installation: getting-started/installation.md
-    - Quick Start: getting-started/quick-start.md
+  - To Begin:
+    - Installation: begin/installation.md
+    - Quick Start: begin/quick-start.md
   - Learn:
-    - About Threadings: learn/threadings.md
+    - HTTP Methods: learn/http-methods.md
+    - HTTP Headers: learn/http-headers.md
+    - About Threads: learn/threads.md
   - Tutorial:
-    - Basic Usage: tutorial/basic-usage.md
+    - Basic Usage: tutorial/basic.md
   - API Reference:
     - RapidTest Class: api/rapidtest.md
     - Performance Testing: api/performance.md
     - Data Generation: api/rapiddata.md
   - Examples:
     - Basic Example: examples/basic.md
-    - Performance Testing Example: examples/performance.md
+    - Advanced Example: examples/advanced.md
 
-# Extra
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/yourusername/rapidtest
+      link: https://github.com/Hector-2710/rapidtest
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/rapidtest/
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/RosalesHector27
