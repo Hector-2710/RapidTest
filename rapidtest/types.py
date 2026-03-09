@@ -1,6 +1,5 @@
 from typing import Union, Any
 import requests
-import enum
 
 """
 Type definitions for the RapidTest library.
