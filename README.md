@@ -40,7 +40,7 @@ tester.get(endpoint="/users", expected_status=200)
 #### POST with Body Validation
 ```python
 user_data = {"username": "Uziel", "password": "Mypass123"}
-tester.post(endpoint="/user", json=user_data, expected_status=201, expected_json=user_data)
+tester.post(endpoint="/user", input_json=user_data, expected_status=201, expected_json=user_data)
 ```
 
 ### Advanced Example with Dynamic Data
@@ -55,7 +55,7 @@ tester = Test(url="http://127.0.0.1:8000")
 user = data.generate_user(id=True, name=True, email=True, age=True, password=True, username=True)
 
 # Test user creation
-tester.post(endpoint="/user", json=user, expected_status=201)
+tester.post(endpoint="/user", input_json=user, expected_status=201)
 ```
 
 ### 3. Generate Random Data
@@ -83,7 +83,7 @@ All HTTP methods support additional parameters:
 tester.get(endpoint="/users", params={"page": 1, "limit": 10})
 
 # Custom headers
-tester.post(endpoint="/auth", json=user_data, headers={"Content-Type": "application/json"})
+tester.post(endpoint="/auth", input_json=user_data, headers={"Content-Type": "application/json"})
 ```
 
 ## ⚡ RapidTest vs FastAPI TestClient
