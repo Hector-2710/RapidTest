@@ -15,6 +15,52 @@ class ASGITest:
         self.app = app
         self._captured_db_operations = []
         self._is_capturing = False
+
+    def get(self, path: str, **kwargs) -> 'ASGIResponse':
+        """Direct GET request via ASGI"""
+        return self._sync_request("GET", path, **kwargs)
+    
+    def post(self, path: str, json_data: dict[str, Any] | None = None, **kwargs) -> 'ASGIResponse':
+        """Direct POST request via ASGI"""
+        body = kwargs.pop("body", None)
+        headers = kwargs.pop("headers", {})
+        
+        if json_data:
+            body = json.dumps(json_data).encode()
+            headers["content-type"] = "application/json"
+            
+        return self._sync_request("POST", path, body=body, headers=headers, **kwargs)
+    
+    def put(self, path: str, json_data: dict[str, Any] | None = None, **kwargs) -> 'ASGIResponse':
+        """Direct PUT request via ASGI"""
+        body = kwargs.pop("body", None)
+        headers = kwargs.pop("headers", {})
+        
+        if json_data:
+            body = json.dumps(json_data).encode()
+            headers["content-type"] = "application/json"
+            
+        return self._sync_request("PUT", path, body=body, headers=headers, **kwargs)
+    
+    def delete(self, path: str, **kwargs) -> 'ASGIResponse':
+        """Direct DELETE request via ASGI"""
+        return self._sync_request("DELETE", path, **kwargs)
+    
+    def patch(self, path: str, json_data: dict[str, Any] | None = None, **kwargs) -> 'ASGIResponse':
+        """Direct PATCH request via ASGI"""
+        body = kwargs.pop("body", None)
+        headers = kwargs.pop("headers", {})
+        
+        if json_data:
+            body = json.dumps(json_data).encode()
+            headers["content-type"] = "application/json"
+            
+        return self._sync_request("PATCH", path, body=body, headers=headers, **kwargs)
+    
+    def _sync_request(self, method: str, path: str, **kwargs) -> 'ASGIResponse':
+        """Helper to run async ASGI request in sync context"""
+        response_data = asyncio.run(self._make_asgi_request(method, path, **kwargs))
+        return ASGIResponse(response_data)
     
     async def _make_asgi_request(
         self, 
@@ -24,6 +70,7 @@ class ASGITest:
         body: bytes | None = None,
         query_params: dict[str, str] | None = None
     ) -> dict[str, Any]:
+        """Core logic to make ASGI request and capture response"""
 
         scope = {
             "type": "http",
@@ -84,87 +131,31 @@ class ASGITest:
         }
     
     def _encode_query_params(self, params: dict[str, str]) -> bytes:
-        """Codifica query params para ASGI scope"""
+        """Encodes query params for ASGI scope"""
         if not params:
             return b""
         return "&".join(f"{k}={v}" for k, v in params.items()).encode()
     
     def _encode_headers(self, headers: dict[str, str]) -> list[tuple[bytes, bytes]]:
-        """Codifica headers para ASGI scope"""
+        """Encodes headers for ASGI scope"""
         encoded = []
         for key, value in headers.items():
             encoded.append((key.lower().encode(), value.encode()))
         return encoded
     
     def _decode_headers(self, headers: list[tuple[bytes, bytes]]) -> list[tuple[str, str]]:
-        """Decodifica headers desde ASGI"""
+        """Decodes headers from ASGI"""
         return [(key.decode(), value.decode()) for key, value in headers]
     
     def _try_parse_json(self, content: bytes) -> dict[str, Any] | None:
-        """Intenta parsear JSON de la respuesta"""
+        """Attempts to parse JSON from response"""
         try:
             return json.loads(content.decode())
         except (json.JSONDecodeError, UnicodeDecodeError):
             return None
     
-    # API pública (síncronos para facilidad de uso)
-    def get(self, path: str, **kwargs) -> 'ASGIResponse':
-        """GET request directo via ASGI"""
-        return self._sync_request("GET", path, **kwargs)
-    
-    def post(self, path: str, json_data: dict[str, Any] | None = None, **kwargs) -> 'ASGIResponse':
-        """POST request directo via ASGI"""
-        body = kwargs.pop("body", None)
-        headers = kwargs.pop("headers", {})
-        
-        if json_data:
-            body = json.dumps(json_data).encode()
-            headers["content-type"] = "application/json"
-            
-        return self._sync_request("POST", path, body=body, headers=headers, **kwargs)
-    
-    def put(self, path: str, json_data: dict[str, Any] | None = None, **kwargs) -> 'ASGIResponse':
-        """PUT request directo via ASGI"""
-        body = kwargs.pop("body", None)
-        headers = kwargs.pop("headers", {})
-        
-        if json_data:
-            body = json.dumps(json_data).encode()
-            headers["content-type"] = "application/json"
-            
-        return self._sync_request("PUT", path, body=body, headers=headers, **kwargs)
-    
-    def delete(self, path: str, **kwargs) -> 'ASGIResponse':
-        """DELETE request directo via ASGI"""
-        return self._sync_request("DELETE", path, **kwargs)
-    
-    def patch(self, path: str, json_data: dict[str, Any] | None = None, **kwargs) -> 'ASGIResponse':
-        """PATCH request directo via ASGI"""
-        body = kwargs.pop("body", None)
-        headers = kwargs.pop("headers", {})
-        
-        if json_data:
-            body = json.dumps(json_data).encode()
-            headers["content-type"] = "application/json"
-            
-        return self._sync_request("PATCH", path, body=body, headers=headers, **kwargs)
-    
-    def _sync_request(self, method: str, path: str, **kwargs) -> 'ASGIResponse':
-        """Wrapper síncrono para requests ASGI"""
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        
-        try:
-            response_data = loop.run_until_complete(
-                self._make_asgi_request(method, path, **kwargs)
-            )
-            return ASGIResponse(response_data)
-        finally:
-            loop.close()
-
-
 class ASGIResponse:
-    """Wrapper para respuestas ASGI que simula requests.Response"""
+    """Wrapper for ASGI responses that mimics requests.Response"""
     
     def __init__(self, data: dict[str, Any]):
         self.status_code = data["status_code"]
@@ -173,17 +164,17 @@ class ASGIResponse:
         self._json = data["json"]
     
     def json(self) -> dict[str, Any] | None:
-        """Retorna JSON parsed de la respuesta"""
+        """Returns parsed JSON from response"""
         return self._json
     
     @property
     def content(self) -> bytes:
-        """Retorna contenido raw de la respuesta"""
+        """Returns raw content from response"""
         return self._content
     
     @property
     def text(self) -> str:
-        """Retorna contenido como string"""
+        """Returns content as string"""
         return self._content.decode()
     
     def __repr__(self):
