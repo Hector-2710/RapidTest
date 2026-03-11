@@ -1,10 +1,17 @@
 import asyncio
 import json
-from typing import Dict, Any, List, Tuple, Optional
+from typing import Any, Annotated
 from collections.abc import Callable
 
 class ASGITest:
-    def __init__(self, app: Callable):
+    """
+    Test class for ASGI applications
+
+    This class allows you to make HTTP requests directly to an ASGI 
+    application without needing to run a server.
+    """
+
+    def __init__(self, app: Annotated[Callable, "ASGI application"]):
         self.app = app
         self._captured_db_operations = []
         self._is_capturing = False
@@ -13,10 +20,10 @@ class ASGITest:
         self, 
         method: str, 
         path: str, 
-        headers: Optional[Dict[str, str]] = None,
-        body: Optional[bytes] = None,
-        query_params: Optional[Dict[str, str]] = None
-    ) -> Dict[str, Any]:
+        headers: dict[str, str] | None  = None,
+        body: bytes | None = None,
+        query_params: dict[str, str] | None = None
+    ) -> dict[str, Any]:
 
         scope = {
             "type": "http",
@@ -67,7 +74,6 @@ class ASGITest:
             
         await self.app(scope, receive, send)
         
-        # 4. Captura de Respuesta (desde memoria)
         response_content = b"".join(response_body)
         
         return {
@@ -77,24 +83,24 @@ class ASGITest:
             "json": self._try_parse_json(response_content),
         }
     
-    def _encode_query_params(self, params: Dict[str, str]) -> bytes:
+    def _encode_query_params(self, params: dict[str, str]) -> bytes:
         """Codifica query params para ASGI scope"""
         if not params:
             return b""
         return "&".join(f"{k}={v}" for k, v in params.items()).encode()
     
-    def _encode_headers(self, headers: Dict[str, str]) -> List[Tuple[bytes, bytes]]:
+    def _encode_headers(self, headers: dict[str, str]) -> list[tuple[bytes, bytes]]:
         """Codifica headers para ASGI scope"""
         encoded = []
         for key, value in headers.items():
             encoded.append((key.lower().encode(), value.encode()))
         return encoded
     
-    def _decode_headers(self, headers: List[Tuple[bytes, bytes]]) -> List[Tuple[str, str]]:
+    def _decode_headers(self, headers: list[tuple[bytes, bytes]]) -> list[tuple[str, str]]:
         """Decodifica headers desde ASGI"""
         return [(key.decode(), value.decode()) for key, value in headers]
     
-    def _try_parse_json(self, content: bytes) -> Optional[Dict[str, Any]]:
+    def _try_parse_json(self, content: bytes) -> dict[str, Any] | None:
         """Intenta parsear JSON de la respuesta"""
         try:
             return json.loads(content.decode())
@@ -106,7 +112,7 @@ class ASGITest:
         """GET request directo via ASGI"""
         return self._sync_request("GET", path, **kwargs)
     
-    def post(self, path: str, json_data: Optional[Dict] = None, **kwargs) -> 'ASGIResponse':
+    def post(self, path: str, json_data: dict[str, Any] | None = None, **kwargs) -> 'ASGIResponse':
         """POST request directo via ASGI"""
         body = kwargs.pop("body", None)
         headers = kwargs.pop("headers", {})
@@ -117,7 +123,7 @@ class ASGITest:
             
         return self._sync_request("POST", path, body=body, headers=headers, **kwargs)
     
-    def put(self, path: str, json_data: Optional[Dict] = None, **kwargs) -> 'ASGIResponse':
+    def put(self, path: str, json_data: dict[str, Any] | None = None, **kwargs) -> 'ASGIResponse':
         """PUT request directo via ASGI"""
         body = kwargs.pop("body", None)
         headers = kwargs.pop("headers", {})
@@ -132,7 +138,7 @@ class ASGITest:
         """DELETE request directo via ASGI"""
         return self._sync_request("DELETE", path, **kwargs)
     
-    def patch(self, path: str, json_data: Optional[Dict] = None, **kwargs) -> 'ASGIResponse':
+    def patch(self, path: str, json_data: dict[str, Any] | None = None, **kwargs) -> 'ASGIResponse':
         """PATCH request directo via ASGI"""
         body = kwargs.pop("body", None)
         headers = kwargs.pop("headers", {})
@@ -160,13 +166,13 @@ class ASGITest:
 class ASGIResponse:
     """Wrapper para respuestas ASGI que simula requests.Response"""
     
-    def __init__(self, data: Dict[str, Any]):
+    def __init__(self, data: dict[str, Any]):
         self.status_code = data["status_code"]
         self.headers = data["headers"]
         self._content = data["content"]
         self._json = data["json"]
     
-    def json(self) -> Optional[Dict[str, Any]]:
+    def json(self) -> dict[str, Any] | None:
         """Retorna JSON parsed de la respuesta"""
         return self._json
     
