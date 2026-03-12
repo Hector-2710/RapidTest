@@ -1,6 +1,6 @@
 import asyncio
 import json
-from typing import Any, Annotated
+from typing import Any
 from collections.abc import Callable
 
 class ASGITest:
@@ -11,7 +11,7 @@ class ASGITest:
     application without needing to run a server.
     """
 
-    def __init__(self, app: Annotated[Callable, "ASGI application"]):
+    def __init__(self, app: Callable):
         self.app = app
         self._captured_db_operations = []
         self._is_capturing = False
