@@ -2,7 +2,6 @@ from contextlib import contextmanager
 from .ASGITest import ASGITest, ASGIResponse
 from .ASGIDatabase import db_interceptor, DatabaseOperation
 from .Utils import print_report, show_connection_error
-from collections.abc import Callable
 from typing import Annotated, Any
 
 class ASGITestRunner(ASGITest):
@@ -12,11 +11,195 @@ class ASGITestRunner(ASGITest):
     This class extends ASGITest to provide enhanced functionality for validating both API
     responses and database operations in a cohesive manner. It includes:
     """
+
     def __init__(self, app: Annotated[Any, "Instance of ASGI application"], auto_patch_db: bool = True):
+        """
+        Initializes the ASGITestRunner with the given ASGI application and optional database patching.
+        
+        Args:
+            app: An instance of the ASGI application to be tested (e.g., FastAPI app).
+            auto_patch_db: If True, attempts to automatically patch database interceptors for capturing operations
+            without requiring manual setup. Defaults to True.
+        """
         super().__init__(app)
         
         if auto_patch_db:
             self._try_patch_database()
+    
+    def get(self, 
+            path: str, 
+            expected_status: int = 200, 
+            expected_json: dict | None = None,
+            contain_keys: list[str] | None = None,
+            **kwargs) -> 'EnhancedASGIResponse':
+        """
+        Performs a GET request and validates status code and response body.
+        
+        Args:
+            path (str): The path for the GET request.
+            expected_status (int): The expected HTTP status code (default: 200).
+            expected_json (dict | None): The expected JSON response body (default: None).
+            contain_keys (list[str] | None): A list of keys that should be present in the response JSON (default: None).
+            **kwargs: Additional keyword arguments to pass to the request method.
+
+        Returns:
+            EnhancedASGIResponse: An enhanced response object that includes database operation information.
+        """
+        try:
+            response = super().get(path, **kwargs)
+            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
+            
+            validation_passed = self._process_response_validation(
+                response, path, expected_status, expected_json, contain_keys
+            )
+            
+            return enhanced
+            
+        except Exception as e:
+            simulated_url = f"asgi://testserver{path}"
+            show_connection_error(simulated_url, e)
+            raise
+    
+    def post(self,
+             path: str, 
+             json_data: dict | None = None, 
+             expected_status: int = 201,
+             expected_json: dict | None = None,
+             contain_keys: list[str] | None = None,
+             **kwargs) -> 'EnhancedASGIResponse':
+        """
+        Performs a POST request and validates status code and response body.
+        
+        Args:
+            path (str): The path for the POST request.
+            json_data (dict | None): The JSON data to send in the request body.
+            expected_status (int): The expected HTTP status code (default: 201).
+            expected_json (dict | None): The expected JSON response body (default: None).
+            contain_keys (list[str] | None): A list of keys that should be present in the response JSON (default: None).
+            **kwargs: Additional keyword arguments to pass to the request method.
+
+        Returns:
+            EnhancedASGIResponse: An enhanced response object that includes database operation information.
+        """
+        try:
+            response = super().post(path, json_data, **kwargs)
+            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
+            
+            validation_passed = self._process_response_validation(
+                response, path, expected_status, expected_json, contain_keys
+            )
+            
+            return enhanced
+            
+        except Exception as e:
+            simulated_url = f"asgi://testserver{path}"
+            show_connection_error(simulated_url, e)
+            raise
+    
+    def put(self, 
+            path: str, 
+            json_data: dict | None = None,
+            expected_status: int = 200,
+            expected_json: dict | None = None,
+            contain_keys: list[str] | None = None,
+            **kwargs) -> 'EnhancedASGIResponse':
+        """
+        Performs a PUT request and validates status code and response body.
+        
+        Args:
+            path (str): The path for the PUT request.
+            json_data (dict | None): The JSON data to send in the request body.
+            expected_status (int): The expected HTTP status code (default: 200).
+            expected_json (dict | None): The expected JSON response body (default: None).
+            contain_keys (list[str] | None): A list of keys that should be present in the response JSON (default: None).
+            **kwargs: Additional keyword arguments to pass to the request method.
+
+        Returns:
+            EnhancedASGIResponse: An enhanced response object that includes database operation information.
+        """
+        try:
+            response = super().put(path, json_data, **kwargs)
+            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
+            
+            validation_passed = self._process_response_validation(
+                response, path, expected_status, expected_json, contain_keys
+            )
+            
+            return enhanced
+            
+        except Exception as e:
+            simulated_url = f"asgi://testserver{path}"
+            show_connection_error(simulated_url, e)
+            raise
+    
+    def delete(self, 
+               path: str, 
+               expected_status: int = 204, 
+               expected_json: dict | None = None,
+               contain_keys: list[str] | None = None,
+               **kwargs) -> 'EnhancedASGIResponse':
+        """
+        Performs a DELETE request and validates status code and response body.
+        
+        Args:
+            path (str): The path for the DELETE request.
+            expected_status (int): The expected HTTP status code (default: 204).
+            expected_json (dict | None): The expected JSON response body (default: None).
+            contain_keys (list[str] | None): A list of keys that should be present in the response JSON (default: None).
+            **kwargs: Additional keyword arguments to pass to the request method.
+
+        Returns:
+            EnhancedASGIResponse: An enhanced response object that includes database operation information.
+        """
+        try:
+            response = super().delete(path, **kwargs)
+            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
+            
+            validation_passed = self._process_response_validation(
+                response, path, expected_status, expected_json, contain_keys
+            )
+            
+            return enhanced
+            
+        except Exception as e:
+            simulated_url = f"asgi://testserver{path}"
+            show_connection_error(simulated_url, e)
+            raise
+    
+    def patch(self, path: str, 
+              json_data: dict | None = None,
+              expected_status: int = 200,
+              expected_json: dict | None = None,
+              contain_keys: list[str] | None = None,
+              **kwargs) -> 'EnhancedASGIResponse':
+        """
+        Performs a PATCH request and validates status code and response body.
+        
+        Args:
+            path (str): The path for the PATCH request.
+            json_data (dict | None): The JSON data to send in the request body.
+            expected_status (int): The expected HTTP status code (default: 200).
+            expected_json (dict | None): The expected JSON response body (default: None).
+            contain_keys (list[str] | None): A list of keys that should be present in the response JSON (default: None).
+            **kwargs: Additional keyword arguments to pass to the request method.
+
+        Returns:
+            EnhancedASGIResponse: An enhanced response object that includes database operation information.
+        """
+        try:
+            response = super().patch(path, json_data, **kwargs)
+            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
+            
+            validation_passed = self._process_response_validation(
+                response, path, expected_status, expected_json, contain_keys
+            )
+            
+            return enhanced
+            
+        except Exception as e:
+            simulated_url = f"asgi://testserver{path}"
+            show_connection_error(simulated_url, e)
+            raise
     
     def _try_patch_database(self):
         """Intent to patch database interceptors if available, but fail gracefully if not"""
@@ -108,129 +291,8 @@ class ASGITestRunner(ASGITest):
         
         return status_ok and body_ok and keys
     
-    def get(self, path: str, expected_status: int = 200, 
-            expected_json: dict | None = None,
-            contain_keys: list[str] | None = None,
-            **kwargs) -> 'EnhancedASGIResponse':
-        
-        """
-        Performs a GET request and validates status code and response body.
-        
-        Args:
-            path (str): The path for the GET request.
-            expected_status (int): The expected HTTP status code (default: 200).
-            expected_json (dict | None): The expected JSON response body (default: None).
-            contain_keys (list[str] | None): A list of keys that should be present in the response JSON (default: None).
-            **kwargs: Additional keyword arguments to pass to the request method.
-
-        Returns:
-            EnhancedASGIResponse: An enhanced response object that includes database operation information.
-        """
-        try:
-            response = super().get(path, **kwargs)
-            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
-            
-            validation_passed = self._process_response_validation(
-                response, path, expected_status, expected_json, contain_keys
-            )
-            
-            return enhanced
-            
-        except Exception as e:
-            simulated_url = f"asgi://testserver{path}"
-            show_connection_error(simulated_url, e)
-            raise
-    
-    def post(self, path: str, json_data: dict | None = None, 
-             expected_status: int = 201,
-             expected_json: dict | None = None,
-             contain_keys: list[str] | None = None,
-             **kwargs) -> 'EnhancedASGIResponse':
-        """POST con validación automática y reporte igual que Test.py"""
-        try:
-            response = super().post(path, json_data, **kwargs)
-            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
-            
-            # Procesar validación y mostrar reporte
-            validation_passed = self._process_response_validation(
-                response, path, expected_status, expected_json, contain_keys
-            )
-            
-            return enhanced
-            
-        except Exception as e:
-            simulated_url = f"asgi://testserver{path}"
-            show_connection_error(simulated_url, e)
-            raise
-    
-    def put(self, path: str, json_data: dict | None = None,
-            expected_status: int = 200,
-            expected_json: dict | None = None,
-            contain_keys: list[str] | None = None,
-            **kwargs) -> 'EnhancedASGIResponse':
-        """PUT con validación automática y reporte igual que Test.py"""
-        try:
-            response = super().put(path, json_data, **kwargs)
-            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
-            
-            # Procesar validación y mostrar reporte
-            validation_passed = self._process_response_validation(
-                response, path, expected_status, expected_json, contain_keys
-            )
-            
-            return enhanced
-            
-        except Exception as e:
-            simulated_url = f"asgi://testserver{path}"
-            show_connection_error(simulated_url, e)
-            raise
-    
-    def delete(self, path: str, expected_status: int = 204, 
-               expected_json: dict | None = None,
-               contain_keys: list[str] | None = None,
-               **kwargs) -> 'EnhancedASGIResponse':
-        """DELETE con validación automática y reporte igual que Test.py"""
-        try:
-            response = super().delete(path, **kwargs)
-            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
-            
-            # Procesar validación y mostrar reporte
-            validation_passed = self._process_response_validation(
-                response, path, expected_status, expected_json, contain_keys
-            )
-            
-            return enhanced
-            
-        except Exception as e:
-            simulated_url = f"asgi://testserver{path}"
-            show_connection_error(simulated_url, e)
-            raise
-    
-    def patch(self, path: str, json_data: dict | None = None,
-              expected_status: int = 200,
-              expected_json: dict | None = None,
-              contain_keys: list[str] | None = None,
-              **kwargs) -> 'EnhancedASGIResponse':
-        """PATCH con validación automática y reporte igual que Test.py"""
-        try:
-            response = super().patch(path, json_data, **kwargs)
-            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
-            
-            # Procesar validación y mostrar reporte
-            validation_passed = self._process_response_validation(
-                response, path, expected_status, expected_json, contain_keys
-            )
-            
-            return enhanced
-            
-        except Exception as e:
-            simulated_url = f"asgi://testserver{path}"
-            show_connection_error(simulated_url, e)
-            raise
-    
-    # Métodos de verificación de BD
     def assert_db_operation_occurred(self, operation: str, table: str):
-        """Verifica que una operación específica ocurrió en BD"""
+        """ Verify that a specific database operation occurred during the test execution"""
         operations = [op for op in db_interceptor.captured_operations 
                      if op.operation_type == operation.upper() and op.table.lower() == table.lower()]
         
@@ -242,7 +304,7 @@ class ASGITestRunner(ASGITest):
             )
     
     def assert_no_db_operations(self, operation: str | None = None, table: str | None = None):
-        """Verifica que no ocurrieron operaciones (o un tipo específico)"""
+        """Verify that no database operations occurred (or a specific type)"""
         if operation and table:
             operations = [op for op in db_interceptor.captured_operations 
                          if op.operation_type == operation.upper() and op.table.lower() == table.lower()]
@@ -265,7 +327,7 @@ class ASGITestRunner(ASGITest):
                 )
     
     def get_db_operations(self, operation_type: str | None = None, table: str | None = None) -> list[DatabaseOperation]:
-        """Obtiene operaciones de BD capturadas"""
+        """Get captured database operations with optional filtering by type and table."""
         operations = db_interceptor.captured_operations.copy()
         
         if operation_type:
@@ -277,7 +339,7 @@ class ASGITestRunner(ASGITest):
         return operations
     
     def print_db_operations_summary(self):
-        """Imprime resumen de operaciones de BD capturadas"""
+        """Prints a summary of captured database operations for the last request, including counts and details."""
         operations = db_interceptor.captured_operations
         
         if not operations:
@@ -286,7 +348,6 @@ class ASGITestRunner(ASGITest):
         
         print(f"\n📊 Database Operations Summary ({len(operations)} total):")
         
-        # Agrupar por tipo
         types_count = {}
         tables_count = {}
         
@@ -302,12 +363,15 @@ class ASGITestRunner(ASGITest):
             print(f"   {i}. {op.operation_type} on '{op.table}' - {query_preview}")
     
     def clear_db_operations(self):
-        """Limpia operaciones de BD capturadas"""
         db_interceptor.clear_operations()
 
 
 class EnhancedASGIResponse(ASGIResponse):
-    """Response ASGI con información de BD adicional"""
+    """
+    An enhanced ASGI response that includes database operation information.
+
+    This class extends ASGIResponse to provide additional context about the database operations.
+    """
     
     def __init__(self, response: ASGIResponse, db_operations: list[DatabaseOperation]):
         super().__init__({
@@ -319,7 +383,7 @@ class EnhancedASGIResponse(ASGIResponse):
         self.db_operations = db_operations
     
     def get_db_changes(self, operation_type: str | None = None, table: str | None = None) -> list[DatabaseOperation]:
-        """Obtiene cambios de BD asociados a esta response"""
+        """Get captured database operations related to this response, with optional filtering by type and table."""
         operations = self.db_operations.copy()
         
         if operation_type:
@@ -331,7 +395,7 @@ class EnhancedASGIResponse(ASGIResponse):
         return operations
     
     def assert_db_operation_in_response(self, operation_type: str, table: str):
-        """Verifica que esta response específica causó una operación de BD"""
+        """Verify that this specific response caused a database operation of the given type on the given table."""
         matching_ops = self.get_db_changes(operation_type, table)
         if not matching_ops:
             available_ops = [f'{op.operation_type} {op.table}' for op in self.db_operations]
@@ -339,18 +403,3 @@ class EnhancedASGIResponse(ASGIResponse):
                 f"Expected {operation_type.upper()} on '{table}' in this response, "
                 f"but operations were: {available_ops}"
             )
-
-
-# Función helper para crear cliente ASGI fácilmente
-def create_asgi_test(app, auto_patch_db: bool = True) -> ASGITestRunner:
-    """
-    Helper para crear un cliente ASGI de manera rápida.
-    
-    Args:
-        app: Aplicación ASGI (FastAPI app)
-        auto_patch_db: Si patchear automáticamente BD
-    
-    Returns:
-        ASGITestRunner: Cliente listo para usar
-    """
-    return ASGITestRunner(app, auto_patch_db=auto_patch_db)
