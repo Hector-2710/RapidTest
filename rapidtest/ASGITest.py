@@ -1,5 +1,6 @@
 import asyncio
 import json
+from urllib.parse import urlencode
 from typing import Any
 from collections.abc import Callable
 
@@ -23,22 +24,30 @@ class ASGITest:
     def post(self, path: str, json_data: dict[str, Any] | None = None, **kwargs) -> 'ASGIResponse':
         """Direct POST request via ASGI"""
         body = kwargs.pop("body", None)
+        form_data = kwargs.pop("data", None)
         headers = kwargs.pop("headers", {})
         
         if json_data:
             body = json.dumps(json_data).encode()
             headers["content-type"] = "application/json"
+        elif form_data is not None:
+            body = urlencode(form_data, doseq=True).encode()
+            headers["content-type"] = "application/x-www-form-urlencoded"
             
         return self._sync_request("POST", path, body=body, headers=headers, **kwargs)
     
     def put(self, path: str, json_data: dict[str, Any] | None = None, **kwargs) -> 'ASGIResponse':
         """Direct PUT request via ASGI"""
         body = kwargs.pop("body", None)
+        form_data = kwargs.pop("data", None)
         headers = kwargs.pop("headers", {})
         
         if json_data:
             body = json.dumps(json_data).encode()
             headers["content-type"] = "application/json"
+        elif form_data is not None:
+            body = urlencode(form_data, doseq=True).encode()
+            headers["content-type"] = "application/x-www-form-urlencoded"
             
         return self._sync_request("PUT", path, body=body, headers=headers, **kwargs)
     
@@ -49,11 +58,15 @@ class ASGITest:
     def patch(self, path: str, json_data: dict[str, Any] | None = None, **kwargs) -> 'ASGIResponse':
         """Direct PATCH request via ASGI"""
         body = kwargs.pop("body", None)
+        form_data = kwargs.pop("data", None)
         headers = kwargs.pop("headers", {})
         
         if json_data:
             body = json.dumps(json_data).encode()
             headers["content-type"] = "application/json"
+        elif form_data is not None:
+            body = urlencode(form_data, doseq=True).encode()
+            headers["content-type"] = "application/x-www-form-urlencoded"
             
         return self._sync_request("PATCH", path, body=body, headers=headers, **kwargs)
     
