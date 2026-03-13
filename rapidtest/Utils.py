@@ -1,27 +1,27 @@
-from typing import Any, Optional, Dict
+from typing import Any
 import json
 import statistics
 import enum
 
 
 class StatusCode(enum.IntEnum):
-    CONTINUE = 100
-    OK = 200
-    CREATED = 201
-    ACCEPTED = 202
-    NO_CONTENT = 204
-    MOVED_PERMANENTLY = 301
-    TEMPORARY_REDIRECT = 307
-    PERMANENT_REDIRECT = 308
-    BAD_REQUEST = 400
-    UNAUTHORIZED = 401
-    FORBIDDEN = 403
-    NOT_FOUND = 404
-    NOT_ACCEPTABLE = 406
-    REQUEST_TIMEOUT = 408
-    INTERNAL_SERVER_ERROR = 500
+    CONTINUE_100 = 100
+    OK_200 = 200
+    CREATED_201 = 201
+    ACCEPTED_202 = 202
+    NO_CONTENT_204 = 204
+    MOVED_PERMANENTLY_301 = 301
+    TEMPORARY_REDIRECT_307 = 307
+    PERMANENT_REDIRECT_308 = 308
+    BAD_REQUEST_400 = 400
+    UNAUTHORIZED_401 = 401
+    FORBIDDEN_403 = 403
+    NOT_FOUND_404 = 404
+    NOT_ACCEPTABLE_406 = 406
+    REQUEST_TIMEOUT_408 = 408
+    INTERNAL_SERVER_ERROR_500 = 500
 
-def print_report(result: str, url: str, status: int, body: Any, error_msg: Optional[str] = None) -> None:
+def print_report(result: str, url: str, status: int, body: Any, error_msg: str | None = None) -> None:
     """
     Imprime un reporte simple y rápido del resultado de una prueba.
 
@@ -102,7 +102,7 @@ def show_connection_error(url: str, exception: Exception) -> None:
     
     print()
     
-    def _calculate_results(results, duration, users) -> Dict[str, Any]:
+    def _calculate_results(results, duration, users) -> dict[str, Any]:
         """Calculate and display test results."""
         if not results:
             print("❌ No results collected")

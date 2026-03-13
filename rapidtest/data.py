@@ -1,5 +1,5 @@
 from faker import Faker
-from typing import Dict, Annotated
+from typing import Annotated
 
 fake = Faker()
 
@@ -12,7 +12,7 @@ class data:
     """
 
     @staticmethod
-    def generate_auth_user() -> Dict[str, str]:
+    def generate_auth_user() -> dict[str, str]:
         """Generates a dictionary with random username and password.
 
         Args:
@@ -32,7 +32,7 @@ class data:
                      password: Annotated[bool, "Whether to generate a password"] = False, 
                      email: Annotated[bool, "Whether to generate an email"] = False, 
                      age: Annotated[bool, "Whether to generate an age"] = False, 
-                     address: Annotated[bool, "Whether to generate an address"] = False) -> Dict[str, str]:
+                     address: Annotated[bool, "Whether to generate an address"] = False) -> dict[str, str]:
         """Generates a dictionary with random user information.
         
         Args:

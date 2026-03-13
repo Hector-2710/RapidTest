@@ -1,27 +1,33 @@
-from rapidtest.RapidTest import Test
-from rapidtest.RapidData import data
-from rapidtest.Performance import Performance
+from rapidtest.Test import Test
+from rapidtest.Utils import StatusCode
+from rapidtest.data import data
+from backend.main import app
 
-fastTest = Test(url="http://127.0.0.1:8000")
+test = Test(app=app,asgi=True) 
 
-user = data.generate_user(id=True, name=True, email=True, age=True, password=True, username=True)
+# LOGIN
+response = test.post(path="/token", expected_status=StatusCode.OK_200, data={"username": "caja", "password": "caja"})
 
-fastTest.get(endpoint="/", expected_status=200)
-fastTest.get(endpoint="/me", expected_status=200, headers={"Authorization": f"Bearer {user['email']}"})
-fastTest.get(endpoint="/users", expected_status=200, params={"use_email": user["email"]})
-fastTest.get(endpoint=f"/users/{user['email']}", expected_status=200)
-fastTest.post(endpoint="/token", data={"username": "caja", "password": "caja"}, expected_status=200)
-fastTest.post(endpoint="/user", json=user, expected_status=201)
-fastTest.put(endpoint=f"/user/2734e76d-de18-4930-8531-54c39b3abe05", json=user, expected_status=200)
-fastTest.patch(endpoint=f"/user/{user['id']}", params={"age": 35}, expected_status=200)
-fastTest.delete(endpoint=f"/user/{user['id']}", expected_status=202)
+# GET
+test.get(path="/", expected_status=StatusCode.OK_200, contain_keys=["message"])
+test.get(path="/me", expected_status=StatusCode.OK_200, headers={"Authorization": "Bearer caja"})
+test.get(path="/users", expected_status=StatusCode.OK_200, query_params={"email": "caja"})
 
-performanceTest = Performance(
-     base_url="http://127.0.0.1:8000", 
-     users=1,           
-     duration=10,    
-     timeout=1      
-)
+# #POST
+test.post(path="/user", 
+          expected_status=StatusCode.CREATED_201,
+          json_data={"id":f"{data.generate_id()}" , "name": "test", "email": "test", "age":12, "password": "test"})
 
-performanceTest.add_get_task(endpoint="/")
-performanceTest.run()
+#PUT
+test.put(path="/user/2734e76d-de18-4930-8531-54c39b3abe05", 
+         expected_status=StatusCode.OK_200,
+         json_data={"id":"2734e76d-de18-4930-8531-54c39b3abe05", "name": "updated", "email": "updated", "age":25, "password": "updated"})
+
+#PATCH
+test.patch(path="/user/2734e76d-de18-4930-8531-54c39b3abe05", 
+           expected_status=StatusCode.OK_200,
+           query_params={"age": 35})
+
+#DELETE
+test.delete(path="/user/2734e76d-de18-4930-8531-54c39b3abe05", 
+            expected_status=StatusCode.ACCEPTED_202)
