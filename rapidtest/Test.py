@@ -1,7 +1,7 @@
 import requests
-from typing import Optional, Dict, Any, Annotated, Union
+from typing import Any, Annotated
 from rapidtest.Utils import print_report, show_connection_error
-from rapidtest.types import URL, JsonDict, Headers, QueryParams, JsonData, RawData, HttpMethod, StatusCode, Endpoint, Response
+from rapidtest.types import Response
 
 class Test:
     """
@@ -12,26 +12,26 @@ class Test:
     """
 
     def __init__(self, *,
-        url: Annotated[URL, "The base URL of the API (e.g., 'http://localhost:8000')"],
-        global_headers: Annotated[Optional[Headers], "Global headers to be applied to all requests (optional)"] = {}
+        url: Annotated[str, "The base URL of the API (e.g., 'http://localhost:8000')"],
+        global_headers: Annotated[dict[str, str] | None, "Global headers to be applied to all requests (optional)"] = {}
         ):
         """
         Initializes the test client.
 
         Args:
             url (str): The base URL of the API (e.g., 'http://localhost:8000').
-            global_headers (Headers, optional): Global headers to be applied to all requests. 
+            global_headers (dict[str, str] | None): Global headers to be applied to all requests. 
         """
         self.url = url.rstrip('/')
         self.global_headers = global_headers  
 
     def get(self, *, 
-            endpoint: Annotated[Endpoint, "The API endpoint to call"],
-            expected_status: Annotated[StatusCode, "The expected HTTP status code (default: 200)"] = 200, 
-            expected_json: Annotated[Optional[JsonDict], "The expected JSON in response"] = None,
-            contain_keys: Annotated[Optional[JsonData], "A subset of JSON keys that should be contained in the response"] = None,
-            params: Annotated[Optional[QueryParams], "The query parameters for the request"] = None,
-            headers: Annotated[Optional[Headers], "The headers for the request"] = None,
+            endpoint: Annotated[str, "The API endpoint to call"],
+            expected_status: Annotated[int, "The expected HTTP status code (default: 200)"] = 200, 
+            expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
+            contain_keys: Annotated[list[str] | None, "A subset of JSON keys that should be contained in the response"] = None,
+            params: Annotated[dict[str, Any] | None, "The query parameters for the request"] = None,
+            headers: Annotated[dict[str, str] | None, "The headers for the request"] = None,
             **kwargs) -> Response:
         """
         Performs a GET request and validates status code and response body.
@@ -53,14 +53,14 @@ class Test:
                            params=params, headers=headers,contain_keys=contain_keys, **kwargs)
 
     def post(self, *, 
-             endpoint: Annotated[Endpoint, "The API endpoint to call"],
-             expected_status: Annotated[StatusCode, "The expected HTTP status code (default: 201)"] = 201, 
-             input_json: Annotated[Optional[JsonData], "JSON data to send in the request body"] = None,
-             expected_json: Annotated[Optional[JsonDict], "The expected JSON in response"] = None,
-             contain_keys: Annotated[Optional[JsonData], "A subset of JSON keys that should be contained in the response"] = None,
-             data: Annotated[Optional[RawData], "Raw data to send in the request body (alternative to input_json)"] = None,
-             params: Annotated[Optional[QueryParams], "Query parameters to append to the request URL"] = None,
-             headers: Annotated[Optional[Headers], "HTTP headers to include in the request"] = None,
+             endpoint: Annotated[str, "The API endpoint to call"],
+             expected_status: Annotated[int, "The expected HTTP status code (default: 201)"] = 201, 
+             input_json: Annotated[dict[str, Any] | None, "JSON data to send in the request body"] = None,
+             expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
+             contain_keys: Annotated[list[str] | None, "A subset of JSON keys that should be contained in the response"] = None,
+             data: Annotated[str | bytes | dict[str, Any] | None, "Raw data to send in the request body (alternative to input_json)"] = None,
+             params: Annotated[dict[str, Any] | None, "Query parameters to append to the request URL"] = None,
+             headers: Annotated[dict[str, str] | None, "HTTP headers to include in the request"] = None,
              **kwargs) -> Response:
         """
         Performs a POST request and validates status code and response body.
@@ -87,14 +87,14 @@ class Test:
                            json=input_json, data=data, params=params, headers=headers, contain_keys=contain_keys, **kwargs)
 
     def put(self, *, 
-            endpoint: Annotated[Endpoint, "The API endpoint to call"], 
-            expected_status: Annotated[StatusCode, "The expected HTTP status code (default: 200)"] = 200, 
-            input_json: Annotated[Optional[JsonData], "JSON data to send in the request body"] = None,
-            expected_json: Annotated[Optional[JsonDict], "The expected JSON in response"] = None,
-            contain_keys: Annotated[Optional[JsonData], "A subset of JSON keys that should be contained in the response"] = None,
-            data: Annotated[Optional[RawData], "Raw data to send in the request body (alternative to input_json)"] = None,
-            params: Annotated[Optional[QueryParams], "Query parameters to append to the request URL"] = None,
-            headers: Annotated[Optional[Headers], "HTTP headers to include in the request"] = None,
+            endpoint: Annotated[str, "The API endpoint to call"], 
+            expected_status: Annotated[int, "The expected HTTP status code (default: 200)"] = 200, 
+            input_json: Annotated[dict[str, Any] | None, "JSON data to send in the request body"] = None,
+            expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
+            contain_keys: Annotated[list[str] | None, "A subset of JSON keys that should be contained in the response"] = None,
+            data: Annotated[str | bytes | dict[str, Any] | None, "Raw data to send in the request body (alternative to input_json)"] = None,
+            params: Annotated[dict[str, Any] | None, "Query parameters to append to the request URL"] = None,
+            headers: Annotated[dict[str, str] | None, "HTTP headers to include in the request"] = None,
             **kwargs) -> Response:
         """
         Performs a PUT request and validates status code and response body.
@@ -121,14 +121,14 @@ class Test:
                            json=input_json, data=data, params=params, headers=headers, contain_keys=contain_keys, **kwargs)
 
     def patch(self, *, 
-              endpoint: Annotated[Endpoint, "The API endpoint to call"], 
-              expected_status: Annotated[StatusCode, "The expected HTTP status code"] = 200, 
-              input_json: Annotated[Optional[JsonData], "JSON data to send in the request body"] = None,
-              expected_json: Annotated[Optional[JsonDict], "The expected JSON in response"] = None,
-              data: Annotated[Optional[RawData], "Raw data to send in the request body (alternative to input_json)"] = None,
-              contain_keys: Annotated[Optional[JsonData], "A subset of JSON keys that should be contained in the response"] = None,
-              params: Annotated[Optional[QueryParams], "Query parameters to append to the request URL"] = None,
-              headers: Annotated[Optional[Headers], "HTTP headers to include in the request"] = None,
+              endpoint: Annotated[str, "The API endpoint to call"], 
+              expected_status: Annotated[int, "The expected HTTP status code"] = 200, 
+              input_json: Annotated[dict[str, Any] | None, "JSON data to send in the request body"] = None,
+              expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
+              data: Annotated[str | bytes | dict[str, Any] | None, "Raw data to send in the request body (alternative to input_json)"] = None,
+              contain_keys: Annotated[list[str] | None, "A subset of JSON keys that should be contained in the response"] = None,
+              params: Annotated[dict[str, Any] | None, "Query parameters to append to the request URL"] = None,
+              headers: Annotated[dict[str, str] | None, "HTTP headers to include in the request"] = None,
               **kwargs) -> Response:
         """
         Performs a PATCH request and validates status code and response body.
@@ -150,14 +150,14 @@ class Test:
                            json=input_json, data=data, params=params, headers=headers, contain_keys=contain_keys, **kwargs)
 
     def delete(self, *, 
-               endpoint: Annotated[Endpoint, "The API endpoint to call"], 
-               expected_status: Annotated[StatusCode, "The expected HTTP status code"] = 204, 
-               input_json: Annotated[Optional[JsonData], "JSON data to send in the request body"] = None,
-               expected_json: Annotated[Optional[JsonDict], "The expected JSON in response"] = None,
-               contain_keys: Annotated[Optional[JsonData], "A subset of JSON keys that should be contained in the response"] = None,
-               data: Annotated[Optional[RawData], "Raw data to send in the request body (alternative to input_json)"] = None,
-               params: Annotated[Optional[QueryParams], "Query parameters to append to the request URL"] = None,
-               headers: Annotated[Optional[Headers], "HTTP headers to include in the request"] = None,
+               endpoint: Annotated[str, "The API endpoint to call"], 
+               expected_status: Annotated[int, "The expected HTTP status code"] = 204, 
+               input_json: Annotated[dict[str, Any] | None, "JSON data to send in the request body"] = None,
+               expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
+               contain_keys: Annotated[list[str] | None, "A subset of JSON keys that should be contained in the response"] = None,
+               data: Annotated[str | bytes | dict[str, Any] | None, "Raw data to send in the request body (alternative to input_json)"] = None,
+               params: Annotated[dict[str, Any] | None, "Query parameters to append to the request URL"] = None,
+               headers: Annotated[dict[str, str] | None, "HTTP headers to include in the request"] = None,
                **kwargs) -> Response:
         """
         Performs a DELETE request and validates status code and response body.
@@ -178,7 +178,7 @@ class Test:
         return self._request("DELETE", endpoint, expected_status, expected_json, 
                            json=input_json, data=data, params=params, headers=headers, contain_keys=contain_keys, **kwargs)
 
-    def set_global_headers(self, headers: Annotated[Headers, "Global headers to be applied to all requests"]) -> None:
+    def set_global_headers(self, headers: Annotated[dict[str, str] | None, "Global headers to be applied to all requests"]) -> None:
         """
         Sets global headers that will be applied to all subsequent requests.
         
@@ -199,7 +199,7 @@ class Test:
         """
         self.global_headers = {}
 
-    def _merge_headers(self, request_headers: Optional[Dict[str, str]]) -> Optional[Dict[str, str]]:
+    def _merge_headers(self, request_headers: dict[str, str] | None) -> dict[str, str] | None:
         """
         Merges global headers with request-specific headers.
         Request-specific headers take precedence over global headers.
@@ -210,21 +210,21 @@ class Test:
             
         merged = self.global_headers.copy()
         if request_headers:
-            merged.update(request_headers)  # Request headers override global ones
+            merged.update(request_headers)  
             
         return merged if merged else None
 
     def _request(
         self, 
-        method: HttpMethod, 
+        method: str, 
         endpoint: str, 
         expected_status: int = 200, 
-        expected_json: Optional[Dict[str, Any]] = None,
-        json: Optional[Union[Dict[str, Any], list, str, int, float, bool]] = None,
-        contain_keys: Optional[list] = None,
-        data: Optional[Union[str, bytes, Dict[str, Any]]] = None,
-        params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
+        expected_json: dict[str, Any] | None = None,
+        json: dict[str, Any] | None = None,
+        contain_keys: list[str] | None= None,
+        data: str | bytes | dict[str, Any] | None  = None,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
         **kwargs
     ) -> Response:
         """
@@ -240,8 +240,7 @@ class Test:
             request_kwargs['data'] = data
         if params is not None:
             request_kwargs['params'] = params
-            
-        # Merge global headers with request-specific headers
+
         merged_headers = self._merge_headers(headers)
         if merged_headers is not None:
             request_kwargs['headers'] = merged_headers
