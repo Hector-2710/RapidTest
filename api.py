@@ -42,17 +42,10 @@ def get_user(current_user : Annotated[User, Depends(get_user_db)]):
     return current_user
 
 @app.get("/users", status_code=status.HTTP_200_OK)
-def get_users(use_email: str):
-    for user in users:
-        if user.email == use_email:
-            print("User found:", user)
-            return user
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-
-@app.get("/users/{email}", status_code=status.HTTP_200_OK)
 def get_users(email: str):
     for user in users:
         if user.email == email:
+            print("User found:", user)
             return user
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
@@ -61,7 +54,6 @@ def get_users(email: str):
 def create_user(user: User):
     users.append(user)
     return user
-
 
 # PUT
 @app.put("/user/{user_id}", status_code=status.HTTP_200_OK)
