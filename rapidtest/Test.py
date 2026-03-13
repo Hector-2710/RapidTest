@@ -2,14 +2,14 @@ import requests
 from typing import Any, Annotated
 from rapidtest.Utils import print_report, show_connection_error
 from rapidtest.types import Response
-from rapidtest.ASGITestRunner import ASGITestRunner
+from .ASGITest import ASGITest
 
 class Test:
     """
-    Main class for performing REST API integration tests.
+    Main class for REST API integration tests.
     
-    This class allows making HTTP requests and automatically validating 
-    status codes and response bodies.
+    This class allows making HTTP requests and ASGI requests, validating
+    responses, and printing detailed test reports to the console.
     """
 
     def __init__(
@@ -26,20 +26,23 @@ class Test:
         Args:
             url (str | None): The base URL of the API (required when asgi=False).
             app (Any | None): ASGI app instance (required when asgi=True).
-            asgi (bool): Enables ASGI mode for direct app testing without HTTP server.
+            asgi (bool | False): Enables ASGI mode for direct app testing without HTTP server.
             global_headers (dict[str, str] | None): Global headers to be applied to all requests.
+        
+        Note:
+            - When asgi=True, 'app' must be provided and 'url' is ignored
         """
         self.asgi = asgi
         self.url = (url or "").rstrip("/")
         self.global_headers = global_headers or {}
-        self._asgi_runner: ASGITestRunner | None = None
+        self._asgi_runner: ASGITest | None = None
 
         if self.asgi:
             if app is None:
-                raise ValueError("'app' is required when asgi=True")
-            self._asgi_runner = ASGITestRunner(app)
+                raise AttributeError(" atributte 'app' is required when asgi=True")
+            self._asgi_runner = ASGITest(app)
         elif not self.url:
-            raise ValueError("'url' is required when asgi=False")
+            raise AttributeError(" atributte 'url' is required when asgi=False")
 
     def get(self, *, 
             endpoint: Annotated[str | None, "The API endpoint to call"] = None,
