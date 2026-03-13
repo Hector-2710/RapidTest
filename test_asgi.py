@@ -1,19 +1,18 @@
 from rapidtest.ASGITestRunner import ASGITestRunner
 from rapidtest.Utils import StatusCode
 from rapidtest.data import data
-from api import app  
+from backend.main import app
 
 test = ASGITestRunner(app)  
 
-#LOGIN
-test.post(path="/token", expected_status=StatusCode.OK_200, data={"username": "caja", "password": "caja"})
-
+# LOGIN
+response = test.post(path="/token", expected_status=StatusCode.OK_200, data={"username": "caja", "password": "caja"})
 # GET
 test.get(path="/", expected_status=StatusCode.OK_200, contain_keys=["message"])
 test.get(path="/me", expected_status=StatusCode.OK_200, headers={"Authorization": "Bearer caja"})
 test.get(path="/users", expected_status=StatusCode.OK_200, query_params={"email": "caja"})
 
-#POST
+# #POST
 test.post(path="/user", 
           expected_status=StatusCode.CREATED_201,
           json_data={"id":f"{data.generate_id()}" , "name": "test", "email": "test", "age":12, "password": "test"})
