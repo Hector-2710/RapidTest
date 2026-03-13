@@ -2,6 +2,7 @@ import requests
 from typing import Any, Annotated
 from rapidtest.Utils import print_report, show_connection_error
 from rapidtest.types import Response
+from rapidtest.ASGITestRunner import ASGITestRunner
 
 class Test:
     """
@@ -11,22 +12,38 @@ class Test:
     status codes and response bodies.
     """
 
-    def __init__(self, *,
-        url: Annotated[str, "The base URL of the API (e.g., 'http://localhost:8000')"],
-        global_headers: Annotated[dict[str, str] | None, "Global headers to be applied to all requests (optional)"] = {}
-        ):
+    def __init__(
+        self,
+        *,
+        url: Annotated[str | None, "The base URL of the API (e.g., 'http://localhost:8000')"] = None,
+        app: Annotated[Any | None, "ASGI app instance when asgi=True"] = None,
+        asgi: Annotated[bool, "Enable ASGI direct testing mode"] = False,
+        global_headers: Annotated[dict[str, str] | None, "Global headers to be applied to all requests (optional)"] = None,
+    ):
         """
         Initializes the test client.
 
         Args:
-            url (str): The base URL of the API (e.g., 'http://localhost:8000').
-            global_headers (dict[str, str] | None): Global headers to be applied to all requests. 
+            url (str | None): The base URL of the API (required when asgi=False).
+            app (Any | None): ASGI app instance (required when asgi=True).
+            asgi (bool): Enables ASGI mode for direct app testing without HTTP server.
+            global_headers (dict[str, str] | None): Global headers to be applied to all requests.
         """
-        self.url = url.rstrip('/')
-        self.global_headers = global_headers  
+        self.asgi = asgi
+        self.url = (url or "").rstrip("/")
+        self.global_headers = global_headers or {}
+        self._asgi_runner: ASGITestRunner | None = None
+
+        if self.asgi:
+            if app is None:
+                raise ValueError("'app' is required when asgi=True")
+            self._asgi_runner = ASGITestRunner(app)
+        elif not self.url:
+            raise ValueError("'url' is required when asgi=False")
 
     def get(self, *, 
-            endpoint: Annotated[str, "The API endpoint to call"],
+            endpoint: Annotated[str | None, "The API endpoint to call"] = None,
+            path: Annotated[str | None, "Alias for endpoint (ASGI-style)"] = None,
             expected_status: Annotated[int, "The expected HTTP status code (default: 200)"] = 200, 
             expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
             contain_keys: Annotated[list[str] | None, "A subset of JSON keys that should be contained in the response"] = None,
@@ -49,11 +66,16 @@ class Test:
             Response: The complete HTTP response object.
         
         """
+        endpoint = self._resolve_endpoint(endpoint, path)
+        if params is None and "query_params" in kwargs:
+            params = kwargs.pop("query_params")
+
         return self._request("GET", endpoint, expected_status, expected_json, 
                            params=params, headers=headers,contain_keys=contain_keys, **kwargs)
 
     def post(self, *, 
-             endpoint: Annotated[str, "The API endpoint to call"],
+             endpoint: Annotated[str | None, "The API endpoint to call"] = None,
+             path: Annotated[str | None, "Alias for endpoint (ASGI-style)"] = None,
              expected_status: Annotated[int, "The expected HTTP status code (default: 201)"] = 201, 
              input_json: Annotated[dict[str, Any] | None, "JSON data to send in the request body"] = None,
              expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
@@ -83,11 +105,18 @@ class Test:
             Prints test results (PASSED/FAILED) with response details to console.
             Use either 'input_json' or 'data' parameter, not both.
         """
+        endpoint = self._resolve_endpoint(endpoint, path)
+        if input_json is None and "json_data" in kwargs:
+            input_json = kwargs.pop("json_data")
+        if params is None and "query_params" in kwargs:
+            params = kwargs.pop("query_params")
+
         return self._request("POST", endpoint, expected_status, expected_json, 
                            json=input_json, data=data, params=params, headers=headers, contain_keys=contain_keys, **kwargs)
 
     def put(self, *, 
-            endpoint: Annotated[str, "The API endpoint to call"], 
+            endpoint: Annotated[str | None, "The API endpoint to call"] = None,
+            path: Annotated[str | None, "Alias for endpoint (ASGI-style)"] = None,
             expected_status: Annotated[int, "The expected HTTP status code (default: 200)"] = 200, 
             input_json: Annotated[dict[str, Any] | None, "JSON data to send in the request body"] = None,
             expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
@@ -117,11 +146,18 @@ class Test:
             Prints test results (PASSED/FAILED) with response details to console.
             Use either 'input_json' or 'data' parameter, not both.
         """
+        endpoint = self._resolve_endpoint(endpoint, path)
+        if input_json is None and "json_data" in kwargs:
+            input_json = kwargs.pop("json_data")
+        if params is None and "query_params" in kwargs:
+            params = kwargs.pop("query_params")
+
         return self._request("PUT", endpoint, expected_status, expected_json, 
                            json=input_json, data=data, params=params, headers=headers, contain_keys=contain_keys, **kwargs)
 
     def patch(self, *, 
-              endpoint: Annotated[str, "The API endpoint to call"], 
+              endpoint: Annotated[str | None, "The API endpoint to call"] = None,
+              path: Annotated[str | None, "Alias for endpoint (ASGI-style)"] = None,
               expected_status: Annotated[int, "The expected HTTP status code"] = 200, 
               input_json: Annotated[dict[str, Any] | None, "JSON data to send in the request body"] = None,
               expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
@@ -146,11 +182,18 @@ class Test:
         Returns:
             Response: The complete HTTP response object.
         """
+        endpoint = self._resolve_endpoint(endpoint, path)
+        if input_json is None and "json_data" in kwargs:
+            input_json = kwargs.pop("json_data")
+        if params is None and "query_params" in kwargs:
+            params = kwargs.pop("query_params")
+
         return self._request("PATCH", endpoint, expected_status, expected_json, 
                            json=input_json, data=data, params=params, headers=headers, contain_keys=contain_keys, **kwargs)
 
     def delete(self, *, 
-               endpoint: Annotated[str, "The API endpoint to call"], 
+               endpoint: Annotated[str | None, "The API endpoint to call"] = None,
+               path: Annotated[str | None, "Alias for endpoint (ASGI-style)"] = None,
                expected_status: Annotated[int, "The expected HTTP status code"] = 204, 
                input_json: Annotated[dict[str, Any] | None, "JSON data to send in the request body"] = None,
                expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
@@ -175,8 +218,20 @@ class Test:
         Returns:
             Response: The HTTP response object if successful.
         """
+        endpoint = self._resolve_endpoint(endpoint, path)
+        if input_json is None and "json_data" in kwargs:
+            input_json = kwargs.pop("json_data")
+        if params is None and "query_params" in kwargs:
+            params = kwargs.pop("query_params")
+
         return self._request("DELETE", endpoint, expected_status, expected_json, 
                            json=input_json, data=data, params=params, headers=headers, contain_keys=contain_keys, **kwargs)
+
+    def _resolve_endpoint(self, endpoint: str | None, path: str | None) -> str:
+        resolved = endpoint if endpoint is not None else path
+        if not resolved:
+            raise ValueError("'endpoint' (or alias 'path') is required")
+        return resolved
 
     def set_global_headers(self, headers: Annotated[dict[str, str] | None, "Global headers to be applied to all requests"]) -> None:
         """
@@ -230,69 +285,150 @@ class Test:
         """
         Internal method to make requests and validate results.
         """
-        url = f"{self.url}/{endpoint.lstrip('/')}"
-        method_func = getattr(requests,method.lower())
-        
+        merged_headers = self._merge_headers(headers)
+        if self.asgi:
+            return self._asgi_request(
+                method=method,
+                endpoint=endpoint,
+                expected_status=expected_status,
+                expected_json=expected_json,
+                json=json,
+                contain_keys=contain_keys,
+                data=data,
+                params=params,
+                headers=merged_headers,
+                **kwargs,
+            )
+
+        return self._http_request(
+            method=method,
+            endpoint=endpoint,
+            expected_status=expected_status,
+            expected_json=expected_json,
+            json=json,
+            contain_keys=contain_keys,
+            data=data,
+            params=params,
+            headers=merged_headers,
+            **kwargs,
+        )
+
+    def _asgi_request(
+        self,
+        *,
+        method: str,
+        endpoint: str,
+        expected_status: int,
+        expected_json: dict[str, Any] | None,
+        json: dict[str, Any] | None,
+        contain_keys: list[str] | None,
+        data: str | bytes | dict[str, Any] | None,
+        params: dict[str, Any] | None,
+        headers: dict[str, str] | None,
+        **kwargs,
+    ):
+        if not self._asgi_runner:
+            raise RuntimeError("ASGI runner is not initialized")
+
+        method_func = getattr(self._asgi_runner, method.lower())
+        path = f"/{endpoint.lstrip('/')}"
+
         request_kwargs = {}
         if json is not None:
-            request_kwargs['json'] = json
+            request_kwargs["json_data"] = json
         if data is not None:
-            request_kwargs['data'] = data
+            request_kwargs["data"] = data
         if params is not None:
-            request_kwargs['params'] = params
+            request_kwargs["query_params"] = params
+        if headers is not None:
+            request_kwargs["headers"] = headers
 
-        merged_headers = self._merge_headers(headers)
-        if merged_headers is not None:
-            request_kwargs['headers'] = merged_headers
-        
         request_kwargs.update(kwargs)
 
-        keys = True
-        if contain_keys is not None:
-            keys = self._validate_contain_keys(expected_json, contain_keys)
+        return method_func(
+            path=path,
+            expected_status=expected_status,
+            expected_json=expected_json,
+            contain_keys=contain_keys,
+            **request_kwargs,
+        )
+
+    def _http_request(
+        self,
+        *,
+        method: str,
+        endpoint: str,
+        expected_status: int,
+        expected_json: dict[str, Any] | None,
+        json: dict[str, Any] | None,
+        contain_keys: list[str] | None,
+        data: str | bytes | dict[str, Any] | None,
+        params: dict[str, Any] | None,
+        headers: dict[str, str] | None,
+        **kwargs,
+    ) -> Response:
+        url = f"{self.url}/{endpoint.lstrip('/')}"
+        method_func = getattr(requests, method.lower())
+
+        request_kwargs = {}
+        if json is not None:
+            request_kwargs["json"] = json
+        if data is not None:
+            request_kwargs["data"] = data
+        if params is not None:
+            request_kwargs["params"] = params
+        if headers is not None:
+            request_kwargs["headers"] = headers
+
+        request_kwargs.update(kwargs)
 
         try:
             response = method_func(url, **request_kwargs)
             status_ok = response.status_code == expected_status
             body_ok = True
             error_msg = None
+
             try:
                 response_json = response.json()
             except Exception:
                 response_json = {"raw_content": response.text}
-            
-        
-            if expected_json is not None:
-                if response_json != expected_json:
-                    body_ok = False
-                    if status_ok:
-                        if keys:
-                            error_msg = "The expected JSON is not the correct"
-                        else:
-                            error_msg = "The expected JSON is not the correct and keys are not correct"
-                    else:
-                        if keys:
-                            error_msg = f"Expected status {expected_status}, but got {response.status_code} and the expected JSON is not the correct"
-                        else:
-                            error_msg = f"Expected status {expected_status}, but got {response.status_code} and the expected JSON is not the correct and keys are not correct"
+
+            keys = True
+            if contain_keys is not None:
+                keys = self._validate_contain_keys(response_json, contain_keys)
+
+            if expected_json is not None and response_json != expected_json:
+                body_ok = False
+                if status_ok:
+                    error_msg = (
+                        "The expected JSON is not the correct"
+                        if keys
+                        else "The expected JSON is not the correct and keys are not correct"
+                    )
+                else:
+                    error_msg = (
+                        f"Expected status {expected_status}, but got {response.status_code} and the expected JSON is not the correct"
+                        if keys
+                        else f"Expected status {expected_status}, but got {response.status_code} and the expected JSON is not the correct and keys are not correct"
+                    )
 
             if not status_ok and not error_msg:
-                if keys:
-                    error_msg = f"Expected status {expected_status}, but got {response.status_code}"
-                else:
-                    error_msg = f"Expected status {expected_status}, but got {response.status_code} and keys are not correct"
+                error_msg = (
+                    f"Expected status {expected_status}, but got {response.status_code}"
+                    if keys
+                    else f"Expected status {expected_status}, but got {response.status_code} and keys are not correct"
+                )
 
             if status_ok and body_ok:
                 if keys:
                     print_report("PASSED", response.url, response.status_code, response_json)
                 else:
-                    error_msg = "Keys are not correct"
-                    print_report("PASSED", response.url, response.status_code, response_json, error_msg=error_msg)
+                    print_report("PASSED", response.url, response.status_code, response_json, error_msg="Keys are not correct")
             else:
                 print_report("FAILED", response.url, response.status_code, response_json, error_msg=error_msg)
 
             return response
-            
+
         except Exception as e:
             show_connection_error(url, e)
             return None
