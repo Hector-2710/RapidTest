@@ -24,6 +24,14 @@ def get_user_db(token: str = Depends(oauth2_scheme)):
             return user
     return None
 
+#LOGIN
+@app.post("/token", status_code=status.HTTP_200_OK)
+def login(form_data : Annotated[OAuth2PasswordRequestForm, Depends()]):
+    for user in users:
+        if user.email == form_data.username and user.password == form_data.password:
+            return {"access_token": user.email, "token_type": "bearer"}
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")  
+
 # GET
 @app.get("/", status_code=status.HTTP_200_OK)
 def get_hello():
@@ -54,12 +62,6 @@ def create_user(user: User):
     users.append(user)
     return user
 
-@app.post("/token", status_code=status.HTTP_200_OK)
-def login(form_data : Annotated[OAuth2PasswordRequestForm, Depends()]):
-    for user in users:
-        if user.email == form_data.username and user.password == form_data.password:
-            return {"access_token": user.email, "token_type": "bearer"}
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")  
 
 # PUT
 @app.put("/user/{user_id}", status_code=status.HTTP_200_OK)
