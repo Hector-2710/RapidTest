@@ -1,8 +1,13 @@
-from contextlib import contextmanager
 from .ASGITest import ASGITest, ASGIResponse
-from .ASGIDatabase import db_interceptor, DatabaseOperation
 from .Utils import print_report, show_connection_error
 from typing import Annotated, Any
+
+
+class DatabaseOperation:
+    """Compatibility placeholder. Database capture is disabled."""
+
+    def __init__(self, *args, **kwargs):
+        pass
 
 class ASGITestRunner(ASGITest):
     """
@@ -22,9 +27,6 @@ class ASGITestRunner(ASGITest):
             without requiring manual setup. Defaults to True.
         """
         super().__init__(app)
-        
-        if auto_patch_db:
-            self._try_patch_database()
     
     def get(self, 
             path: str, 
@@ -47,7 +49,7 @@ class ASGITestRunner(ASGITest):
         """
         try:
             response = super().get(path, **kwargs)
-            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
+            enhanced = EnhancedASGIResponse(response, [])
             
             validation_passed = self._process_response_validation(
                 response, path, expected_status, expected_json, contain_keys
@@ -83,7 +85,7 @@ class ASGITestRunner(ASGITest):
         """
         try:
             response = super().post(path, json_data, **kwargs)
-            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
+            enhanced = EnhancedASGIResponse(response, [])
             
             validation_passed = self._process_response_validation(
                 response, path, expected_status, expected_json, contain_keys
@@ -119,7 +121,7 @@ class ASGITestRunner(ASGITest):
         """
         try:
             response = super().put(path, json_data, **kwargs)
-            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
+            enhanced = EnhancedASGIResponse(response, [])
             
             validation_passed = self._process_response_validation(
                 response, path, expected_status, expected_json, contain_keys
@@ -153,7 +155,7 @@ class ASGITestRunner(ASGITest):
         """
         try:
             response = super().delete(path, **kwargs)
-            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
+            enhanced = EnhancedASGIResponse(response, [])
             
             validation_passed = self._process_response_validation(
                 response, path, expected_status, expected_json, contain_keys
@@ -188,7 +190,7 @@ class ASGITestRunner(ASGITest):
         """
         try:
             response = super().patch(path, json_data, **kwargs)
-            enhanced = EnhancedASGIResponse(response, db_interceptor.captured_operations.copy())
+            enhanced = EnhancedASGIResponse(response, [])
             
             validation_passed = self._process_response_validation(
                 response, path, expected_status, expected_json, contain_keys
@@ -200,27 +202,6 @@ class ASGITestRunner(ASGITest):
             simulated_url = f"asgi://testserver{path}"
             show_connection_error(simulated_url, e)
             raise
-    
-    def _try_patch_database(self):
-        """Intent to patch database interceptors if available, but fail gracefully if not"""
-        try:
-            db_interceptor.patch_sqlalchemy_session()
-        except Exception:
-            pass
-    
-    @contextmanager
-    def capture_api_and_database(self):
-        """
-        Context manager to capture both API responses and database operations together.
-        This allows for cohesive validation of the entire request lifecycle, including
-        the API response and the underlying database interactions that occurred during the request.
-        """
-        self._is_capturing = True
-        
-        with db_interceptor.capture_operations() as operations:
-            yield operations
-        
-        self._is_capturing = False
     
     def _validate_contain_keys(self, response_json: dict, contain_keys: list) -> bool:
         """
@@ -291,80 +272,6 @@ class ASGITestRunner(ASGITest):
         
         return status_ok and body_ok and keys
     
-    def assert_db_operation_occurred(self, operation: str, table: str):
-        """ Verify that a specific database operation occurred during the test execution"""
-        operations = [op for op in db_interceptor.captured_operations 
-                     if op.operation_type == operation.upper() and op.table.lower() == table.lower()]
-        
-        if not operations:
-            available_ops = [f'{op.operation_type} {op.table}' for op in db_interceptor.captured_operations]
-            raise AssertionError(
-                f"Expected {operation.upper()} operation on table '{table}', but none occurred. "
-                f"Captured operations: {available_ops}"
-            )
-    
-    def assert_no_db_operations(self, operation: str | None = None, table: str | None = None):
-        """Verify that no database operations occurred (or a specific type)"""
-        if operation and table:
-            operations = [op for op in db_interceptor.captured_operations 
-                         if op.operation_type == operation.upper() and op.table.lower() == table.lower()]
-            if operations:
-                raise AssertionError(
-                    f"Expected no {operation.upper()} operations on table '{table}', but {len(operations)} occurred"
-                )
-        elif operation:
-            operations = [op for op in db_interceptor.captured_operations 
-                         if op.operation_type == operation.upper()]
-            if operations:
-                raise AssertionError(
-                    f"Expected no {operation.upper()} operations, but {len(operations)} occurred"
-                )
-        else:
-            if db_interceptor.captured_operations:
-                ops_summary = [f'{op.operation_type} {op.table}' for op in db_interceptor.captured_operations]
-                raise AssertionError(
-                    f"Expected no DB operations, but {len(db_interceptor.captured_operations)} occurred: {ops_summary}"
-                )
-    
-    def get_db_operations(self, operation_type: str | None = None, table: str | None = None) -> list[DatabaseOperation]:
-        """Get captured database operations with optional filtering by type and table."""
-        operations = db_interceptor.captured_operations.copy()
-        
-        if operation_type:
-            operations = [op for op in operations if op.operation_type == operation_type.upper()]
-        
-        if table:
-            operations = [op for op in operations if op.table.lower() == table.lower()]
-        
-        return operations
-    
-    def print_db_operations_summary(self):
-        """Prints a summary of captured database operations for the last request, including counts and details."""
-        operations = db_interceptor.captured_operations
-        
-        if not operations:
-            print("📊 No database operations captured")
-            return
-        
-        print(f"\n📊 Database Operations Summary ({len(operations)} total):")
-        
-        types_count = {}
-        tables_count = {}
-        
-        for op in operations:
-            types_count[op.operation_type] = types_count.get(op.operation_type, 0) + 1
-            tables_count[op.table] = tables_count.get(op.table, 0) + 1
-        
-        print(f"   Operation types: {dict(types_count)}")
-        print(f"   Tables affected: {dict(tables_count)}")
-        
-        for i, op in enumerate(operations, 1):
-            query_preview = op.query[:60] + "..." if len(op.query) > 60 else op.query
-            print(f"   {i}. {op.operation_type} on '{op.table}' - {query_preview}")
-    
-    def clear_db_operations(self):
-        db_interceptor.clear_operations()
-
 
 class EnhancedASGIResponse(ASGIResponse):
     """
@@ -382,24 +289,4 @@ class EnhancedASGIResponse(ASGIResponse):
         })
         self.db_operations = db_operations
     
-    def get_db_changes(self, operation_type: str | None = None, table: str | None = None) -> list[DatabaseOperation]:
-        """Get captured database operations related to this response, with optional filtering by type and table."""
-        operations = self.db_operations.copy()
-        
-        if operation_type:
-            operations = [op for op in operations if op.operation_type == operation_type.upper()]
-        
-        if table:
-            operations = [op for op in operations if op.table.lower() == table.lower()]
-        
-        return operations
-    
-    def assert_db_operation_in_response(self, operation_type: str, table: str):
-        """Verify that this specific response caused a database operation of the given type on the given table."""
-        matching_ops = self.get_db_changes(operation_type, table)
-        if not matching_ops:
-            available_ops = [f'{op.operation_type} {op.table}' for op in self.db_operations]
-            raise AssertionError(
-                f"Expected {operation_type.upper()} on '{table}' in this response, "
-                f"but operations were: {available_ops}"
-            )
+ 
