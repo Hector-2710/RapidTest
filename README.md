@@ -58,7 +58,55 @@ user = data.generate_user(id=True, name=True, email=True, age=True, password=Tru
 tester.post(endpoint="/user", input_json=user, expected_status=201)
 ```
 
-### 3. Generate Random Data
+### 4. ASGI Testing (Direct App Testing)
+
+For maximum performance and FastAPI integration, use ASGI testing that operates directly on your application without HTTP overhead:
+
+```python
+from rapidtest import ASGITestRunner, create_asgi_test
+
+# Your FastAPI app (no changes needed)
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+
+app = FastAPI()
+
+@app.post("/users/")
+def create_user(user: dict, db: Session = Depends(get_db)):
+    db_user = User(name=user["name"])
+    db.add(db_user)
+    db.commit()
+    return {"id": db_user.id, "name": db_user.name}
+
+# ASGI Testing (like FastAPI TestClient but with DB verification)
+def test_user_creation():
+    client = ASGITestRunner(app)  # Auto-patches SQLAlchemy
+    
+    with client.capture_api_and_database():
+        # Direct ASGI call (no HTTP, maximum speed)
+        response = client.post("/users/", json_data={"name": "Juan"})
+        
+        # Automatic validations
+        assert response.status_code == 201
+        assert response.json()["name"] == "Juan"
+        
+        # Database verification (automatic)
+        client.assert_db_operation_occurred("INSERT", "users")
+        client.print_db_operations_summary()
+
+# Helper function for quick setup
+client = create_asgi_test(app)
+response = client.get("/users", expected_status=200, contain_keys=["users"])
+```
+
+**ASGI Testing Benefits:**
+- 🚀 **Maximum Speed**: No HTTP overhead, direct memory operations
+- 🔍 **Auto-Detection**: Automatically detects test environment via ASGI scope
+- 📊 **Database Monitoring**: Automatically intercepts and verifies SQLAlchemy operations
+- ⚡ **FastAPI-Compatible**: Works exactly like `TestClient` but with database insights
+- 🧪 **Enterprise-Ready**: Context managers, automatic cleanup, comprehensive validation
+
+### 5. Generate Random Data
 
 Use the `data` class to create test data on the fly:
 
