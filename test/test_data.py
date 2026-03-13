@@ -4,7 +4,7 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from rapidtest.RapidData import data 
+from rapidtest.data import data 
 
 class TestData(unittest.TestCase):
     def test_create_auth_user(self):

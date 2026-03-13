@@ -1,4 +1,4 @@
-from typing import Any, Optional, Dict
+from typing import Any
 import json
 import statistics
 import enum
@@ -21,7 +21,7 @@ class StatusCode(enum.IntEnum):
     REQUEST_TIMEOUT_408 = 408
     INTERNAL_SERVER_ERROR_500 = 500
 
-def print_report(result: str, url: str, status: int, body: Any, error_msg: Optional[str] = None) -> None:
+def print_report(result: str, url: str, status: int, body: Any, error_msg: str | None = None) -> None:
     """
     Imprime un reporte simple y rápido del resultado de una prueba.
 
@@ -102,7 +102,7 @@ def show_connection_error(url: str, exception: Exception) -> None:
     
     print()
     
-    def _calculate_results(results, duration, users) -> Dict[str, Any]:
+    def _calculate_results(results, duration, users) -> dict[str, Any]:
         """Calculate and display test results."""
         if not results:
             print("❌ No results collected")
