@@ -1,9 +1,8 @@
 import time
 import threading
 import requests
-from typing import Dict, Any, Annotated
+from typing import Any, Annotated
 import statistics
-from rapidtest.types import Endpoint, Results, URL, Seconds
 
 class Performance:
     """
@@ -13,18 +12,18 @@ class Performance:
     """
 
     def __init__(self, *, 
-                 base_url: Annotated[URL, "Base URL to test"],
+                 base_url: Annotated[str, "Base URL to test"],
                  users: Annotated[int, "Number of concurrent users to simulate (default: 10)"] = 10,
-                 duration: Annotated[Seconds, "Test duration in seconds (default: 10)"] = 10,
-                 timeout: Annotated[Seconds, "Max request timeout in seconds (default: 10)"] = 10):
+                 duration: Annotated[int, "Test duration in seconds (default: 10)"] = 10,
+                 timeout: Annotated[int, "Max request timeout in seconds (default: 10)"] = 10):
         """
         Initialize the performance test.
 
         Args:
-            base_url (URL): Base URL to test
+            base_url (str): Base URL to test
             users (int): Number of concurrent users to simulate
-            duration (Seconds): Test duration in seconds
-            timeout (Seconds): Request timeout in seconds
+            duration (int): Test duration in seconds
+            timeout (int): Request timeout in seconds
         """
         self.base_url = base_url.rstrip('/')
         self.users = users
@@ -33,11 +32,11 @@ class Performance:
         self.results = []
         self.lock = threading.Lock()
         
-    def add_get_task(self, *, endpoint: Annotated[Endpoint, "URL endpoint to test"]):
+    def add_get_task(self, *, endpoint: Annotated[str, "URL endpoint to test"]):
         """Add a GET request task.
 
         Args:
-            endpoint (Endpoint): URL endpoint to test
+            endpoint (str): URL endpoint to test
 
         Returns:
             None 
@@ -45,7 +44,7 @@ class Performance:
 
         self.endpoint = endpoint
         
-    def run(self) -> Results:
+    def run(self) -> dict[str, Any]:
         """
         Run the performance test.
         
@@ -53,7 +52,7 @@ class Performance:
             None
 
         Returns:
-            Results: Test results and statistics.
+            dict[str, Any]: Test results and statistics.
         """
         if not hasattr(self, 'endpoint'):
             raise ValueError("No endpoint defined. Use add_get_task() before running.")
@@ -116,7 +115,7 @@ class Performance:
             
             time.sleep(0.1)
     
-    def _calculate_results(self) -> Dict[str, Any]:
+    def _calculate_results(self) -> dict[str, Any]:
         """Calculate and display test results."""
         if not self.results:
             print("❌ No results collected")
