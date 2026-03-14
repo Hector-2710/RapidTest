@@ -21,6 +21,106 @@ class StatusCode(enum.IntEnum):
     REQUEST_TIMEOUT_408 = 408
     INTERNAL_SERVER_ERROR_500 = 500
 
+
+def encode_query_params(params: dict[str, Any]) -> bytes:
+    """Encode query params to ASGI query_string bytes."""
+    if not params:
+        return b""
+    return "&".join(f"{k}={v}" for k, v in params.items()).encode()
+
+
+def encode_headers(headers: dict[str, str]) -> list[tuple[bytes, bytes]]:
+    """Encode headers to ASGI-compatible byte tuples."""
+    return [(key.lower().encode(), value.encode()) for key, value in headers.items()]
+
+
+def decode_headers(headers: list[tuple[bytes, bytes]]) -> list[tuple[str, str]]:
+    """Decode ASGI header tuples to string tuples."""
+    return [(key.decode(), value.decode()) for key, value in headers]
+
+
+def try_parse_json(content: bytes) -> dict[str, Any] | None:
+    """Best-effort JSON parser for response payloads."""
+    try:
+        return json.loads(content.decode())
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return None
+
+
+def validate_contain_keys(response_json: dict[str, Any] | None, contain_keys: list[str]) -> bool:
+    """Validate that the parsed response contains the expected keys."""
+    if not response_json:
+        return False
+
+    for item in contain_keys:
+        if item not in response_json:
+            return False
+
+    return True
+
+
+def parse_response_body(response: Any) -> dict[str, Any]:
+    """Parse a response body, falling back to raw text when JSON decoding fails."""
+    try:
+        parsed = response.json()
+        return parsed if parsed is not None else {"raw_content": None}
+    except Exception:
+        if hasattr(response, "text"):
+            return {"raw_content": response.text}
+
+        return {"raw_content": str(getattr(response, "content", ""))}
+
+
+def validate_and_report_response(
+    response: Any,
+    url: str,
+    expected_status: int,
+    expected_json: dict[str, Any] | None = None,
+    contain_keys: list[str] | None = None,
+) -> bool:
+    """Validate a response and print the standard test report."""
+    response_json = parse_response_body(response)
+    keys_ok = True
+
+    if contain_keys is not None:
+        keys_ok = validate_contain_keys(response_json, contain_keys)
+
+    status_ok = response.status_code == expected_status
+    body_ok = True
+    error_msg = None
+
+    if expected_json is not None and response_json != expected_json:
+        body_ok = False
+        if status_ok:
+            error_msg = (
+                "The expected JSON is not the correct"
+                if keys_ok
+                else "The expected JSON is not the correct and keys are not correct"
+            )
+        else:
+            error_msg = (
+                f"Expected status {expected_status}, but got {response.status_code} and the expected JSON is not the correct"
+                if keys_ok
+                else f"Expected status {expected_status}, but got {response.status_code} and the expected JSON is not the correct and keys are not correct"
+            )
+
+    if not status_ok and not error_msg:
+        error_msg = (
+            f"Expected status {expected_status}, but got {response.status_code}"
+            if keys_ok
+            else f"Expected status {expected_status}, but got {response.status_code} and keys are not correct"
+        )
+
+    if status_ok and body_ok:
+        if keys_ok:
+            print_report("PASSED", url, response.status_code, response_json)
+        else:
+            print_report("PASSED", url, response.status_code, response_json, error_msg="Keys are not correct")
+    else:
+        print_report("FAILED", url, response.status_code, response_json, error_msg=error_msg)
+
+    return status_ok and body_ok and keys_ok
+
 def print_report(result: str, url: str, status: int, body: Any, error_msg: str | None = None) -> None:
     """
     Imprime un reporte simple y rápido del resultado de una prueba.
