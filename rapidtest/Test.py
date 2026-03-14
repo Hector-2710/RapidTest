@@ -1,6 +1,6 @@
 import requests
 from typing import Any, Annotated
-from rapidtest.Utils import print_report, show_connection_error
+from rapidtest.Utils import show_connection_error, validate_and_report_response
 from rapidtest.types import Response
 from .ASGITest import ASGITest
 
@@ -258,7 +258,7 @@ class Test:
 
         request_kwargs = {}
         if json is not None:
-            request_kwargs["json_data"] = json
+            request_kwargs["json"] = json
         if data is not None:
             request_kwargs["data"] = data
         if params is not None:
@@ -270,9 +270,9 @@ class Test:
 
         return method_func(
             path=path,
-            expected_status=status,
+            status=status,
             expected_json=expected_json,
-            contain_keys=keys,
+            keys=keys,
             **request_kwargs,
         )
 
@@ -307,61 +307,18 @@ class Test:
 
         try:
             response = method_func(url, **request_kwargs)
-            status_ok = response.status_code == status
-            body_ok = True
-            error_msg = None
-
-            try:
-                response_json = response.json()
-            except Exception:
-                response_json = {"raw_content": response.text}
-
-            keys = True
-            if keys is not None:
-                keys = self._validate_contain_keys(response_json, keys)
-
-            if expected_json is not None and response_json != expected_json:
-                body_ok = False
-                if status_ok:
-                    error_msg = (
-                        "The expected JSON is not the correct"
-                        if keys
-                        else "The expected JSON is not the correct and keys are not correct"
-                    )
-                else:
-                    error_msg = (
-                        f"Expected status {status}, but got {response.status_code} and the expected JSON is not the correct"
-                        if keys
-                        else f"Expected status {status}, but got {response.status_code} and the expected JSON is not the correct and keys are not correct"
-                    )
-
-            if not status_ok and not error_msg:
-                error_msg = (
-                    f"Expected status {status}, but got {response.status_code}"
-                    if keys
-                    else f"Expected status {status}, but got {response.status_code} and keys are not correct"
-                )
-
-            if status_ok and body_ok:
-                if keys:
-                    print_report("PASSED", response.url, response.status_code, response_json)
-                else:
-                    print_report("PASSED", response.url, response.status_code, response_json, error_msg="Keys are not correct")
-            else:
-                print_report("FAILED", response.url, response.status_code, response_json, error_msg=error_msg)
-
+            validate_and_report_response(
+                response,
+                response.url,
+                status,
+                expected_json,
+                keys,
+            )
             return response
 
         except Exception as e:
             show_connection_error(url, e)
             return None
-
-    def _validate_contain_keys(self, response_json: dict, contain_keys: list) -> bool:
-        """ Validates that the response JSON contains the expected subset of keys."""
-        for item in contain_keys:
-            if item not in response_json:
-                return False
-        return True
 
     def set_global_headers(self, headers: dict[str, str] | None) -> None:
         """ Set Header for all requests."""

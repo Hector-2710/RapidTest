@@ -1,5 +1,5 @@
 import asyncio
-import json
+import json as json_lib
 from urllib.parse import urlencode
 from typing import Any
 from collections.abc import Callable
@@ -8,9 +8,9 @@ from .Utils import (
     decode_headers,
     encode_headers,
     encode_query_params,
-    print_report,
     show_connection_error,
     try_parse_json,
+    validate_and_report_response,
 )
 class ASGIResponse:
     """Wrapper for ASGI responses that mimics requests.Response"""
@@ -52,38 +52,38 @@ class ASGITest:
     def get(
         self,
         path: str,
-        expected_status: int = 200,
+        status: int = 200,
         expected_json: dict | None = None,
-        contain_keys: list[str] | None = None,
+        keys: list[str] | None = None,
         **kwargs,
     ) -> ASGIResponse:
         """Direct GET request via ASGI with integrated validation."""
         return self._validated_request(
-            "GET",
-            path,
-            expected_status=expected_status,
+            method="GET",
+            path=path,
+            status=status,
             expected_json=expected_json,
-            contain_keys=contain_keys,
+            keys=keys,
             **kwargs,
         )
     
     def post(
         self,
         path: str,
-        json_data: dict[str, Any] | None = None,
-        expected_status: int = 201,
+        json: dict[str, Any] | None = None,
+        status: int = 201,
         expected_json: dict | None = None,
-        contain_keys: list[str] | None = None,
+        keys: list[str] | None = None,
         **kwargs,
     ) -> ASGIResponse:
         """Direct POST request via ASGI with integrated validation."""
-        body, headers = self._prepare_body_and_headers(json_data, kwargs)
+        body, headers = self._prepare_body_and_headers(json, kwargs)
         return self._validated_request(
-            "POST",
-            path,
-            expected_status=expected_status,
+            method="POST",
+            path=path,
+            status=status,
             expected_json=expected_json,
-            contain_keys=contain_keys,
+            keys=keys,
             body=body,
             headers=headers,
             **kwargs,
@@ -92,20 +92,20 @@ class ASGITest:
     def put(
         self,
         path: str,
-        json_data: dict[str, Any] | None = None,
-        expected_status: int = 200,
+        json: dict[str, Any] | None = None,
+        status: int = 200,
         expected_json: dict | None = None,
-        contain_keys: list[str] | None = None,
+        keys: list[str] | None = None,
         **kwargs,
     ) -> ASGIResponse:
         """Direct PUT request via ASGI with integrated validation."""
-        body, headers = self._prepare_body_and_headers(json_data, kwargs)
+        body, headers = self._prepare_body_and_headers(json, kwargs)
         return self._validated_request(
-            "PUT",
-            path,
-            expected_status=expected_status,
+            method="PUT",
+            path=path,
+            status=status,
             expected_json=expected_json,
-            contain_keys=contain_keys,
+            keys=keys,
             body=body,
             headers=headers,
             **kwargs,
@@ -114,69 +114,75 @@ class ASGITest:
     def delete(
         self,
         path: str,
-        expected_status: int = 204,
+        status: int = 204,
         expected_json: dict | None = None,
-        contain_keys: list[str] | None = None,
+        keys: list[str] | None = None,
         **kwargs,
     ) -> ASGIResponse:
         """Direct DELETE request via ASGI with integrated validation."""
         return self._validated_request(
-            "DELETE",
-            path,
-            expected_status=expected_status,
+            method="DELETE",
+            path=path,
+            status=status,
             expected_json=expected_json,
-            contain_keys=contain_keys,
+            keys=keys,
             **kwargs,
         )
     
     def patch(
         self,
         path: str,
-        json_data: dict[str, Any] | None = None,
-        expected_status: int = 200,
+        json: dict[str, Any] | None = None,
+        status: int = 200,
         expected_json: dict | None = None,
-        contain_keys: list[str] | None = None,
+        keys: list[str] | None = None,
         **kwargs,
     ) -> ASGIResponse:
         """Direct PATCH request via ASGI with integrated validation."""
-        body, headers = self._prepare_body_and_headers(json_data, kwargs)
+        body, headers = self._prepare_body_and_headers(json, kwargs)
         return self._validated_request(
-            "PATCH",
-            path,
-            expected_status=expected_status,
+            method="PATCH",
+            path=path,
+            status=status,
             expected_json=expected_json,
-            contain_keys=contain_keys,
+            keys=keys,
             body=body,
             headers=headers,
             **kwargs,
         )
 
     def _validated_request(
-        self,
+        self, *,
         method: str,
         path: str,
-        *,
-        expected_status: int,
+        status: int,
         expected_json: dict | None,
-        contain_keys: list[str] | None,
+        keys: list[str] | None,
         **kwargs,
     ) -> ASGIResponse:
         try:
             response = self._sync_request(method, path, **kwargs)
-            self._process_response_validation(response, path, expected_status, expected_json, contain_keys)
+            simulated_url = f"asgi://testserver{path}"
+            validate_and_report_response(
+                response,
+                simulated_url,
+                status,
+                expected_json,
+                keys,
+            )
             return response
         except Exception as exception:
             simulated_url = f"asgi://testserver{path}"
             show_connection_error(simulated_url, exception)
             raise
 
-    def _prepare_body_and_headers(self, json_data: dict[str, Any] | None, kwargs: dict) -> tuple[bytes | None, dict[str, str]]:
+    def _prepare_body_and_headers(self, json: dict[str, Any] | None, kwargs: dict) -> tuple[bytes | None, dict[str, str]]:
         body = kwargs.pop("body", None)
         form_data = kwargs.pop("data", None)
         headers = kwargs.pop("headers", {})
 
-        if json_data is not None:
-            body = json.dumps(json_data).encode()
+        if json is not None:
+            body = json_lib.dumps(json).encode()
             headers["content-type"] = "application/json"
         elif form_data is not None:
             body = urlencode(form_data, doseq=True).encode()
@@ -243,8 +249,6 @@ class ASGITest:
                 if body_chunk:
                     response_body.append(body_chunk)
         
-        if self._is_capturing:
-            scope["rapidtest_capturing"] = True
             
         await self.app(scope, receive, send)
         
@@ -257,69 +261,6 @@ class ASGITest:
             "json": try_parse_json(response_content),
         }
 
-    def _validate_contain_keys(self, response_json: dict, contain_keys: list[str]) -> bool:
-        if not response_json:
-            return False
-        for item in contain_keys:
-            if item not in response_json:
-                return False
-        return True
-
-    def _process_response_validation(
-        self,
-        response: "ASGIResponse",
-        path: str,
-        expected_status: int,
-        expected_json: dict | None = None,
-        contain_keys: list[str] | None = None,
-    ):
-        simulated_url = f"asgi://testserver{path}"
-
-        keys = True
-        if contain_keys is not None:
-            try:
-                response_json = response.json()
-                keys = self._validate_contain_keys(response_json, contain_keys)
-            except Exception:
-                response_json = {"raw_content": response.text if hasattr(response, "text") else str(response.content)}
-                keys = False
-
-        try:
-            response_json = response.json()
-        except Exception:
-            response_json = {"raw_content": response.text if hasattr(response, "text") else str(response.content)}
-
-        status_ok = response.status_code == expected_status
-        body_ok = True
-        error_msg = None
-
-        if expected_json is not None and response_json != expected_json:
-            body_ok = False
-            if status_ok:
-                error_msg = "The expected JSON is not the correct" if keys else "The expected JSON is not the correct and keys are not correct"
-            else:
-                error_msg = (
-                    f"Expected status {expected_status}, but got {response.status_code} and the expected JSON is not the correct"
-                    if keys
-                    else f"Expected status {expected_status}, but got {response.status_code} and the expected JSON is not the correct and keys are not correct"
-                )
-
-        if not status_ok and not error_msg:
-            error_msg = (
-                f"Expected status {expected_status}, but got {response.status_code}"
-                if keys
-                else f"Expected status {expected_status}, but got {response.status_code} and keys are not correct"
-            )
-
-        if status_ok and body_ok:
-            if keys:
-                print_report("PASSED", simulated_url, response.status_code, response_json)
-            else:
-                print_report("PASSED", simulated_url, response.status_code, response_json, error_msg="Keys are not correct")
-        else:
-            print_report("FAILED", simulated_url, response.status_code, response_json, error_msg=error_msg)
-
-        return status_ok and body_ok and keys
 
 
 
