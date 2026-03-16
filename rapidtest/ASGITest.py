@@ -137,18 +137,18 @@ class ASGITest:
     ) -> ASGIResponse:
         try:
             response = self._sync_request(method, path, **kwargs)
-            simulated_url = f"asgi://testserver{path}"
+            url = f"asgi://testserver{path}"
             validate_and_report_response(
                 response,
-                simulated_url,
+                url,
                 status,
                 expected_json,
                 keys,
             )
             return response
         except Exception as exception:
-            simulated_url = f"asgi://testserver{path}"
-            show_connection_error(simulated_url, exception)
+            url = f"asgi://testserver{path}"
+            show_connection_error(url, exception)
             raise
 
     def _prepare_body_and_headers(self, json: dict[str, Any] | None, kwargs: dict) -> tuple[bytes | None, dict[str, str]]:
@@ -165,15 +165,15 @@ class ASGITest:
 
         return body, headers
     
-    def _sync_request(self, method: str, path: str, **kwargs) -> 'ASGIResponse':
+    def _sync_request(self, method: str | None, path: str | None, **kwargs) -> 'ASGIResponse':
         """Helper to run async ASGI request in sync context"""
         response_data = asyncio.run(self._make_asgi_request(method, path, **kwargs))
         return ASGIResponse(response_data)
     
     async def _make_asgi_request(
         self, 
-        method: str, 
-        path: str, 
+        method: str | None, 
+        path: str | None, 
         headers: dict[str, str] | None  = None,
         body: bytes | None = None,
         query_params: dict[str, str] | None = None
