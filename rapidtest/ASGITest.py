@@ -14,7 +14,6 @@ from .Utils import (
     validate_and_report_response,
 )
 
-
 class ASGITest:
     """
     Test class for ASGI applications
@@ -22,14 +21,13 @@ class ASGITest:
     This class allows you to make HTTP requests directly to an ASGI 
     application without needing to run a server.
     """
-
     def __init__(self, app: Callable):
         self.app = app
 
     def get(
         self,
-        path: str,
-        status: int = 200,
+        path: str | None = None,
+        status: int | None = 200,
         expected_json: dict | None = None,
         keys: list[str] | None = None,
         **kwargs,
@@ -46,9 +44,9 @@ class ASGITest:
     
     def post(
         self,
-        path: str,
+        path: str | None = None,
         json: dict[str, Any] | None = None,
-        status: int = 201,
+        status: int | None = 201,
         expected_json: dict | None = None,
         keys: list[str] | None = None,
         **kwargs,
@@ -68,9 +66,9 @@ class ASGITest:
     
     def put(
         self,
-        path: str,
+        path: str | None = None,
         json: dict[str, Any] | None = None,
-        status: int = 200,
+        status: int | None = 200,
         expected_json: dict | None = None,
         keys: list[str] | None = None,
         **kwargs,
@@ -90,8 +88,8 @@ class ASGITest:
     
     def delete(
         self,
-        path: str,
-        status: int = 204,
+        path: str | None = None,
+        status: int | None = 204,
         expected_json: dict | None = None,
         keys: list[str] | None = None,
         **kwargs,
@@ -108,9 +106,9 @@ class ASGITest:
     
     def patch(
         self,
-        path: str,
+        path: str | None = None,
         json: dict[str, Any] | None = None,
-        status: int = 200,
+        status: int | None = 200,
         expected_json: dict | None = None,
         keys: list[str] | None = None,
         **kwargs,
@@ -131,8 +129,8 @@ class ASGITest:
     def _validated_request(
         self, *,
         method: str,
-        path: str,
-        status: int,
+        path: str | None,
+        status: int | None,
         expected_json: dict | None,
         keys: list[str] | None,
         **kwargs,
