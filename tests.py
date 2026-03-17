@@ -1,33 +1,34 @@
 from rapidtest.Test import Test
-from rapidtest.Utils import StatusCode
 from rapidtest.data import data
+from rapidtest.StatusCode import StatusCode
 from backend.main import app
 
-test = Test(app=app,asgi=True) 
+test = Test(app=app,asgi_mode=True) 
+new_email = data.generate_email()
 
 # LOGIN
-response = test.post(path="/token", expected_status=StatusCode.OK_200, data={"username": "caja", "password": "caja"})
+response = test.post(path="/token", status=StatusCode.OK_200, data={"username": "caja", "password": "caja"})
 
 # GET
-test.get(path="/", expected_status=StatusCode.OK_200, contain_keys=["message"])
-test.get(path="/me", expected_status=StatusCode.OK_200, headers={"Authorization": "Bearer caja"})
-test.get(path="/users", expected_status=StatusCode.OK_200, query_params={"email": "caja"})
+test.get(path="/", status=StatusCode.OK_200, keys=["message"])
+test.get(path="/me", status=StatusCode.OK_200, headers={"Authorization": "Bearer caja"})
+test.get(path="/users", status=StatusCode.OK_200, params={"email": "caja"})
 
 # #POST
 test.post(path="/user", 
-          expected_status=StatusCode.CREATED_201,
-          json_data={"id":f"{data.generate_id()}" , "name": "test", "email": "test", "age":12, "password": "test"})
+          status=StatusCode.CREATED_201,
+          json={"id":f"{data.generate_id()}" , "name": "test", "email": new_email, "age":12, "password": "test"})
 
 #PUT
 test.put(path="/user/2734e76d-de18-4930-8531-54c39b3abe05", 
-         expected_status=StatusCode.OK_200,
-         json_data={"id":"2734e76d-de18-4930-8531-54c39b3abe05", "name": "updated", "email": "updated", "age":25, "password": "updated"})
+         status=StatusCode.OK_200,
+         json={"id":"2734e76d-de18-4930-8531-54c39b3abe05", "name": "updated", "email": "updated", "age":25, "password": "updated"})
 
 #PATCH
 test.patch(path="/user/2734e76d-de18-4930-8531-54c39b3abe05", 
-           expected_status=StatusCode.OK_200,
-           query_params={"age": 35})
+           status=StatusCode.OK_200,
+           params={"age": 35})
 
 #DELETE
 test.delete(path="/user/2734e76d-de18-4930-8531-54c39b3abe05", 
-            expected_status=StatusCode.ACCEPTED_202)
+            status=StatusCode.ACCEPTED_202)
