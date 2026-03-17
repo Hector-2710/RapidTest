@@ -12,18 +12,18 @@ class Performance:
     """
 
     def __init__(self, *, 
-                 base_url: Annotated[str, "Base URL to test"],
-                 users: Annotated[int, "Number of concurrent users to simulate (default: 10)"] = 10,
-                 duration: Annotated[int, "Test duration in seconds (default: 10)"] = 10,
-                 timeout: Annotated[int, "Max request timeout in seconds (default: 10)"] = 10):
+                 base_url: Annotated[str | None, "Base URL to test"] = None,
+                 users: Annotated[int | None, "Number of concurrent users to simulate (default: 10)"] = 10,
+                 duration: Annotated[int | None, "Test duration in seconds (default: 10)"] = 10,
+                 timeout: Annotated[int | None, "Max request timeout in seconds (default: 10)"] = 10):
         """
         Initialize the performance test.
 
         Args:
-            base_url (str): Base URL to test
-            users (int): Number of concurrent users to simulate
-            duration (int): Test duration in seconds
-            timeout (int): Request timeout in seconds
+            base_url (str | None): Base URL to test
+            users (int | None): Number of concurrent users to simulate
+            duration (int | None): Test duration in seconds
+            timeout (int | None): Request timeout in seconds
         """
         self.base_url = base_url.rstrip('/')
         self.users = users
