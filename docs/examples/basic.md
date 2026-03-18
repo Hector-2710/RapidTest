@@ -11,7 +11,19 @@ from rapidtest import Test
 
 # Test API health endpoint
 api = Test(url="http://localhost:8000")
-api.get(endpoint="/health", expected_status=200)
+api.get(path="/health", status=200)
+```
+
+### ASGI Health Check (Faster testing)
+
+No server required, tests run directly against the app instance.
+
+```python
+from myapp.main import app
+from rapidtest import Test
+
+api = Test(app=app, asgi_mode=True)
+api.get(path="/health", status=200)
 ```
 
 ### CRUD Operations
@@ -23,63 +35,63 @@ api = Test(url="http://localhost:8000")
 
 # Create
 user_data = {"name": "John Doe", "email": "john@example.com"}
-response = api.post(endpoint="/users", json=user_data, expected_status=201)
+response = api.post(path="/users", json=user_data, status=201)
 user_id = response.json()["id"]
 
 # Read
-api.get(endpoint=f"/users/{user_id}", expected_status=200)
+api.get(path=f"/users/{user_id}", status=200)
 
 # Update
-api.patch(endpoint=f"/users/{user_id}", json={"name": "Jane Doe"}, expected_status=200)
+api.patch(path=f"/users/{user_id}", json={"name": "Jane Doe"}, status=200)
 
 # Delete
-api.delete(endpoint=f"/users/{user_id}", expected_status=204)
+api.delete(path=f"/users/{user_id}", status=204)
 ```
 
 ## Using Fake Data
 
 ```python
-from rapidtest import Test, Data
+from rapidtest import Test, data
 
 api = Test(url="http://localhost:8000")
 
 # Generate realistic test data
 fake_user = {
-    "name": Data.generate_name(),
-    "email": Data.generate_email(),
-    "phone": Data.generate_phone(),
-    "address": Data.generate_address()
+    "name": data.generate_name(),
+    "email": data.generate_email(),
+    "phone": data.generate_phone(),
+    "address": data.generate_address()
 }
 
-api.post(endpoint="/users", json=fake_user, expected_status=201)
+api.post(path="/users", json=fake_user, status=201)
 ```
 
 ## Authentication Testing
 
 ```python
-from rapidtest import Test, Data
+from rapidtest import Test, data
 
 api = Test(url="http://localhost:8000")
 
 # Generate auth credentials
-credentials = Data.generate_auth_user()
+credentials = data.generate_auth_user()
 
 # Register
-api.post(endpoint="/register", json=credentials, expected_status=201)
+api.post(path="/register", json=credentials, status=201)
 
 # Login
 login_response = api.post(
-    endpoint="/login", 
+    path="/login", 
     json=credentials, 
-    expected_status=200
+    status=200
 )
 
 # Use token for authenticated requests
 token = login_response.json()["token"]
 api.get(
-    endpoint="/profile",
+    path="/profile",
     headers={"Authorization": f"Bearer {token}"},
-    expected_status=200
+    status=200
 )
 ```
 
@@ -96,7 +108,7 @@ perf = Performance(
     timeout=30        # 30 second timeout
 )
 
-perf.add_get_task(endpoint="/api/products")
+perf.add_get_task(path="/api/products")
 results = perf.run()
 
 print(f"Success Rate: {results['success_rate']}%")
@@ -111,23 +123,23 @@ from rapidtest import Test
 api = Test(url="http://localhost:8000")
 
 # Test 404 errors
-api.get(endpoint="/users/99999", expected_status=404)
+api.get(path="/users/99999", status=404)
 
 # Test validation errors
 api.post(
-    endpoint="/users",
+    path="/users",
     json={"email": "invalid-email"},
-    expected_status=400
+    status=400
 )
 
 # Test unauthorized access
-api.get(endpoint="/admin/users", expected_status=401)
+api.get(path="/admin/users", status=401)
 ```
 
 ## Real-World E-commerce API
 
 ```python
-from rapidtest import Test, Data, Performance
+from rapidtest import Test, data, Performance
 
 class EcommerceAPITest:
     def __init__(self, base_url):
@@ -137,16 +149,16 @@ class EcommerceAPITest:
         """Test product listing and details."""
         # List products
         products = self.api.get(
-            endpoint="/products",
+            path="/products",
             params={"category": "electronics", "limit": 10},
-            expected_status=200
+            status=200
         )
         
         # Get specific product
         product_id = products.json()["data"][0]["id"]
         self.api.get(
-            endpoint=f"/products/{product_id}",
-            expected_status=200
+            path=f"/products/{product_id}",
+            status=200
         )
     
     def test_shopping_cart(self):
@@ -160,25 +172,25 @@ class EcommerceAPITest:
         }
         
         self.api.post(
-            endpoint="/cart/items",
+            path="/cart/items",
             json=cart_item,
-            expected_status=201
+            status=201
         )
         
         # View cart
-        cart = self.api.get(endpoint="/cart", expected_status=200)
+        cart = self.api.get(path="/cart", status=200)
         
         # Update quantity
         self.api.patch(
-            endpoint="/cart/items/123",
+            path="/cart/items/123",
             json={"quantity": 3},
-            expected_status=200
+            status=200
         )
         
         # Remove item
         self.api.delete(
-            endpoint="/cart/items/123",
-            expected_status=204
+            path="/cart/items/123",
+            status=204
         )
     
     def test_checkout_process(self):
@@ -186,14 +198,14 @@ class EcommerceAPITest:
         # Create order
         order_data = {
             "items": [{"product_id": 123, "quantity": 1}],
-            "shipping_address": Data.generate_address(),
+            "shipping_address": data.generate_address(),
             "payment_method": "credit_card"
         }
         
         order = self.api.post(
-            endpoint="/orders",
+            path="/orders",
             json=order_data,
-            expected_status=201
+            status=201
         )
         
         order_id = order.json()["order_id"]
@@ -206,15 +218,15 @@ class EcommerceAPITest:
         }
         
         self.api.post(
-            endpoint="/payments",
+            path="/payments",
             json=payment_data,
-            expected_status=200
+            status=200
         )
         
         # Check order status
         self.api.get(
-            endpoint=f"/orders/{order_id}",
-            expected_status=200
+            path=f"/orders/{order_id}",
+            status=200
         )
 
 # Usage
@@ -236,7 +248,7 @@ Exit code 1 = at least one test failed
 """
 
 import sys
-from rapidtest import Test, Data
+from rapidtest import Test, data
 
 def run_smoke_tests():
     """Essential tests that must pass before deployment."""
@@ -244,14 +256,14 @@ def run_smoke_tests():
     
     try:
         # Health check
-        api.get(endpoint="/health", expected_status=200)
+        api.get(path="/health", status=200)
         
         # Database connectivity
-        api.get(endpoint="/db-status", expected_status=200)
+        api.get(path="/db-status", status=200)
         
         # Authentication service
-        auth_user = Data.generate_auth_user()
-        api.post(endpoint="/auth/validate", json=auth_user, expected_status=200)
+        auth_user = data.generate_auth_user()
+        api.post(path="/auth/validate", json=auth_user, status=200)
         
         print("✅ All smoke tests passed")
         return True
@@ -265,7 +277,7 @@ def run_regression_tests():
     api = Test(url="https://staging.example.com")
     
     test_cases = [
-        ("User Registration", "/users", {"username": Data.generate_name()}),
+        ("User Registration", "/users", {"username": data.generate_name()}),
         ("Product Creation", "/products", {"name": "Test Product", "price": 99.99}),
         ("Order Processing", "/orders", {"product_id": 1, "quantity": 2}),
     ]
@@ -274,7 +286,7 @@ def run_regression_tests():
     
     for test_name, endpoint, data in test_cases:
         try:
-            api.post(endpoint=endpoint, json=data, expected_status=201)
+            api.post(path=endpoint, json=data, status=201)
             print(f"✅ {test_name} - PASSED")
         except Exception as e:
             print(f"❌ {test_name} - FAILED: {e}")
@@ -315,15 +327,15 @@ for service_name, service_url in services.items():
     api = Test(url=service_url)
     
     # Health check for each service
-    api.get(endpoint="/health", expected_status=200)
+    api.get(path="/health", status=200)
     
     # Service-specific tests
     if service_name == "user-service":
-        api.get(endpoint="/users", expected_status=200)
+        api.get(path="/users", status=200)
     elif service_name == "order-service":
-        api.get(endpoint="/orders", expected_status=200)
+        api.get(path="/orders", status=200)
     elif service_name == "payment-service":
-        api.get(endpoint="/payment-methods", expected_status=200)
+        api.get(path="/payment-methods", status=200)
 
 print("✅ All microservices are healthy")
 ```
