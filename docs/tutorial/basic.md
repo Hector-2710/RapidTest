@@ -36,7 +36,7 @@ The first test should always be to verify that your server responds:
 
 ```python
 # Verify that your API is running
-tester.get(endpoint="/health", expected_status=200)
+tester.get(endpoint="/health", status=200)
 ```
 
 If this works, you'll see: ✅ **GET /health** - Perfect! Your server is responding.
@@ -47,10 +47,10 @@ Now let's test getting data:
 
 ```python
 # Get the list of users
-tester.get(endpoint="/users", expected_status=200)
+tester.get(endpoint="/users", status=200)
 
 # If you have users, test getting a specific one
-tester.get(endpoint="/users/1", expected_status=200)
+tester.get(endpoint="/users/1", status=200)
 ```
 
 ### Test Write Endpoints (POST, PUT, DELETE)
@@ -67,8 +67,8 @@ new_user = {
 
 tester.post(
     endpoint="/users",
-    input_json=new_user,
-    expected_status=201  
+    json=new_user,
+    status=201  
 )
 ```
 
@@ -86,8 +86,8 @@ expected_user = {
 
 tester.get(
     endpoint="/users/1",
-    expected_status=200,
-    expected_body=expected_user
+    status=200,
+    expected_json=expected_user
 )
 ```
 
@@ -97,14 +97,14 @@ It's crucial to test that your API handles errors correctly:
 
 ```python
 # Test that it returns 404 for users that don't exist
-tester.get(endpoint="/users/99999", expected_status=404)
+tester.get(endpoint="/users/99999", status=404)
 
 # Test validation of invalid data
 invalid_data = {"email": "badly-formatted-email"}
 tester.post(
     endpoint="/users",
     json=invalid_data,
-    expected_status=400  # 400 means "invalid request"
+    status=400  # 400 means "invalid request"
 )
 ```
 
@@ -119,7 +119,7 @@ auth_headers = {"Authorization": "Bearer your-token-here"}
 tester.get(
     endpoint="/profile",
     headers=auth_headers,
-    expected_status=200
+    status=200
 )
 ```
 
@@ -146,7 +146,7 @@ fake_user = generator.generate_user(name=True, email=True, age=True)
 tester.post(
     endpoint="/users",
     json=fake_user,
-    expected_status=201
+    status=201
 )
 ```
 
@@ -160,8 +160,8 @@ for i in range(10):
     # Add each user to your API
     tester.post(
         endpoint="/users",
-        input_json=user,
-        expected_status=201
+        json=user,
+        status=201
     )
 ```
 
@@ -246,7 +246,7 @@ for i in range(5):
     tester.post(
         endpoint="/users",
         json=user,
-        expected_status=201
+        status=201
         )
 
 print("✅ Test users created successfully")

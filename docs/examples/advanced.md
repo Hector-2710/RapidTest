@@ -5,33 +5,33 @@ This section demonstrates advanced usage patterns and real-world testing scenari
 ## Complete CRUD Testing
 
 ```python
-from rapidtest import Test, Data
+from rapidtest import Test, data
 
 # Initialize API client
 api = Test(url="http://localhost:8000")
 
 # Generate test data
 user_data = {
-    "username": Data.generate_name().replace(" ", "_").lower(),
-    "email": Data.generate_email(),
-    "password": Data.generate_password()
+    "username": data.generate_name().replace(" ", "_").lower(),
+    "email": data.generate_email(),
+    "password": data.generate_password()
 }
 
 print("🧪 Testing CRUD operations...")
 
 # CREATE - Post new user
 response = api.post(
-    endpoint="/api/users",
+    path="/api/users",
     json=user_data,
-    expected_status=201
+    status=201
 )
 user_id = response.json()["id"]
 
 # READ - Get user by ID
 api.get(
-    endpoint=f"/api/users/{user_id}",
-    expected_status=200,
-    expected_body={
+    path=f"/api/users/{user_id}",
+    status=200,
+    expected_json={
         "id": user_id,
         "username": user_data["username"],
         "email": user_data["email"]
@@ -39,49 +39,49 @@ api.get(
 )
 
 # UPDATE - Modify user
-updated_data = {"email": Data.generate_email()}
+updated_data = {"email": data.generate_email()}
 api.patch(
-    endpoint=f"/api/users/{user_id}",
+    path=f"/api/users/{user_id}",
     json=updated_data,
-    expected_status=200
+    status=200
 )
 
 # DELETE - Remove user
 api.delete(
-    endpoint=f"/api/users/{user_id}",
-    expected_status=204
+    path=f"/api/users/{user_id}",
+    status=204
 )
 ```
 
 ## Authentication Flow Testing
 
 ```python
-from rapidtest import Test, Data
+from rapidtest import Test, data
 
 api = Test(url="http://localhost:8000")
 
 # 1. Register new user
-auth_user = Data.generate_auth_user()
+auth_user = data.generate_auth_user()
 register_data = {
     "username": auth_user["username"],
     "password": auth_user["password"],
-    "email": Data.generate_email()
+    "email": data.generate_email()
 }
 
 api.post(
-    endpoint="/auth/register",
+    path="/auth/register",
     json=register_data,
-    expected_status=201
+    status=201
 )
 
 # 2. Login with credentials
 login_response = api.post(
-    endpoint="/auth/login",
+    path="/auth/login",
     json={
         "username": auth_user["username"],
         "password": auth_user["password"]
     },
-    expected_status=200
+    status=200
 )
 
 # Extract token from response
@@ -89,37 +89,37 @@ token = login_response.json()["token"]
 
 # 3. Access protected endpoint
 api.get(
-    endpoint="/auth/profile",
+    path="/auth/profile",
     headers={"Authorization": f"Bearer {token}"},
-    expected_status=200
+    status=200
 )
 ```
 
 ## Testing with Dynamic Data
 
 ```python
-from rapidtest import Test, Data
+from rapidtest import Test, data
 
 api = Test(url="http://localhost:8000")
 
 # Test multiple users with generated data
 for i in range(5):
     user = {
-        "id": Data.generate_id(),
-        "name": Data.generate_name(),
-        "email": Data.generate_email(),
-        "phone": Data.generate_phone(),
-        "address": Data.generate_address(),
-        "job": Data.generate_job()
+        "id": data.generate_id(),
+        "name": data.generate_name(),
+        "email": data.generate_email(),
+        "phone": data.generate_phone(),
+        "address": data.generate_address(),
+        "job": data.generate_job()
     }
     
     print(f"Testing user {i+1}: {user['name']}")
     
     api.post(
-        endpoint="/users",
+        path="/users",
         json=user,
-        expected_status=201,
-        expected_body=user
+        status=201,
+        expected_json=user
     )
 ```
 
@@ -134,11 +134,11 @@ test_data = {"name": "Test Item"}
 
 # Version 1
 api_v1 = Test(url=f"{base_url}/api/v1")
-api_v1.post(endpoint="/items", json=test_data, expected_status=201)
+api_v1.post(path="/items", json=test_data, status=201)
 
 # Version 2  
 api_v2 = Test(url=f"{base_url}/api/v2")
-api_v2.post(endpoint="/items", json=test_data, expected_status=201)
+api_v2.post(path="/items", json=test_data, status=201)
 ```
 
 ## Error Handling and Edge Cases
@@ -158,18 +158,18 @@ invalid_inputs = [
 
 for invalid_data in invalid_inputs:
     api.post(
-        endpoint="/users",
+        path="/users",
         json=invalid_data,
-        expected_status=400
+        status=400
     )
 
 # Test authorization errors
-api.get(endpoint="/admin/users", expected_status=401)  # No auth header
+api.get(path="/admin/users", status=401)  # No auth header
 
 api.get(
-    endpoint="/admin/users", 
+    path="/admin/users", 
     headers={"Authorization": "Bearer invalid-token"},
-    expected_status=403  # Invalid token
+    status=403  # Invalid token
 )
 ```
 
@@ -180,10 +180,10 @@ from rapidtest import Test, Performance, Data
 
 # Regular functional test first
 api = Test(url="http://localhost:8000")
-test_user = Data.generate_auth_user()
+test_user = data.generate_auth_user()
 
 # Ensure endpoint works functionally
-api.post(endpoint="/auth/login", json=test_user, expected_status=200)
+api.post(path="/auth/login", json=test_user, status=200)
 
 # Then performance test the same endpoint
 perf = Performance(
@@ -192,7 +192,7 @@ perf = Performance(
     duration=30,
     timeout=10
 )
-perf.add_get_task(endpoint="/health")
+perf.add_get_task(path="/health")
 results = perf.run()
 
 # Validate performance criteria
@@ -212,9 +212,9 @@ api = Test(url="http://localhost:8000")
 
 # Test first page
 page1 = api.get(
-    endpoint="/users",
+    path="/users",
     params={"page": 1, "limit": 10},
-    expected_status=200
+    status=200
 )
 
 # Verify pagination structure
@@ -225,16 +225,16 @@ assert len(response_data["data"]) <= 10
 
 # Test subsequent pages
 api.get(
-    endpoint="/users",
+    path="/users",
     params={"page": 2, "limit": 10},
-    expected_status=200
+    status=200
 )
 
 # Test edge cases
 api.get(
-    endpoint="/users",
+    path="/users",
     params={"page": 999, "limit": 10},
-    expected_status=200  # Should return empty array
+    status=200  # Should return empty array
 )
 ```
 
@@ -252,10 +252,31 @@ with open("test_file.txt", "w") as f:
 # Upload file using data parameter
 with open("test_file.txt", "rb") as f:
     api.post(
-        endpoint="/upload",
+        path="/upload",
         data={"file": f},
-        expected_status=201
+        status=201
     )
+```
+
+## ASGI Direct Testing
+
+Test your FastAPI, Starlette, or any ASGI-compatible application directly without running a real HTTP server. This is faster and doesn't require port binding.
+
+```python
+from rapidtest import Test
+from myapp.main import app  # Your ASGI app instance
+
+# Initialize in ASGI mode
+api = Test(app=app, asgi_mode=True)
+
+# Requests are made directly to the app
+api.get(path="/health", status=200)
+
+api.post(
+    path="/users",
+    json={"name": "ASGI User", "email": "asgi@example.com"},
+    status=201
+)
 ```
 
 ## Environment-Based Testing
@@ -277,13 +298,13 @@ else:
 api = Test(url=base_url)
 
 # Run the same tests across environments
-api.get(endpoint="/health", expected_status=200)
+api.get(path="/health", status=200)
 ```
 
 ## Custom Test Runner
 
 ```python
-from rapidtest import Test, Data
+from rapidtest import Test, data
 import sys
 
 class APITestSuite:
@@ -304,12 +325,12 @@ class APITestSuite:
             print(f"❌ {test_name} - FAILED: {e}")
     
     def test_user_creation(self):
-        user = Data.generate_auth_user()
-        self.api.post(endpoint="/users", json=user, expected_status=201)
+        user = data.generate_auth_user()
+        self.api.post(path="/users", json=user, status=201)
     
     def test_user_login(self):
-        user = Data.generate_auth_user()
-        self.api.post(endpoint="/login", json=user, expected_status=200)
+        user = data.generate_auth_user()
+        self.api.post(path="/login", json=user, status=200)
     
     def execute_all(self):
         """Run all tests and report results."""

@@ -17,7 +17,7 @@ tester = Test(url="http://localhost:8000")
 
 ```python
 # Simple GET request
-tester.get(endpoint="/users", expected_status=200)
+tester.get(endpoint="/users", status=200)
 ```
 
 ### 📤 POST Request
@@ -27,8 +27,8 @@ tester.get(endpoint="/users", expected_status=200)
 user_data = {"username": "hector", "password": "123"}
 tester.post(
     endpoint="/user", 
-    input_json=user_data, 
-    expected_status=201, 
+    json=user_data, 
+    status=201, 
     expected_json=user_data
 )
 ```
@@ -37,13 +37,13 @@ tester.post(
 
 ```python
 # PUT request
-tester.put(endpoint="/user/1", input_json={"name": "Updated Name"})
+tester.put(endpoint="/user/1", json={"name": "Updated Name"})
 
 # PATCH request  
-tester.patch(endpoint="/user/1", input_json={"email": "new@email.com"})
+tester.patch(endpoint="/user/1", json={"email": "new@email.com"})
 
 # DELETE request
-tester.delete(endpoint="/user/1", expected_status=204)
+tester.delete(endpoint="/user/1", status=204)
 ```
 
 ## 3. ✅ Response Validation
@@ -52,7 +52,7 @@ tester.delete(endpoint="/user/1", expected_status=204)
 
 ```python
 # Expect specific status code
-tester.get(endpoint="/", expected_status=200)
+tester.get(endpoint="/", status=200)
 ```
 
 ### 📋 Response Body Validation
@@ -60,7 +60,7 @@ tester.get(endpoint="/", expected_status=200)
 ```python
 tester.get(
     endpoint="/", 
-    expected_status=200,
+    status=200,
     expected_json= "API running"
 )
 ```

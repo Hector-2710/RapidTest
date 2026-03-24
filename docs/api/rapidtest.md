@@ -11,15 +11,29 @@ from rapidtest import Test
 ### Constructor
 
 ```python
-Test(*, url: str)
+Test(
+    *, 
+    url: str | None = None, 
+    app: Any | None = None, 
+    asgi_mode: bool = False, 
+    global_headers: dict[str, str] | None = None
+)
 ```
 
 **Parameters:**
-- `url` (str): The base URL of the API (e.g., 'http://localhost:8000')
+- `url` (str | None): The base URL of the API (e.g., 'http://localhost:8000'). Required when `asgi_mode=False`.
+- `app` (Any | None): ASGI app instance. Required when `asgi_mode=True`.
+- `asgi_mode` (bool): Enable ASGI direct testing mode. Default is `False`.
+- `global_headers` (dict[str, str] | None): Global headers to be applied to all requests (optional).
 
 **Example:**
 ```python
+# HTTP mode
 tester = Test(url="http://localhost:8000")
+
+# ASGI mode
+from myapp.asgi import application
+tester = Test(app=application, asgi_mode=True)
 ```
 
 ### HTTP Methods
@@ -28,9 +42,10 @@ All HTTP methods share the following common parameters:
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `endpoint` | str | Required | Endpoint path (e.g., '/users') |
-| `expected_status` | int | 200 | Expected HTTP status code |
-| `expected_body` | dict | None | Expected JSON body in response |
+| `path` | str | Required | The API endpoint to call (e.g., '/users') |
+| `status` | int | 200/201/204 | Expected HTTP status code |
+| `expected_json` | dict | None | Expected JSON body in response |
+| `keys` | list[str] | None | A subset of JSON keys that should be contained in the response |
 | `json` | dict/list/str/int/float/bool | None | JSON data to send in request body |
 | `data` | str/bytes/dict | None | Request body data |
 | `params` | dict | None | Query parameters for the URL |
@@ -40,8 +55,8 @@ All HTTP methods share the following common parameters:
 
 ```python
 tester.get(
-    endpoint="/users",
-    expected_status=200,
+    path="/users",
+    status=200,
     headers={"Authorization": "Bearer token"},
     params={"page": 1}
 )
@@ -52,10 +67,10 @@ tester.get(
 ```python
 user_data = {"username": "john", "email": "john@example.com"}
 tester.post(
-    endpoint="/users",
+    path="/users",
     json=user_data,
-    expected_status=201,
-    expected_body=user_data
+    status=201,
+    expected_json=user_data
 )
 ```
 
@@ -63,9 +78,9 @@ tester.post(
 
 ```python
 tester.put(
-    endpoint="/users/1",
+    path="/users/1",
     json={"name": "Updated Name"},
-    expected_status=200
+    status=200
 )
 ```
 
@@ -73,9 +88,9 @@ tester.put(
 
 ```python
 tester.patch(
-    endpoint="/users/1",
+    path="/users/1",
     json={"email": "newemail@example.com"},
-    expected_status=200
+    status=200
 )
 ```
 
@@ -83,8 +98,8 @@ tester.patch(
 
 ```python
 tester.delete(
-    endpoint="/users/1",
-    expected_status=204
+    path="/users/1",
+    status=204
 )
 ```
 
@@ -93,7 +108,8 @@ tester.delete(
 RapidTest automatically validates:
 
 1. **Status Code**: Compares actual vs expected status code
-2. **Response Body**: Compares actual JSON response vs expected body (if provided)
+2. **Response Body**: Compares actual JSON response vs `expected_json` (if provided)
+3. **Response Keys**: Validates the presence of expected keys (if `keys` is provided)
 
 ### Error Handling
 
@@ -104,10 +120,17 @@ RapidTest automatically validates:
 
 ### Return Values
 
-All HTTP methods return a `requests.Response` object on success, or `None` if a critical connection error occurred.
+All HTTP methods return a `Response` object on success, or `None` if a critical connection error occurred.
 
-You can access:
+You can access properties directly:
 - `response.status_code`: HTTP status code
 - `response.json()`: JSON response body
 - `response.text`: Raw response text  
 - `response.headers`: Response headers
+
+### Global Headers Management
+
+```python
+tester.set_global_headers({"x-api-key": "secret-key"})
+tester.clear_global_headers()
+```

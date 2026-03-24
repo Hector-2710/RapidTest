@@ -19,6 +19,14 @@ A lightweight library for REST API testing with functional checks, ASGI direct m
 pip install rapidtest
 ```
 
+## CLI
+
+Generate a test skeleton file:
+
+```bash
+rapidtest init
+```
+
 ## Quick Start (HTTP mode)
 
 ```python
@@ -121,7 +129,7 @@ Returned metrics:
 
 ## Project Info
 
-- Version: `0.4.0`
+- Version: `0.5.0`
 - Author: Hector Rosales
 - License: MIT
 - Homepage: https://github.com/hector-dev/rapidtest

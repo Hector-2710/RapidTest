@@ -23,7 +23,7 @@ pip freeze
 
 You should see output similar to:
 ```
-rapidtest==0.3.1
+rapidtest==0.4.0
 ```
 
 ## 🎉 Congrats RapidTest installed!

@@ -41,5 +41,11 @@ class TestData(unittest.TestCase):
         self.assertIsInstance(result, dict, "The result should be a dictionary.")
         self.assertEqual(len(result), 0, "The result should be an empty dictionary when no fields are requested.")
 
+    def test_generate_name(self):
+        result = data.generate_name()
+        self.assertIsInstance(result, str, "The result should be a string.")
+        self.assertGreater(len(result), 1, "The result should be a string of length greater than 1.")
+        
+
 if __name__ == '__main__':
     unittest.main()

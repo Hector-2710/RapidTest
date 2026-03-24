@@ -3,7 +3,7 @@
 Random data generator for testing using the Faker library.
 
 ```python
-from rapidtest import Data
+from rapidtest import data
 ```
 
 ## Data Class
@@ -15,42 +15,42 @@ Static class providing fake data generation methods for testing purposes.
 #### generate_name
 
 ```python
-Data.generate_name() -> str
+data.generate_name() -> str
 ```
 
 Generates a random full name.
 
 **Example:**
 ```python
-name = Data.generate_name()
+name = data.generate_name()
 print(name)  # "John Smith"
 ```
 
 #### generate_email
 
 ```python
-Data.generate_email() -> str
+data.generate_email() -> str
 ```
 
 Generates a random email address.
 
 **Example:**
 ```python
-email = Data.generate_email()
+email = data.generate_email()
 print(email)  # "john.smith@example.com"
 ```
 
 #### generate_phone
 
 ```python
-Data.generate_phone() -> str
+data.generate_phone() -> str
 ```
 
 Generates a random phone number.
 
 **Example:**
 ```python
-phone = Data.generate_phone()
+phone = data.generate_phone()
 print(phone)  # "+1-555-123-4567"
 ```
 
@@ -59,7 +59,7 @@ print(phone)  # "+1-555-123-4567"
 #### generate_auth_user
 
 ```python
-Data.generate_auth_user() -> Dict[str, str]
+data.generate_auth_user() -> Dict[str, str]
 ```
 
 Generates a complete user authentication object with username and password.
@@ -74,7 +74,7 @@ Generates a complete user authentication object with username and password.
 
 **Example:**
 ```python
-user = Data.generate_auth_user()
+user = data.generate_auth_user()
 print(user["username"])  # "john_smith_123"
 print(user["password"])  # "SecureP@ssw0rd123"
 ```
@@ -82,14 +82,14 @@ print(user["password"])  # "SecureP@ssw0rd123"
 #### generate_password
 
 ```python
-Data.generate_password() -> str
+data.generate_password() -> str
 ```
 
 Generates a secure random password.
 
 **Example:**
 ```python
-password = Data.generate_password()
+password = data.generate_password()
 print(password)  # "Kp9$mN2#xR4@"
 ```
 
@@ -98,14 +98,14 @@ print(password)  # "Kp9$mN2#xR4@"
 #### generate_id
 
 ```python
-Data.generate_id() -> str
+data.generate_id() -> str
 ```
 
 Generates a unique UUID.
 
 **Example:**
 ```python
-user_id = Data.generate_id()
+user_id = data.generate_id()
 print(user_id)  # "f47ac10b-58cc-4372-a567-0e02b2c3d479"
 ```
 
@@ -114,21 +114,21 @@ print(user_id)  # "f47ac10b-58cc-4372-a567-0e02b2c3d479"
 #### generate_address
 
 ```python
-Data.generate_address() -> str
+data.generate_address() -> str
 ```
 
 Generates a complete postal address.
 
 **Example:**
 ```python
-address = Data.generate_address()
+address = data.generate_address()
 print(address)  # "123 Main St\nAnytown, CA 12345"
 ```
 
 #### generate_city
 
 ```python
-Data.generate_city() -> str
+data.generate_city() -> str
 ```
 
 Generates a random city name.
@@ -136,7 +136,7 @@ Generates a random city name.
 #### generate_state
 
 ```python
-Data.generate_state() -> str
+data.generate_state() -> str
 ```
 
 Generates a random state/province name.
@@ -144,7 +144,7 @@ Generates a random state/province name.
 #### generate_zipcode
 
 ```python
-Data.generate_zipcode() -> str
+data.generate_zipcode() -> str
 ```
 
 Generates a random postal code.
@@ -152,7 +152,7 @@ Generates a random postal code.
 #### generate_country
 
 ```python
-Data.generate_country() -> str
+data.generate_country() -> str
 ```
 
 Generates a random country name.
@@ -162,21 +162,21 @@ Generates a random country name.
 #### generate_text
 
 ```python
-Data.generate_text() -> str
+data.generate_text() -> str
 ```
 
 Generates random text (short paragraph).
 
 **Example:**
 ```python
-text = Data.generate_text()
+text = data.generate_text()
 print(text)  # "Lorem ipsum dolor sit amet..."
 ```
 
 #### generate_paragraph
 
 ```python
-Data.generate_paragraph() -> str
+data.generate_paragraph() -> str
 ```
 
 Generates a longer random paragraph.
@@ -186,14 +186,14 @@ Generates a longer random paragraph.
 #### generate_job
 
 ```python
-Data.generate_job() -> str
+data.generate_job() -> str
 ```
 
 Generates a random job title.
 
 **Example:**
 ```python
-job = Data.generate_job()
+job = data.generate_job()
 print(job)  # "Software Engineer"
 ```
 
@@ -202,7 +202,7 @@ print(job)  # "Software Engineer"
 #### generate_date
 
 ```python
-Data.generate_date() -> str
+data.generate_date() -> str
 ```
 
 Generates a random date in ISO format (YYYY-MM-DD).
@@ -210,7 +210,7 @@ Generates a random date in ISO format (YYYY-MM-DD).
 #### generate_datetime
 
 ```python
-Data.generate_datetime() -> str
+data.generate_datetime() -> str
 ```
 
 Generates random date and time in ISO format.
@@ -218,7 +218,7 @@ Generates random date and time in ISO format.
 #### generate_time
 
 ```python
-Data.generate_time() -> str
+data.generate_time() -> str
 ```
 
 Generates a random time.
@@ -226,35 +226,35 @@ Generates a random time.
 ## Complete Example
 
 ```python
-from rapidtest import Test, Data
+from rapidtest import Test, data
 
 # Initialize API tester
 tester = Test(url="http://localhost:8000")
 
 # Generate fake user data
 fake_user = {
-    "id": Data.generate_id(),
-    "username": Data.generate_name().replace(" ", "_").lower(),
-    "email": Data.generate_email(),
-    "password": Data.generate_password(),
-    "phone": Data.generate_phone(),
-    "address": Data.generate_address(),
-    "job": Data.generate_job()
+    "id": data.generate_id(),
+    "username": data.generate_name().replace(" ", "_").lower(),
+    "email": data.generate_email(),
+    "password": data.generate_password(),
+    "phone": data.generate_phone(),
+    "address": data.generate_address(),
+    "job": data.generate_job()
 }
 
 # Use fake data in API test
 response = tester.post(
     endpoint="/users",
     json=fake_user,
-    expected_status=201
+    status=201
 )
 
 # Generate auth user for login tests
-auth_user = Data.generate_auth_user()
+auth_user = data.generate_auth_user()
 tester.post(
     endpoint="/login",
     json=auth_user,
-    expected_status=200
+    status=200
 )
 ```
 
