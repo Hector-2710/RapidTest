@@ -21,6 +21,12 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
+[project.optional-dependencies]
+cli = ["rich"]
+
+[project.scripts]
+rapidtest = "rapidtest.cli:main"
+
 [project.urls]
 "Homepage" = "https://github.com/hector-dev/rapidtest"
 "Bug Tracker" = "https://github.com/hector-dev/rapidtest/issues"
