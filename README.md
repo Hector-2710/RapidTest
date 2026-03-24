@@ -19,6 +19,14 @@ A lightweight library for REST API testing with functional checks, ASGI direct m
 pip install rapidtest
 ```
 
+## CLI
+
+Generate a test skeleton file:
+
+```bash
+rapidtest init
+```
+
 ## Quick Start (HTTP mode)
 
 ```python
