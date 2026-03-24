@@ -42,45 +42,35 @@ def test_with_auth():
 '''
 
 def init_command(args) -> int:
-    output_path = Path(args.output)
     
     project_name = input("Name of project: (default my_api_tests): ").strip() or "my_tests"
-    
-    if args.output == "my_tests": 
-        filename = f"{project_name}.py"
-    else:
-        filename = args.output
+    filename = f"{project_name}.py"
 
     output_path = Path(filename)
 
-    if output_path.exists() and not args.force:
+    if output_path.exists():
         print(f"Error: {output_path} already exists.")
         return 1
     
     content = INIT_TEMPLATE.format(project_name=project_name)
-
     output_path.write_text(content)
+
     print(f"Created: {output_path}")
     
     return 0
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        prog="rapidtest",
-        description="REST API Testing Framework",
-    )
+    parser = argparse.ArgumentParser(prog="rapidtest")
+    subparsers = parser.add_subparsers(dest="command")
 
+    sc = subparsers.add_parser("init", help="Initialize a new RapidTest project")
+    sc.set_defaults(func=init_command)
+    
     parser.add_argument(
         "-v", "--version",
         action="version",
-        version="RapidTest CLI 1.0.0"
+        version="RapidTest CLI 0.1.0"
     )
-
-    subparsers = parser.add_subparsers(dest="command")
-    sc = subparsers.add_parser("init", help="Initialize a new RapidTest project")
-    sc.add_argument("-o", "--output", default="test_api.py", help="Archivo de salida")
-    sc.add_argument("-f", "--force", action="store_true", help="Sobrescribe si el archivo existe")
-    sc.set_defaults(func=init_command)
     
     args = parser.parse_args()
     
