@@ -43,6 +43,7 @@ def validate_and_report_response(
     expected_status: int,
     expected_json: dict[str, Any] | None = None,
     contain_keys: list[str] | None = None,
+    simple_report: bool = False
 ) -> bool:
     response_json = parse_response_body(response)
     keys_ok = True
@@ -54,8 +55,9 @@ def validate_and_report_response(
     body_ok = True
     error_msg = None
 
-    if expected_json is not None and response_json != expected_json:
-        body_ok = False
+    if simple_report is True:
+        if expected_json is not None and response_json != expected_json:
+            body_ok = False
         if status_ok:
             error_msg = (
                 "The expected JSON is not the correct"
@@ -69,20 +71,53 @@ def validate_and_report_response(
                 else f"Expected status {expected_status}, but got {response.status_code} and the expected JSON is not the correct and keys are not correct"
             )
 
-    if not status_ok and not error_msg:
-        error_msg = (
+        if not status_ok and not error_msg:
+            error_msg = (
             f"Expected status {expected_status}, but got {response.status_code}"
             if keys_ok
             else f"Expected status {expected_status}, but got {response.status_code} and keys are not correct"
         )
 
-    if status_ok and body_ok:
-        if keys_ok:
-            print_report("PASSED", url, response.status_code, response_json)
+        if status_ok and body_ok:
+            if keys_ok:
+                print_report_simple("PASSED")
+            else:
+                print_report_simple("PASSED")
         else:
-            print_report("PASSED", url, response.status_code, response_json, error_msg="Keys are not correct")
+            print_report_simple("FAILED")
+
+        return status_ok and body_ok and keys_ok
+
     else:
-        print_report("FAILED", url, response.status_code, response_json, error_msg=error_msg)
+        if expected_json is not None and response_json != expected_json:
+            body_ok = False
+        if status_ok:
+            error_msg = (
+                "The expected JSON is not the correct"
+                if keys_ok
+                else "The expected JSON is not the correct and keys are not correct"
+            )
+        else:
+            error_msg = (
+                f"Expected status {expected_status}, but got {response.status_code} and the expected JSON is not the correct"
+                if keys_ok
+                else f"Expected status {expected_status}, but got {response.status_code} and the expected JSON is not the correct and keys are not correct"
+            )
+
+        if not status_ok and not error_msg:
+            error_msg = (
+            f"Expected status {expected_status}, but got {response.status_code}"
+            if keys_ok
+            else f"Expected status {expected_status}, but got {response.status_code} and keys are not correct"
+        )
+
+        if status_ok and body_ok:
+            if keys_ok:
+                print_report("PASSED", url, response.status_code, response_json)
+            else:
+                print_report("PASSED", url, response.status_code, response_json, error_msg="Keys are not correct")
+        else:
+            print_report("FAILED", url, response.status_code, response_json, error_msg=error_msg)
 
     return status_ok and body_ok and keys_ok
 
@@ -124,6 +159,21 @@ def print_report(result: str, url: str, status: int, body: Any, error_msg: str |
             print(str(body))
     
     print("="*60)
+
+def print_report_simple(result: str) -> None:
+    GREEN = '\033[92m'  
+    RED = '\033[91m' 
+    BOLD = '\033[1m'
+    RESET = '\033[0m' 
+
+    if result == "PASSED":
+        color = GREEN 
+        icon = "✅"
+    else:      
+        color = RED    
+        icon = "❌"
+    
+    print(f"{color}{BOLD}{icon} {result}{RESET}")
 
 def show_connection_error(url: str, exception: Exception) -> None:
     RED = '\033[91m'    
