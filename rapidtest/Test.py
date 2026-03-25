@@ -19,6 +19,7 @@ class Test:
         app: Annotated[Any | None, "ASGI app instance when asgi=True"] = None,
         asgi_mode: Annotated[bool, "Enable ASGI direct testing mode"] = False,
         global_headers: Annotated[dict[str, str] | None, "Global headers to be applied to all requests (optional)"] = None,
+        simple_report: Annotated[bool, "If True, only prints PASSED/FAILED without detailed response info"] = False,
     ):
         """
         Initializes the test client.
@@ -28,7 +29,7 @@ class Test:
             app (Any | None): ASGI app instance (required when asgi=True).
             asgi (bool | False): Enables ASGI mode for direct app testing without HTTP server.
             global_headers (dict[str, str] | None): Global headers to be applied to all requests.
-        
+            simple_report (bool): If True, only prints PASSED/FAILED without detailed response info.
         Note:
             - When asgi_mode=True, 'app' must be provided and 'url' is ignored
         """
@@ -36,11 +37,12 @@ class Test:
         self.url = (url or "").rstrip("/")
         self.global_headers = global_headers or {}
         self._asgi_runner: ASGITest | None = None
+        self.simple_report = simple_report
 
         if self.asgi_mode:
             if app is None:
                 raise AttributeError(" atributte 'app' is required when asgi_mode=True")
-            self._asgi_runner = ASGITest(app)
+            self._asgi_runner = ASGITest(app, simple_report=simple_report)
         elif not self.url:
             raise AttributeError(" atributte 'url' is required when asgi_mode=False")
 
@@ -313,6 +315,7 @@ class Test:
                 status,
                 expected_json,
                 keys,
+                simple_report=self.simple_report
             )
             return response
 
