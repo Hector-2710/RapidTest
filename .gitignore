@@ -4,3 +4,4 @@ dist/
 site
 .env
 env
+rapidtest.egg-info
