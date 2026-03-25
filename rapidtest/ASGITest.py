@@ -21,8 +21,9 @@ class ASGITest:
     This class allows you to make HTTP requests directly to an ASGI 
     application without needing to run a server.
     """
-    def __init__(self, app: Callable):
+    def __init__(self, app: Callable = None, simple_report: bool = False):
         self.app = app
+        self.simple_report = simple_report
 
     def get(
         self,
@@ -144,6 +145,7 @@ class ASGITest:
                 status,
                 expected_json,
                 keys,
+                simple_report=self.simple_report
             )
             return response
         except Exception as exception:
