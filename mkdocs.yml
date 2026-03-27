@@ -74,6 +74,7 @@ nav:
     - RapidTest Class: api/rapidtest.md
     - Performance Testing: api/performance.md
     - Data Generation: api/rapiddata.md
+    - CLI: api/cli.md
   - Examples:
     - Basic Example: examples/basic.md
     - Advanced Example: examples/advanced.md
