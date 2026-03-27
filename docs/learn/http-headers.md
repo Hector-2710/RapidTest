@@ -19,12 +19,12 @@ HTTP headers provide essential metadata about requests and responses, headers ex
 
 #### Bearer Token
 ```python
-from rapidtest import RapidTest
+from rapidtest import Test
 
 # Test with Bearer token
-test = RapidTest()
+test = Test(url="http://localhost:8000")
 response = test.get(
-    "/protected-endpoint",
+    path="/protected-endpoint",
     headers={"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOi..."}
 )
 ```
@@ -46,7 +46,7 @@ response = test.get(
 # Sending JSON data
 data = {"name": "John", "email": "john@example.com"}
 response = test.post(
-    "/users",
+    path="/users",
     json=data,  # RapidTest automatically sets Content-Type: application/json
     headers={"Content-Type": "application/json"}
 )
@@ -67,7 +67,7 @@ response = test.post(
 ```python
 # Test with session cookie
 response = test.get(
-    "/dashboard",
+    path="/dashboard",
     headers={
         "Cookie": "session_id=abc123; user_pref=dark_mode"
     }
