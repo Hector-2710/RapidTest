@@ -1,6 +1,6 @@
 import atexit
-from typing import Any
 import json
+from typing import Any
 
 _simple_report_buffer: list[str] = []
 

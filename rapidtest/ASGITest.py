@@ -5,7 +5,7 @@ from typing import Any
 from collections.abc import Callable
 from .AGSIResponse import ASGIResponse
 
-from .Utils import (
+from .utils import (
     decode_headers,
     encode_headers,
     encode_query_params,
