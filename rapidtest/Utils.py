@@ -1,5 +1,8 @@
+import atexit
 from typing import Any
 import json
+
+_simple_report_buffer: list[str] = []
 
 def encode_query_params(params: dict[str, Any]) -> bytes:
     if not params:
@@ -167,13 +170,27 @@ def print_report_simple(result: str) -> None:
     RESET = '\033[0m' 
 
     if result == "PASSED":
-        color = GREEN 
+        color = GREEN
         icon = "✅"
-    else:      
-        color = RED    
+    else:
+        color = RED
         icon = "❌"
-    
-    print(f"{color}{BOLD}{icon} {result}{RESET}")
+
+    _simple_report_buffer.append(f"{color}{BOLD}{icon} {result}{RESET}")
+
+
+def flush_simple_report_buffer() -> None:
+    """Prints all buffered simple report entries at once and clears the buffer."""
+    if not _simple_report_buffer:
+        return
+
+    print()
+    for item in _simple_report_buffer:
+        print(item)
+    _simple_report_buffer.clear()
+
+
+atexit.register(flush_simple_report_buffer)
 
 def show_connection_error(url: str, exception: Exception) -> None:
     RED = '\033[91m'    
