@@ -21,12 +21,12 @@ def try_parse_json(content: bytes) -> dict[str, Any] | None:
     except (json.JSONDecodeError, UnicodeDecodeError):
         return None
 
-def validate_contain_keys(response_json: dict[str, Any] | None, contain_keys: list[str]) -> bool:
-    if not response_json:
+def validate_contain_keys(json: dict[str, Any] | None, keys: list[str]) -> bool:
+    if not json:
         return False
 
-    for item in contain_keys:
-        if item not in response_json:
+    for key in keys:
+        if key not in json:
             return False
     return True
 
