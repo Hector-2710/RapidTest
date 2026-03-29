@@ -3,7 +3,7 @@ from rapidtest.data import data
 from rapidtest.StatusCode import StatusCode
 from backend.main import app
 
-test = Test(app=app,asgi_mode=True, simple_report=True) 
+test = Test(app=app, asgi_mode=True, simple_report=True) 
 new_email = data.generate_email()
 
 # LOGIN
