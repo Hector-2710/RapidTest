@@ -43,7 +43,7 @@ def parse_response_body(response: Any) -> dict[str, Any]:
     try:
         parsed = response.json()
         return parsed if parsed is not None else {"raw_content": None}
-    except Exception:
+    except json.JSONDecodeError:
         if hasattr(response, "text"):
             return {"raw_content": response.text}
 
