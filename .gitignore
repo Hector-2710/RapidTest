@@ -6,3 +6,4 @@ site
 env
 rapidtest.egg-info
 .agents/
+skills-lock.json
