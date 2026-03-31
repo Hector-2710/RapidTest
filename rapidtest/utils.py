@@ -1,6 +1,7 @@
 import atexit
 import json
 from typing import Any
+from urllib.parse import urlencode
 
 _simple_report_buffer: list[str] = []
 
@@ -15,7 +16,7 @@ RESET = "\033[0m"
 def encode_query_params(params: dict[str, Any]) -> bytes:
     if not params:
         return b""
-    return "&".join(f"{k}={v}" for k, v in params.items()).encode()
+    return urlencode(params).encode()
 
 
 def encode_headers(headers: dict[str, str]) -> list[tuple[bytes, bytes]]:
