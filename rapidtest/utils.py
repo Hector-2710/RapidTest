@@ -36,11 +36,7 @@ def try_parse_json(content: bytes) -> dict[str, Any] | None:
 def validate_contain_keys(json: dict[str, Any] | None, keys: list[str]) -> bool:
     if not json:
         return False
-
-    for key in keys:
-        if key not in json:
-            return False
-    return True
+    return all(key in json for key in keys)
 
 
 def parse_response_body(response: Any) -> dict[str, Any]:
