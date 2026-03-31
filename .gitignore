@@ -5,3 +5,4 @@ site
 .env
 env
 rapidtest.egg-info
+.agents/
