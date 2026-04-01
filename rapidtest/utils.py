@@ -160,8 +160,9 @@ def show_connection_error(url: str, exception: Exception) -> None:
     print(f"{BOLD}Error Type:{RESET} {YELLOW}{type(exception).__name__}{RESET}")
     print(f"{BOLD}Error Message:{RESET} {RED}{str(exception)}{RESET}")
 
-    if hasattr(exception, "response") and exception.response is not None:
-        print(f"{BOLD}HTTP Status:{RESET} {RED}{exception.response.status_code}{RESET}")
-        print(f"{BOLD}Response Headers:{RESET} {dict(exception.response.headers)}")
+    response = getattr(exception, "response", None)
+    if response is not None:
+        print(f"{BOLD}HTTP Status:{RESET} {RED}{response.status_code}{RESET}")
+        print(f"{BOLD}Response Headers:{RESET} {dict(response.headers)}")
 
     print()
