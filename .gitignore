@@ -5,5 +5,4 @@ site
 .env
 env
 rapidtest.egg-info
-.agents/
 skills-lock.json
