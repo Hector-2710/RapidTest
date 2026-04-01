@@ -11,13 +11,19 @@ from rapidtest import Test
 tester = Test(url="http://localhost:8000")
 ```
 
+Or initialize a starter file with the CLI:
+
+```bash
+rapidtest init
+```
+
 ## 2. 🌐 Basic HTTP Methods
 
 ### 📥 GET Request
 
 ```python
 # Simple GET request
-tester.get(endpoint="/users", status=200)
+tester.get(path="/users", status=200)
 ```
 
 ### 📤 POST Request
@@ -26,7 +32,7 @@ tester.get(endpoint="/users", status=200)
 # POST with JSON data
 user_data = {"username": "hector", "password": "123"}
 tester.post(
-    endpoint="/user", 
+    path="/user", 
     json=user_data, 
     status=201, 
     expected_json=user_data
@@ -37,13 +43,23 @@ tester.post(
 
 ```python
 # PUT request
-tester.put(endpoint="/user/1", json={"name": "Updated Name"})
+tester.put(path="/user/1", json={"name": "Updated Name"})
 
 # PATCH request  
-tester.patch(endpoint="/user/1", json={"email": "new@email.com"})
+tester.patch(path="/user/1", json={"email": "new@email.com"})
 
 # DELETE request
-tester.delete(endpoint="/user/1", status=204)
+tester.delete(path="/user/1", status=204)
+```
+
+### ⚡ ASGI mode with the same class
+
+```python
+from rapidtest import Test
+from backend.main import app
+
+tester = Test(app=app, asgi_mode=True)
+tester.get(path="/health", status=200)
 ```
 
 ## 3. ✅ Response Validation
@@ -52,14 +68,14 @@ tester.delete(endpoint="/user/1", status=204)
 
 ```python
 # Expect specific status code
-tester.get(endpoint="/", status=200)
+tester.get(path="/", status=200)
 ```
 
 ### 📋 Response Body Validation
 
 ```python
 tester.get(
-    endpoint="/", 
+    path="/", 
     status=200,
     expected_json= "API running"
 )
