@@ -333,3 +333,80 @@ class data:
 
         price = random.uniform(min_price, max_price)
         return f"{price:.2f}"
+
+    @staticmethod
+    def generate_users(
+        count: Annotated[int, "Number of users to generate"] = 1,
+        fields: Annotated[list[str] | None, "Fields to include (None = all)"] = None,
+    ) -> list[dict[str, str]]:
+        """Generates a list of users.
+
+        Args:
+            count: Number of users to generate.
+            fields: List of fields to include. Available: 'id', 'name', 'username',
+                    'password', 'email', 'age', 'address', 'phone', 'city', 'state',
+                    'country', 'company'. If None, generates all fields.
+
+        Returns:
+            A list of user dictionaries.
+
+        Example:
+            >>> data.generate_users(3)
+            [{'id': '...', 'name': '...', ...}, ...]
+            >>> data.generate_users(2, ['name', 'email'])
+            [{'name': '...', 'email': '...'}, ...]
+        """
+        return [data.generate_user(fields=fields) for _ in range(count)]
+
+    @staticmethod
+    def generate_companies(
+        count: Annotated[int, "Number of companies to generate"] = 1,
+    ) -> list[dict[str, str]]:
+        """Generates a list of companies.
+
+        Args:
+            count: Number of companies to generate.
+
+        Returns:
+            A list of company dictionaries with 'name', 'email', 'address', 'city'.
+
+        Example:
+            >>> data.generate_companies(2)
+            [{'name': '...', 'email': '...', ...}, ...]
+        """
+        return [
+            {
+                "name": fake.company(),
+                "email": fake.company_email(),
+                "address": fake.address(),
+                "city": fake.city(),
+                "country": fake.country(),
+            }
+            for _ in range(count)
+        ]
+
+    @staticmethod
+    def generate_products(
+        count: Annotated[int, "Number of products to generate"] = 1,
+        include_price: Annotated[bool, "Include random price"] = True,
+    ) -> list[dict[str, str]]:
+        """Generates a list of products.
+
+        Args:
+            count: Number of products to generate.
+            include_price: Whether to include a random price.
+
+        Returns:
+            A list of product dictionaries with 'name', 'price' (optional).
+
+        Example:
+            >>> data.generate_products(2)
+            [{'name': '...', 'price': '...'}, ...]
+        """
+        products = []
+        for _ in range(count):
+            product = {"name": fake.catch_phrase()}
+            if include_price:
+                product["price"] = data.generate_price()
+            products.append(product)
+        return products
