@@ -4,10 +4,11 @@ from rapidtest.utils import show_connection_error, validate_and_report_response
 from rapidtest.types import Response
 from .ASGITest import ASGITest
 
+
 class Test:
     """
     Main class for REST API integration tests.
-    
+
     This class allows making HTTP requests and ASGI requests, validating
     responses, and printing detailed test reports to the console.
     """
@@ -15,11 +16,19 @@ class Test:
     def __init__(
         self,
         *,
-        url: Annotated[str | None, "The base URL of the API (e.g., 'http://localhost:8000')"] = None,
+        url: Annotated[
+            str | None, "The base URL of the API (e.g., 'http://localhost:8000')"
+        ] = None,
         app: Annotated[Any | None, "ASGI app instance when asgi=True"] = None,
         asgi_mode: Annotated[bool, "Enable ASGI direct testing mode"] = False,
-        global_headers: Annotated[dict[str, str] | None, "Global headers to be applied to all requests (optional)"] = None,
-        simple_report: Annotated[bool, "If True, only prints PASSED/FAILED without detailed response info"] = False,
+        global_headers: Annotated[
+            dict[str, str] | None,
+            "Global headers to be applied to all requests (optional)",
+        ] = None,
+        simple_report: Annotated[
+            bool, "If True, only prints PASSED/FAILED without detailed response info"
+        ] = False,
+        timeout: Annotated[int, "Default timeout for all requests in seconds"] = 30,
     ):
         """
         Initializes the test client.
@@ -30,6 +39,7 @@ class Test:
             asgi (bool | False): Enables ASGI mode for direct app testing without HTTP server.
             global_headers (dict[str, str] | None): Global headers to be applied to all requests.
             simple_report (bool): If True, only prints PASSED/FAILED without detailed response info.
+            timeout (int): Default timeout for requests in seconds (default: 30).
         Note:
             - When asgi_mode=True, 'app' must be provided and 'url' is ignored
         """
@@ -38,22 +48,34 @@ class Test:
         self.global_headers = global_headers or {}
         self._asgi_runner: ASGITest | None = None
         self.simple_report = simple_report
+        self.timeout = timeout
 
         if self.asgi_mode:
             if app is None:
-                raise AttributeError(" atributte 'app' is required when asgi_mode=True")
+                raise AttributeError(" attribute 'app' is required when asgi_mode=True")
             self._asgi_runner = ASGITest(app, simple_report=simple_report)
         elif not self.url:
-            raise AttributeError(" atributte 'url' is required when asgi_mode=False")
+            raise AttributeError(" attribute 'url' is required when asgi_mode=False")
 
-    def get(self, *, 
-            path: Annotated[str | None, "The API endpoint to call"] = None,
-            status: Annotated[int, "The expected HTTP status code (default: 200)"] = 200, 
-            json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
-            keys: Annotated[list[str] | None, "A subset of JSON keys that should be contained in the response"] = None,
-            params: Annotated[dict[str, Any] | None, "The query parameters for the request"] = None,
-            headers: Annotated[dict[str, str] | None, "The headers for the request"] = None,
-            **kwargs) -> Response:
+    def get(
+        self,
+        *,
+        path: Annotated[str | None, "The API endpoint to call"] = None,
+        status: Annotated[int, "The expected HTTP status code (default: 200)"] = 200,
+        json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
+        keys: Annotated[
+            list[str] | None,
+            "A subset of JSON keys that should be contained in the response",
+        ] = None,
+        params: Annotated[
+            dict[str, Any] | None, "The query parameters for the request"
+        ] = None,
+        headers: Annotated[dict[str, str] | None, "The headers for the request"] = None,
+        timeout: Annotated[
+            int | None, "Request timeout in seconds (overrides default)"
+        ] = None,
+        **kwargs,
+    ) -> Response:
         """
         Performs a GET request and validates status code and response body.
 
@@ -64,62 +86,126 @@ class Test:
             keys: A subset of JSON keys that should be contained in the response
             params: Query parameters to append to the request URL
             headers: HTTP headers to include in the request
+            timeout: Request timeout in seconds (overrides default)
             **kwargs: Additional arguments passed to the underlying requests.get()
 
         Returns:
             Response: The complete HTTP response object.
-        
-        """
-        return self._request(method="GET", path=path, status=status, json=json, params=params, headers=headers, keys=keys, **kwargs)
 
-    def post(self, *, 
-             path: Annotated[str | None, "The API endpoint to call"] = None,
-             status: Annotated[int, "The expected HTTP status code (default: 201)"] = 201, 
-             json: Annotated[dict[str, Any] | None, "JSON data to send in the request body"] = None,
-             expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
-             keys: Annotated[list[str] | None, "A subset of JSON keys that should be contained in the response"] = None,
-             data: Annotated[str | bytes | dict[str, Any] | None, "Raw data to send in the request body (alternative to input_json)"] = None,
-             params: Annotated[dict[str, Any] | None, "Query parameters to append to the request URL"] = None,
-             headers: Annotated[dict[str, str] | None, "HTTP headers to include in the request"] = None,
-             **kwargs) -> Response:
+        """
+        return self._request(
+            method="GET",
+            path=path,
+            status=status,
+            json=json,
+            params=params,
+            headers=headers,
+            keys=keys,
+            timeout=timeout,
+            **kwargs,
+        )
+
+    def post(
+        self,
+        *,
+        path: Annotated[str | None, "The API endpoint to call"] = None,
+        status: Annotated[int, "The expected HTTP status code (default: 201)"] = 201,
+        json: Annotated[
+            dict[str, Any] | None, "JSON data to send in the request body"
+        ] = None,
+        expected_json: Annotated[
+            dict[str, Any] | None, "The expected JSON in response"
+        ] = None,
+        keys: Annotated[
+            list[str] | None,
+            "A subset of JSON keys that should be contained in the response",
+        ] = None,
+        data: Annotated[
+            str | bytes | dict[str, Any] | None,
+            "Raw data to send in the request body (alternative to input_json)",
+        ] = None,
+        params: Annotated[
+            dict[str, Any] | None, "Query parameters to append to the request URL"
+        ] = None,
+        headers: Annotated[
+            dict[str, str] | None, "HTTP headers to include in the request"
+        ] = None,
+        timeout: Annotated[
+            int | None, "Request timeout in seconds (overrides default)"
+        ] = None,
+        **kwargs,
+    ) -> Response:
         """
         Performs a POST request and validates status code and response body.
-        
+
         Args:
-            path: The API endpoint to call 
+            path: The API endpoint to call
             status: The expected HTTP status code (default: 201)
             json: JSON data to send in the request body
-            expected_json: The expected JSON in response 
+            expected_json: The expected JSON in response
             keys: A subset of JSON keys that should be contained in the response
             data: Raw data to send in the request body (alternative to input_json)
             params: Query parameters to append to the request URL
             headers: HTTP headers to include in the request
+            timeout: Request timeout in seconds (overrides default)
             **kwargs: Additional arguments passed to the underlying requests.post()
-        
+
         Returns:
             Response: The complete HTTP response object.
-        
+
         Note:
             Prints test results (PASSED/FAILED) with response details to console.
             Use either 'json' or 'data' parameter, not both.
         """
-        return self._request(method="POST", path=path, status=status, json=json,expected_json=expected_json, data=data, params=params, headers=headers, keys=keys, **kwargs)
+        return self._request(
+            method="POST",
+            path=path,
+            status=status,
+            json=json,
+            expected_json=expected_json,
+            data=data,
+            params=params,
+            headers=headers,
+            keys=keys,
+            timeout=timeout,
+            **kwargs,
+        )
 
-    def put(self, *, 
-            path: Annotated[str | None, "The API endpoint to call"] = None,
-            status: Annotated[int, "The expected HTTP status code (default: 200)"] = 200, 
-            json: Annotated[dict[str, Any] | None, "JSON data to send in the request body"] = None,
-            expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
-            keys: Annotated[list[str] | None, "A subset of JSON keys that should be contained in the response"] = None,
-            data: Annotated[str | bytes | dict[str, Any] | None, "Raw data to send in the request body (alternative to input_json)"] = None,
-            params: Annotated[dict[str, Any] | None, "Query parameters to append to the request URL"] = None,
-            headers: Annotated[dict[str, str] | None, "HTTP headers to include in the request"] = None,
-            **kwargs) -> Response:
+    def put(
+        self,
+        *,
+        path: Annotated[str | None, "The API endpoint to call"] = None,
+        status: Annotated[int, "The expected HTTP status code (default: 200)"] = 200,
+        json: Annotated[
+            dict[str, Any] | None, "JSON data to send in the request body"
+        ] = None,
+        expected_json: Annotated[
+            dict[str, Any] | None, "The expected JSON in response"
+        ] = None,
+        keys: Annotated[
+            list[str] | None,
+            "A subset of JSON keys that should be contained in the response",
+        ] = None,
+        data: Annotated[
+            str | bytes | dict[str, Any] | None,
+            "Raw data to send in the request body (alternative to input_json)",
+        ] = None,
+        params: Annotated[
+            dict[str, Any] | None, "Query parameters to append to the request URL"
+        ] = None,
+        headers: Annotated[
+            dict[str, str] | None, "HTTP headers to include in the request"
+        ] = None,
+        timeout: Annotated[
+            int | None, "Request timeout in seconds (overrides default)"
+        ] = None,
+        **kwargs,
+    ) -> Response:
         """
         Performs a PUT request and validates status code and response body.
-        
+
         Args:
-            path: The API endpoint to call 
+            path: The API endpoint to call
             status: The expected HTTP status code (default: 200)
             json: JSON data to send in the request body
             expected_json: The expected JSON response body for validation (optional)
@@ -127,30 +213,63 @@ class Test:
             data: Raw data to send in the request body (alternative to json)
             params: Query parameters to append to the request URL
             headers: HTTP headers to include in the request
+            timeout: Request timeout in seconds (overrides default)
             **kwargs: Additional arguments passed to the underlying requests.put()
-        
+
         Returns:
             Response: The complete HTTP response object.
-        
+
         Note:
             Prints test results (PASSED/FAILED) with response details to console.
             Use either 'json' or 'data' parameter, not both.
         """
-        return self._request(method="PUT", path=path, status=status, json=json, expected_json=expected_json, data=data, params=params, headers=headers, keys=keys, **kwargs)
+        return self._request(
+            method="PUT",
+            path=path,
+            status=status,
+            json=json,
+            expected_json=expected_json,
+            data=data,
+            params=params,
+            headers=headers,
+            keys=keys,
+            timeout=timeout,
+            **kwargs,
+        )
 
-    def patch(self, *, 
-              path: Annotated[str | None, "The API endpoint to call"] = None,
-              status: Annotated[int, "The expected HTTP status code"] = 200, 
-              json: Annotated[dict[str, Any] | None, "JSON data to send in the request body"] = None,
-              expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
-              data: Annotated[str | bytes | dict[str, Any] | None, "Raw data to send in the request body (alternative to json)"] = None,
-              keys: Annotated[list[str] | None, "A subset of JSON keys that should be contained in the response"] = None,
-              params: Annotated[dict[str, Any] | None, "Query parameters to append to the request URL"] = None,
-              headers: Annotated[dict[str, str] | None, "HTTP headers to include in the request"] = None,
-              **kwargs) -> Response:
+    def patch(
+        self,
+        *,
+        path: Annotated[str | None, "The API endpoint to call"] = None,
+        status: Annotated[int, "The expected HTTP status code"] = 200,
+        json: Annotated[
+            dict[str, Any] | None, "JSON data to send in the request body"
+        ] = None,
+        expected_json: Annotated[
+            dict[str, Any] | None, "The expected JSON in response"
+        ] = None,
+        data: Annotated[
+            str | bytes | dict[str, Any] | None,
+            "Raw data to send in the request body (alternative to json)",
+        ] = None,
+        keys: Annotated[
+            list[str] | None,
+            "A subset of JSON keys that should be contained in the response",
+        ] = None,
+        params: Annotated[
+            dict[str, Any] | None, "Query parameters to append to the request URL"
+        ] = None,
+        headers: Annotated[
+            dict[str, str] | None, "HTTP headers to include in the request"
+        ] = None,
+        timeout: Annotated[
+            int | None, "Request timeout in seconds (overrides default)"
+        ] = None,
+        **kwargs,
+    ) -> Response:
         """
         Performs a PATCH request and validates status code and response body.
-        
+
         Args:
             path: The API endpoint to call
             status: The expected HTTP status code
@@ -160,25 +279,58 @@ class Test:
             data: Raw data to send in the request body (alternative to json)
             params: Query parameters to append to the request URL
             headers: HTTP headers to include in the request
-        
+            timeout: Request timeout in seconds (overrides default)
+
         Returns:
             Response: The complete HTTP response object.
         """
-        return self._request(method="PATCH", path=path, status=status, json=json, expected_json=expected_json, data=data, params=params, headers=headers, keys=keys, **kwargs)
+        return self._request(
+            method="PATCH",
+            path=path,
+            status=status,
+            json=json,
+            expected_json=expected_json,
+            data=data,
+            params=params,
+            headers=headers,
+            keys=keys,
+            timeout=timeout,
+            **kwargs,
+        )
 
-    def delete(self, *, 
-               path: Annotated[str | None, "The API endpoint to call"] = None,
-               status: Annotated[int, "The expected HTTP status code"] = 204, 
-               json: Annotated[dict[str, Any] | None, "JSON data to send in the request body"] = None,
-               expected_json: Annotated[dict[str, Any] | None, "The expected JSON in response"] = None,
-               keys: Annotated[list[str] | None, "A subset of JSON keys that should be contained in the response"] = None,
-               data: Annotated[str | bytes | dict[str, Any] | None, "Raw data to send in the request body (alternative to json)"] = None,
-               params: Annotated[dict[str, Any] | None, "Query parameters to append to the request URL"] = None,
-               headers: Annotated[dict[str, str] | None, "HTTP headers to include in the request"] = None,
-               **kwargs) -> Response:
+    def delete(
+        self,
+        *,
+        path: Annotated[str | None, "The API endpoint to call"] = None,
+        status: Annotated[int, "The expected HTTP status code"] = 204,
+        json: Annotated[
+            dict[str, Any] | None, "JSON data to send in the request body"
+        ] = None,
+        expected_json: Annotated[
+            dict[str, Any] | None, "The expected JSON in response"
+        ] = None,
+        keys: Annotated[
+            list[str] | None,
+            "A subset of JSON keys that should be contained in the response",
+        ] = None,
+        data: Annotated[
+            str | bytes | dict[str, Any] | None,
+            "Raw data to send in the request body (alternative to json)",
+        ] = None,
+        params: Annotated[
+            dict[str, Any] | None, "Query parameters to append to the request URL"
+        ] = None,
+        headers: Annotated[
+            dict[str, str] | None, "HTTP headers to include in the request"
+        ] = None,
+        timeout: Annotated[
+            int | None, "Request timeout in seconds (overrides default)"
+        ] = None,
+        **kwargs,
+    ) -> Response:
         """
         Performs a DELETE request and validates status code and response body.
-        
+
         Args:
             path: The API endpoint to call
             status: The expected HTTP status code
@@ -188,24 +340,39 @@ class Test:
             data: Raw data to send in the request body (alternative to json)
             params: Query parameters to append to the request URL
             headers: HTTP headers to include in the request
-        
+            timeout: Request timeout in seconds (overrides default)
+
         Returns:
             Response: The HTTP response object if successful.
         """
-        return self._request(method="DELETE", path=path, status=status, json=json, expected_json=expected_json, data=data, params=params, headers=headers, keys=keys, **kwargs)
+        return self._request(
+            method="DELETE",
+            path=path,
+            status=status,
+            json=json,
+            expected_json=expected_json,
+            data=data,
+            params=params,
+            headers=headers,
+            timeout=timeout,
+            keys=keys,
+            **kwargs,
+        )
 
     def _request(
-        self, *,
-        method: str, 
-        path: str, 
-        status: int = 200, 
+        self,
+        *,
+        method: str,
+        path: str,
+        status: int = 200,
         json: dict[str, Any] | None = None,
         expected_json: dict[str, Any] | None = None,
-        keys: list[str] | None= None,
-        data: str | bytes | dict[str, Any] | None  = None,
+        keys: list[str] | None = None,
+        data: str | bytes | dict[str, Any] | None = None,
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
-        **kwargs
+        timeout: int | None = None,
+        **kwargs,
     ) -> Response:
         """
         Internal method to make requests and validate results.
@@ -235,6 +402,7 @@ class Test:
             data=data,
             params=params,
             headers=merged_headers,
+            timeout=timeout,
             **kwargs,
         )
 
@@ -290,6 +458,7 @@ class Test:
         data: str | bytes | dict[str, Any] | None,
         params: dict[str, Any] | None,
         headers: dict[str, str] | None,
+        timeout: int | None = None,
         **kwargs,
     ) -> Response:
         url = f"{self.url}/{path.lstrip('/')}"
@@ -305,6 +474,10 @@ class Test:
         if headers is not None:
             request_kwargs["headers"] = headers
 
+        effective_timeout = timeout if timeout is not None else self.timeout
+        if effective_timeout is not None:
+            request_kwargs["timeout"] = effective_timeout
+
         request_kwargs.update(kwargs)
 
         try:
@@ -315,7 +488,7 @@ class Test:
                 status,
                 expected_json,
                 keys,
-                simple_report=self.simple_report
+                simple_report=self.simple_report,
             )
             return response
 
@@ -324,25 +497,25 @@ class Test:
             return None
 
     def set_global_headers(self, headers: dict[str, str] | None) -> None:
-        """ Set Header for all requests."""
+        """Set Header for all requests."""
         if headers is None:
             self.global_headers = {}
         else:
             self.global_headers.update(headers)
 
     def clear_global_headers(self) -> None:
-        """ Clears all global headers."""
+        """Clears all global headers."""
         self.global_headers = {}
 
-    def _merge_headers(self, request_headers: dict[str, str] | None) -> dict[str, str] | None:
-        """ Merges global headers with request-specific headers."""
+    def _merge_headers(
+        self, request_headers: dict[str, str] | None
+    ) -> dict[str, str] | None:
+        """Merges global headers with request-specific headers."""
         if not self.global_headers and not request_headers:
             return None
-            
+
         merged = self.global_headers.copy()
         if request_headers:
-            merged.update(request_headers)  
-            
+            merged.update(request_headers)
+
         return merged if merged else None
-    
-    
