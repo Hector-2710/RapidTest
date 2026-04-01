@@ -59,45 +59,48 @@ class data:
 
     @staticmethod
     def generate_user(
-        *,
-        user_id: Annotated[bool, "Whether to generate an ID"] = False,
-        name: Annotated[bool, "Whether to generate a name"] = False,
-        username: Annotated[bool, "Whether to generate a username"] = False,
-        password: Annotated[bool, "Whether to generate a password"] = False,
-        email: Annotated[bool, "Whether to generate an email"] = False,
-        age: Annotated[bool, "Whether to generate an age"] = False,
-        address: Annotated[bool, "Whether to generate an address"] = False,
+        fields: Annotated[
+            list[str] | None, "List of fields to generate (None = all)"
+        ] = None,
     ) -> dict[str, str]:
         """Generates a dictionary with random user information.
 
         Args:
-            user_id: Whether to include a unique ID in the user data
-            name: Whether to include a full name in the user data
-            username: Whether to include a username in the user data
-            password: Whether to include a password in the user data
-            email: Whether to include an email address in the user data
-            age: Whether to include an age (18-80) in the user data
-            address: Whether to include a postal address in the user data
+            fields: List of fields to include. Available: 'id', 'name', 'username',
+                    'password', 'email', 'age', 'address', 'phone', 'city', 'state',
+                    'country', 'company'. If None, generates all fields.
 
         Returns:
             A dictionary with the requested user information fields.
+
+        Example:
+            >>> data.generate_user()  # All fields
+            {'id': '...', 'name': '...', 'email': '...', ...}
+            >>> data.generate_user(['name', 'email'])  # Only name and email
+            {'name': '...', 'email': '...'}
         """
+        all_fields = {
+            "id": lambda: fake.uuid4(),
+            "name": lambda: fake.name(),
+            "username": lambda: fake.user_name(),
+            "password": lambda: fake.password(),
+            "email": lambda: fake.email(),
+            "age": lambda: str(fake.random_int(min=18, max=80)),
+            "address": lambda: fake.address(),
+            "phone": lambda: fake.phone_number(),
+            "city": lambda: fake.city(),
+            "state": lambda: fake.state(),
+            "country": lambda: fake.country(),
+            "company": lambda: fake.company(),
+        }
+
+        if fields is None:
+            fields = list(all_fields.keys())
 
         user = {}
-        if user_id:
-            user["id"] = fake.uuid4()
-        if name:
-            user["name"] = fake.name()
-        if username:
-            user["username"] = fake.user_name()
-        if password:
-            user["password"] = fake.password()
-        if email:
-            user["email"] = fake.email()
-        if age:
-            user["age"] = str(fake.random_int(min=18, max=80))
-        if address:
-            user["address"] = fake.address()
+        for field in fields:
+            if field in all_fields:
+                user[field] = all_fields[field]()
         return user
 
     @staticmethod
