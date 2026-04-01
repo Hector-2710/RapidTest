@@ -2,6 +2,15 @@
 
 This document provides guidelines for agents working on the RapidTest codebase.
 
+## Available Skills
+
+| Skill | Description |
+|-------|-------------|
+| `python-expert` | Senior Python developer expertise for clean, efficient code |
+| `skill-commits` | Conventional commit messages with emojis |
+
+Use `skill` tool to load a skill when needed.
+
 ## Project Overview
 
 RapidTest is a lightweight Python library for REST API testing with functional checks, ASGI direct mode, fake data generation, and basic performance testing.
