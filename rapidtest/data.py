@@ -260,3 +260,73 @@ class data:
             A random time as a string.
         """
         return str(fake.time())
+
+    @staticmethod
+    def generate_url() -> str:
+        """Generates a random URL.
+
+        Returns:
+            A random URL string (e.g., 'https://www.example.com/page').
+        """
+        return fake.url()
+
+    @staticmethod
+    def generate_domain() -> str:
+        """Generates a random domain name.
+
+        Returns:
+            A random domain string (e.g., 'example.com').
+        """
+        return fake.domain_name()
+
+    @staticmethod
+    def generate_ipv4() -> str:
+        """Generates a random IPv4 address.
+
+        Returns:
+            A random IPv4 address string (e.g., '192.168.1.1').
+        """
+        return fake.ipv4()
+
+    @staticmethod
+    def generate_company() -> str:
+        """Generates a random company name.
+
+        Returns:
+            A random company name string.
+        """
+        return fake.company()
+
+    @staticmethod
+    def generate_company_email() -> str:
+        """Generates a random company email address.
+
+        Returns:
+            A random company email string (e.g., 'info@example.com').
+        """
+        return fake.company_email()
+
+    @staticmethod
+    def generate_product_name() -> str:
+        """Generates a random product name.
+
+        Returns:
+            A random product name string.
+        """
+        return fake.catch_phrase()
+
+    @staticmethod
+    def generate_price(min_price: float = 1.0, max_price: float = 1000.0) -> str:
+        """Generates a random price.
+
+        Args:
+            min_price: Minimum price value.
+            max_price: Maximum price value.
+
+        Returns:
+            A random price as a formatted string with 2 decimals.
+        """
+        import random
+
+        price = random.uniform(min_price, max_price)
+        return f"{price:.2f}"
