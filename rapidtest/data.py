@@ -3,13 +3,46 @@ from typing import Annotated
 
 fake = Faker()
 
+
 class data:
     """
     Data provider for testing.
-    
-    This class uses the Faker library to generate realistic information 
+
+    This class uses the Faker library to generate realistic information
     like names, emails, addresses, etc.
+
+    Example:
+        >>> data.set_locale("es_ES")
+        >>> data.generate_name()
+        'Carlos García'
+        >>> data.reset_locale()
     """
+
+    @staticmethod
+    def set_locale(locale: str) -> None:
+        """Sets the locale for data generation.
+
+        Args:
+            locale: Locale code (e.g., 'es_ES', 'en_US', 'fr_FR', 'de_DE').
+                    See Faker documentation for available locales.
+
+        Example:
+            >>> data.set_locale("es_ES")  # Spanish data
+            >>> data.set_locale("en_US")  # US English data
+        """
+        global fake
+        fake = Faker(locale)
+
+    @staticmethod
+    def reset_locale() -> None:
+        """Resets Faker to default locale (en_US).
+
+        Example:
+            >>> data.set_locale("es_ES")
+            >>> data.reset_locale()
+        """
+        global fake
+        fake = Faker()
 
     @staticmethod
     def generate_auth_user() -> dict[str, str]:
@@ -20,21 +53,23 @@ class data:
         Returns:
             A dictionary with 'username' and 'password' keys.
         """
-        
+
         user = {"username": fake.user_name(), "password": fake.password()}
-        return user   
+        return user
 
     @staticmethod
-    def generate_user(*, 
-                     user_id: Annotated[bool, "Whether to generate an ID"] = False, 
-                     name: Annotated[bool, "Whether to generate a name"] = False, 
-                     username: Annotated[bool, "Whether to generate a username"] = False, 
-                     password: Annotated[bool, "Whether to generate a password"] = False, 
-                     email: Annotated[bool, "Whether to generate an email"] = False, 
-                     age: Annotated[bool, "Whether to generate an age"] = False, 
-                     address: Annotated[bool, "Whether to generate an address"] = False) -> dict[str, str]:
+    def generate_user(
+        *,
+        user_id: Annotated[bool, "Whether to generate an ID"] = False,
+        name: Annotated[bool, "Whether to generate a name"] = False,
+        username: Annotated[bool, "Whether to generate a username"] = False,
+        password: Annotated[bool, "Whether to generate a password"] = False,
+        email: Annotated[bool, "Whether to generate an email"] = False,
+        age: Annotated[bool, "Whether to generate an age"] = False,
+        address: Annotated[bool, "Whether to generate an address"] = False,
+    ) -> dict[str, str]:
         """Generates a dictionary with random user information.
-        
+
         Args:
             user_id: Whether to include a unique ID in the user data
             name: Whether to include a full name in the user data
@@ -42,7 +77,7 @@ class data:
             password: Whether to include a password in the user data
             email: Whether to include an email address in the user data
             age: Whether to include an age (18-80) in the user data
-            address: Whether to include a postal address in the user data   
+            address: Whether to include a postal address in the user data
 
         Returns:
             A dictionary with the requested user information fields.
@@ -64,12 +99,12 @@ class data:
         if address:
             user["address"] = fake.address()
         return user
-       
+
     @staticmethod
     def generate_name() -> str:
         """Generates a random full name.
-        
-        Args:   
+
+        Args:
             None
         Returns:
             A random full name as a string.
@@ -79,7 +114,7 @@ class data:
     @staticmethod
     def generate_id() -> str:
         """Generates a unique UUID.
-        Args:   
+        Args:
             None
         Returns:
             A unique UUID as a string.
@@ -89,9 +124,9 @@ class data:
     @staticmethod
     def generate_email() -> str:
         """Generates a random email address.
-        Args:   
+        Args:
             None
-        Returns:                
+        Returns:
             A random email address as a string.
         """
         return fake.email()
@@ -99,9 +134,9 @@ class data:
     @staticmethod
     def generate_password() -> str:
         """Generates a secure random password.
-        Args:   
+        Args:
             None
-        Returns:                
+        Returns:
             A random password as a string.
         """
         return fake.password()
@@ -109,9 +144,9 @@ class data:
     @staticmethod
     def generate_phone() -> str:
         """Generates a random phone number.
-        Args:   
+        Args:
             None
-        Returns:                
+        Returns:
             A random phone number as a string.
         """
         return fake.phone_number()
@@ -119,9 +154,9 @@ class data:
     @staticmethod
     def generate_address() -> str:
         """Generates a random postal address.
-        Args:   
+        Args:
             None
-        Returns:                
+        Returns:
             A random postal address as a string.
         """
         return fake.address()
@@ -129,9 +164,9 @@ class data:
     @staticmethod
     def generate_city() -> str:
         """Generates a random city name.
-        Args:   
+        Args:
             None
-        Returns:                
+        Returns:
             A random city name as a string.
         """
         return fake.city()
@@ -139,9 +174,9 @@ class data:
     @staticmethod
     def generate_state() -> str:
         """Generates a random state/province name.
-        Args:   
+        Args:
             None
-        Returns:                
+        Returns:
             A random state/province name as a string.
         """
         return fake.state()
@@ -149,9 +184,9 @@ class data:
     @staticmethod
     def generate_zipcode() -> str:
         """Generates a random postal code.
-        Args:   
+        Args:
             None
-        Returns:                
+        Returns:
             A random postal code as a string.
         """
         return fake.zipcode()
@@ -159,9 +194,9 @@ class data:
     @staticmethod
     def generate_country() -> str:
         """Generates a random country name.
-        Args:   
+        Args:
             None
-        Returns:                
+        Returns:
             A random country name as a string.
         """
         return fake.country()
@@ -169,9 +204,9 @@ class data:
     @staticmethod
     def generate_job() -> str:
         """Generates a random job title.
-        Args:   
+        Args:
             None
-        Returns:                
+        Returns:
             A random job title as a string.
         """
         return fake.job()
@@ -179,17 +214,17 @@ class data:
     @staticmethod
     def generate_text() -> str:
         """Generates random text (short paragraph).
-        Args:   
+        Args:
             None
-        Returns:                
-            A random text as a string.  
+        Returns:
+            A random text as a string.
         """
         return fake.text()
 
     @staticmethod
     def generate_paragraph() -> str:
         """Generates a long random paragraph.
-        Args:   
+        Args:
             None
         Returns:
             A random paragraph as a string.
@@ -199,7 +234,7 @@ class data:
     @staticmethod
     def generate_date() -> str:
         """Generates a random date (ISO format).
-        Args:   
+        Args:
             None
         Returns:
             A random date as a string.
@@ -209,7 +244,7 @@ class data:
     @staticmethod
     def generate_datetime() -> str:
         """Generates random date and time (ISO format).
-        Args:   
+        Args:
             None
         Returns:
             A random date and time as a string.
@@ -219,7 +254,7 @@ class data:
     @staticmethod
     def generate_time() -> str:
         """Generates a random time.
-        Args:   
+        Args:
             None
         Returns:
             A random time as a string.
