@@ -11,6 +11,14 @@ This document provides guidelines for agents working on the RapidTest codebase.
 
 Use `skill` tool to load a skill when needed.
 
+## Commit Messages
+
+**IMPORTANT**: After completing ANY code change, you MUST use the `skill-commits` skill to generate a proper commit message.
+
+1. Use `skill` tool to load `skill-commits`
+2. Generate the commit message following the format: `{emoji} {type}: {description}`
+3. Output ONLY the commit message (no explanation)
+
 ## Project Overview
 
 RapidTest is a lightweight Python library for REST API testing with functional checks, ASGI direct mode, fake data generation, and basic performance testing.
