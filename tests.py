@@ -1,6 +1,6 @@
-from rapidtest.Test import Test
+from rapidtest.test import Test
 from rapidtest.data import Data
-from rapidtest.StatusCode import StatusCode
+from rapidtest.status_code import StatusCode
 from backend.main import app
 
 test = Test(app=app, asgi_mode=True, simple_report=True)
