@@ -310,7 +310,7 @@ The backend (FastAPI app) uses the test framework internally:
 ```python
 # tests.py demonstrates testing the backend
 from rapidtest.Test import Test
-from rapidtest.data import data
+from rapidtest.data import Data
 from rapidtest.StatusCode import StatusCode
 from backend.main import app
 
@@ -323,3 +323,19 @@ test.post(
     data={"username": "caja", "password": "caja"}
 )
 ```
+
+## Model Configuration
+
+**Temperature: 0.1**
+
+A low temperature ensures consistent, deterministic responses ideal for code generation and technical tasks.
+
+### Reasoning
+
+| Temperature | Behavior | Use Case |
+|-------------|----------|----------|
+| 0.1 | Precise, focused, less creative | Code, refactoring, debugging |
+| 0.5 | Balanced | General conversation |
+| 0.9 | Creative, varied | Brainstorming, exploration |
+
+This configuration prioritizes accuracy and consistency over creativity.
