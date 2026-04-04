@@ -3,7 +3,7 @@ import json as json_lib
 from urllib.parse import urlencode
 from typing import Any
 from collections.abc import Callable
-from .AGSIResponse import ASGIResponse
+from .asgi_response import ASGIResponse
 
 from .utils import (
     decode_headers,
