@@ -176,7 +176,7 @@ api.get(
 ## Performance Testing Integration
 
 ```python
-from rapidtest import Test, Performance, Data
+from rapidtest import Test, Performance, data
 
 # Regular functional test first
 api = Test(url="http://localhost:8000")

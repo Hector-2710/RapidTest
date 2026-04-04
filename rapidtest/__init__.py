@@ -1,13 +1,11 @@
 """
 RapidTest: A library for simplifying REST API testing.
 
-Includes traditional HTTP testing and ASGI-level testing for maximum performance.
+Includes traditional HTTP testing, ASGI-level testing and Performance testing.
 """
 
-from .Test import Test as Test
-from .data import data as data
-from .Performance import Performance as Performance
-from .StatusCode import StatusCode as StatusCode
-
-
+from .test import Test as Test
+from .data import Data as Data
+from .performance import Performance as Performance
+from .status_code import StatusCode as StatusCode
 

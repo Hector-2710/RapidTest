@@ -26,6 +26,12 @@ You should see output similar to:
 rapidtest==0.4.0
 ```
 
+Verify the CLI is available:
+
+```bash
+rapidtest --help
+```
+
 ## 🎉 Congrats RapidTest installed!
 
 

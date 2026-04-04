@@ -4,3 +4,5 @@ dist/
 site
 .env
 env
+rapidtest.egg-info
+skills-lock.json
