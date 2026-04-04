@@ -311,16 +311,15 @@ def generate_email() -> str:
 2. Follow naming pattern: `NAME_NUMBER`
 3. Use IntEnum for integer comparison
 
-## Testing Backend Changes
+## Testing with RapidTest
 
-The backend (FastAPI app) uses the test framework internally:
+Use `asgi_mode=True` to test ASGI applications directly:
 
 ```python
-# tests.py demonstrates testing the backend
 from rapidtest.Test import Test
 from rapidtest.data import Data
 from rapidtest.StatusCode import StatusCode
-from backend.main import app
+from myapp import app  # Your FastAPI/Starlette app
 
 test = Test(app=app, asgi_mode=True)
 
@@ -328,8 +327,16 @@ test = Test(app=app, asgi_mode=True)
 test.post(
     path="/token",
     status=StatusCode.OK_200,
-    data={"username": "caja", "password": "caja"}
+    data={"username": "testuser", "password": "testpass"}
 )
+```
+
+Or test external APIs:
+
+```python
+test = Test(url="https://api.example.com")
+
+test.get(path="/users", status=200)
 ```
 
 ## Model Configuration
