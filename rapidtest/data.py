@@ -4,7 +4,7 @@ from typing import Annotated
 fake = Faker()
 
 
-class data:
+class Data:
     """
     Data provider for testing.
 
@@ -12,10 +12,10 @@ class data:
     like names, emails, addresses, etc.
 
     Example:
-        >>> data.set_locale("es_ES")
-        >>> data.generate_name()
+        >>> Data.set_locale("es_ES")
+        >>> Data.generate_name()
         'Carlos García'
-        >>> data.reset_locale()
+        >>> Data.reset_locale()
     """
 
     @staticmethod
@@ -27,8 +27,8 @@ class data:
                     See Faker documentation for available locales.
 
         Example:
-            >>> data.set_locale("es_ES")  # Spanish data
-            >>> data.set_locale("en_US")  # US English data
+            >>> Data.set_locale("es_ES")  # Spanish data
+            >>> Data.set_locale("en_US")  # US English data
         """
         global fake
         fake = Faker(locale)
@@ -38,8 +38,8 @@ class data:
         """Resets Faker to default locale (en_US).
 
         Example:
-            >>> data.set_locale("es_ES")
-            >>> data.reset_locale()
+            >>> Data.set_locale("es_ES")
+            >>> Data.reset_locale()
         """
         global fake
         fake = Faker()
@@ -74,9 +74,9 @@ class data:
             A dictionary with the requested user information fields.
 
         Example:
-            >>> data.generate_user()  # All fields
+            >>> Data.generate_user()  # All fields
             {'id': '...', 'name': '...', 'email': '...', ...}
-            >>> data.generate_user(['name', 'email'])  # Only name and email
+            >>> Data.generate_user(['name', 'email'])  # Only name and email
             {'name': '...', 'email': '...'}
         """
         all_fields = {
@@ -356,7 +356,7 @@ class data:
             >>> data.generate_users(2, ['name', 'email'])
             [{'name': '...', 'email': '...'}, ...]
         """
-        return [data.generate_user(fields=fields) for _ in range(count)]
+        return [Data.generate_user(fields=fields) for _ in range(count)]
 
     @staticmethod
     def generate_companies(
@@ -407,6 +407,6 @@ class data:
         for _ in range(count):
             product = {"name": fake.catch_phrase()}
             if include_price:
-                product["price"] = data.generate_price()
+                product["price"] = Data.generate_price()
             products.append(product)
         return products

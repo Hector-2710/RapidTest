@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 INIT_TEMPLATE = '''
-from rapidtest import Test, StatusCode, data
+from rapidtest import Test, StatusCode, Data
 
 api = Test(url="http://localhost:8000")
 
@@ -26,7 +26,7 @@ def test_post_example():
     """Example POST request with JSON body."""
     response = api.post(
         path="/users",
-        json={"name": "test", "email": data.generate_email()},
+        json={"name": "test", "email": Data.generate_email()},
         status=StatusCode.CREATED_201,
         keys=["id"]
     )
