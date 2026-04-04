@@ -2,7 +2,7 @@ import requests
 from typing import Any, Annotated
 from rapidtest.utils import show_connection_error, validate_and_report_response
 from rapidtest.types import Response
-from .ASGITest import ASGITest
+from .asgi_test import ASGITest
 
 
 class Test:
