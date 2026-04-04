@@ -129,7 +129,7 @@ Returned metrics:
 
 ## Project Info
 
-- Version: `0.5.0`
+- Version: `0.5.1`
 - Author: Hector Rosales
 - License: MIT
 - Homepage: https://github.com/hector-dev/rapidtest
