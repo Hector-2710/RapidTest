@@ -6,4 +6,7 @@ site
 env
 rapidtest.egg-info
 skills-lock.json
-.opencode/
+.opencode/**/*.env
+.opencode/**/secrets.json
+backend
+test
