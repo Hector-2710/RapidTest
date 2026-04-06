@@ -5,6 +5,7 @@ from urllib.parse import urlencode
 
 _simple_report_buffer: list[tuple[int, str]] = []
 _test_counter: int = 0
+_total_elapsed: float = 0.0
 
 GREEN = "\033[92m"
 RED = "\033[91m"
@@ -72,6 +73,7 @@ def validate_and_report_response(
     expected_json: dict[str, Any] | None = None,
     contain_keys: list[str] | None = None,
     simple_report: bool = False,
+    elapsed_ms: float | None = None,
 ) -> bool:
     response_json = parse_response_body(response)
     keys_ok = (
@@ -84,18 +86,25 @@ def validate_and_report_response(
     result = "PASSED" if (status_ok and body_ok and keys_ok) else "FAILED"
 
     if simple_report:
-        print_report_simple(result)
+        print_report_simple(result, elapsed_ms)
     else:
         error_msg = _build_error_message(
             status_ok, keys_ok, expected_status, response.status_code
         )
-        print_report(result, url, response.status_code, response_json, error_msg)
+        print_report(
+            result, url, response.status_code, response_json, error_msg, elapsed_ms
+        )
 
     return status_ok and body_ok and keys_ok
 
 
 def print_report(
-    result: str, url: str, status: int, body: Any, error_msg: str | None = None
+    result: str,
+    url: str,
+    status: int,
+    body: Any,
+    error_msg: str | None = None,
+    elapsed_ms: float | None = None,
 ) -> None:
     if result == "PASSED":
         color = GREEN
@@ -115,6 +124,8 @@ def print_report(
     print(f"{color}{BOLD}{icon} TEST {result}{RESET}")
     print(f"{BLUE}URL:{RESET} {url}")
     print(f"{BLUE}Status:{RESET} {status_color}{status}{RESET}")
+    if elapsed_ms is not None:
+        print(f"{BLUE}Time:{RESET} {elapsed_ms:.2f}ms")
 
     if error_msg:
         print(f"{RED}{BOLD}Error:{RESET} {error_msg}")
@@ -129,8 +140,8 @@ def print_report(
     print("=" * 60)
 
 
-def print_report_simple(result: str) -> None:
-    global _test_counter
+def print_report_simple(result: str, elapsed_ms: float | None = None) -> None:
+    global _test_counter, _total_elapsed
     _test_counter += 1
     test_num = _test_counter
 
@@ -146,18 +157,24 @@ def print_report_simple(result: str) -> None:
         )
     )
 
+    if elapsed_ms is not None:
+        _total_elapsed += elapsed_ms
+
 
 def flush_simple_report_buffer() -> None:
     """Prints all buffered simple report entries at once and clears the buffer."""
-    global _test_counter
+    global _test_counter, _total_elapsed
     if not _simple_report_buffer:
         return
 
     print()
     for _, item in _simple_report_buffer:
         print(item)
+    if _total_elapsed > 0:
+        print(f"\n{BLUE}Total time:{RESET} {_total_elapsed:.2f}ms")
     _simple_report_buffer.clear()
     _test_counter = 0
+    _total_elapsed = 0.0
 
 
 atexit.register(flush_simple_report_buffer)

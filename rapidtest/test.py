@@ -1,4 +1,5 @@
 import requests
+import time
 from typing import Any, Annotated
 from rapidtest.utils import show_connection_error, validate_and_report_response
 from rapidtest.types import Response
@@ -481,7 +482,9 @@ class Test:
         request_kwargs.update(kwargs)
 
         try:
+            start_time = time.perf_counter()
             response = method_func(url, **request_kwargs)
+            elapsed = (time.perf_counter() - start_time) * 1000
             validate_and_report_response(
                 response,
                 response.url,
@@ -489,6 +492,7 @@ class Test:
                 expected_json,
                 keys,
                 simple_report=self.simple_report,
+                elapsed_ms=elapsed,
             )
             return response
 
