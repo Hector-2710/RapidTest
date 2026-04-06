@@ -1,5 +1,6 @@
 import asyncio
 import json as json_lib
+import time
 from urllib.parse import urlencode
 from typing import Any, Annotated
 from collections.abc import Callable
@@ -172,7 +173,9 @@ class ASGITest:
         **kwargs,
     ) -> ASGIResponse:
         try:
+            start_time = time.perf_counter()
             response = self._sync_request(method, path, **kwargs)
+            elapsed = (time.perf_counter() - start_time) * 1000
             url = f"asgi://testserver{path}"
             validate_and_report_response(
                 response,
@@ -181,6 +184,7 @@ class ASGITest:
                 expected_json,
                 keys,
                 simple_report=self.simple_report,
+                elapsed_ms=elapsed,
             )
             return response
         except Exception as exception:
