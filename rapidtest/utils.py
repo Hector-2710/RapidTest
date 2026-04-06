@@ -3,7 +3,8 @@ import json
 from typing import Any
 from urllib.parse import urlencode
 
-_simple_report_buffer: list[str] = []
+_simple_report_buffer: list[tuple[int, str]] = []
+_test_counter: int = 0
 
 GREEN = "\033[92m"
 RED = "\033[91m"
@@ -129,25 +130,34 @@ def print_report(
 
 
 def print_report_simple(result: str) -> None:
+    global _test_counter
+    _test_counter += 1
+    test_num = _test_counter
+
     if result == "PASSED":
         icon = "✅"
     else:
         icon = "❌"
 
     _simple_report_buffer.append(
-        f"{GREEN if result == 'PASSED' else RED}{BOLD}{icon} {result}{RESET}"
+        (
+            test_num,
+            f"{GREEN if result == 'PASSED' else RED}{BOLD}{icon} {test_num}. {result}{RESET}",
+        )
     )
 
 
 def flush_simple_report_buffer() -> None:
     """Prints all buffered simple report entries at once and clears the buffer."""
+    global _test_counter
     if not _simple_report_buffer:
         return
 
     print()
-    for item in _simple_report_buffer:
+    for _, item in _simple_report_buffer:
         print(item)
     _simple_report_buffer.clear()
+    _test_counter = 0
 
 
 atexit.register(flush_simple_report_buffer)
