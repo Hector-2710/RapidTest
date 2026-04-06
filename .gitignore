@@ -9,4 +9,5 @@ skills-lock.json
 .opencode/**/*.env
 .opencode/**/secrets.json
 backend
-test
+tests.py
+.opencode/
