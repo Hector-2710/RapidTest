@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rapidtest"
-version = "0.5.2"
+version = "0.5.3"
 authors = [
   { name="Hector Rosales", email="h.rosales01@ufromail.cl" },
 ]
@@ -20,10 +20,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-
-[project.optional-dependencies]
-cli = ["rich"]
-
 [project.scripts]
 rapidtest = "rapidtest.cli:main"
 
