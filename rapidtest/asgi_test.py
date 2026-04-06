@@ -31,6 +31,8 @@ class ASGITest:
     ):
         self.app = app
         self.simple_report = simple_report
+        self._loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self._loop)
 
     def get(
         self,
@@ -211,8 +213,14 @@ class ASGITest:
         **kwargs,
     ) -> Annotated[ASGIResponse, "Response object"]:
         """Helper to run async ASGI request in sync context."""
-        response_data = asyncio.run(self._make_asgi_request(method, path, **kwargs))
+        response_data = self._loop.run_until_complete(
+            self._make_asgi_request(method, path, **kwargs)
+        )
         return ASGIResponse(response_data)
+
+    def close(self) -> None:
+        """Close the event loop."""
+        self._loop.close()
 
     async def _make_asgi_request(
         self,
@@ -240,55 +248,11 @@ class ASGITest:
         request_body = body or b""
         request_complete = False
         response_started = False
-        response_body = []
-        response_headers = []
-        response_status = 200
-
-        async def receive():
-            nonlocal request_complete
-            if not request_complete:
-                request_complete = True
-                return {
-                    "type": "http.request",
-                    "body": request_body,
-                    "more_body": False,
-                }
-            return {"type": "http.disconnect"}
-
-        async def send(message):
-            nonlocal response_started, response_headers, response_status, response_body
-
-            if message["type"] == "http.response.start":
-                response_started = True
-                response_status = message["status"]
-                response_headers = message.get("headers", [])
-
-            elif message["type"] == "http.response.body":
-                body_chunk = message.get("body", b"")
-                if body_chunk:
-                    response_body.append(body_chunk)
-
-        await self.app(scope, receive, send)
-
-        response_content = b"".join(response_body)
-
-        return {
-            "status_code": response_status,
-            "headers": dict(decode_headers(response_headers)),
-            "content": response_content,
-            "json": try_parse_json(response_content),
-        }
-        scope.update(kwargs)
-
-        request_body = body or b""
-        request_complete = False
-        response_started = False
         response_body: list[bytes] = []
         response_headers: list[tuple[bytes, bytes]] = []
         response_status = 200
 
         async def receive() -> dict[str, Any]:
-            """ASGI receive callable."""
             nonlocal request_complete
             if not request_complete:
                 request_complete = True
@@ -300,7 +264,6 @@ class ASGITest:
             return {"type": "http.disconnect"}
 
         async def send(message: dict[str, Any]) -> None:
-            """ASGI send callable."""
             nonlocal response_started, response_headers, response_status, response_body
 
             if message["type"] == "http.response.start":
