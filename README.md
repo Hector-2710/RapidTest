@@ -2,15 +2,15 @@
 
 # RapidTest
 
-A lightweight library for REST API testing with functional checks, ASGI direct mode, fake data generation, and basic performance testing.
+A lightweight library for REST API testing with ASGI/HTTP mode, fake data generation, and performance testing.
 
 ## Features
 
-- Simple HTTP testing with `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
+- **ASGI Testing** - Test FastAPI/Starlette apps directly without HTTP server
+- **HTTP Testing** - Test external APIs with `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
 - Built-in response validation (status, JSON body, required keys)
-- ASGI direct mode for testing app instances without running an HTTP server
 - Fake data generation with Faker
-- Basic load testing with concurrent users (`threading` + `requests`)
+- Performance testing with concurrent users (`threading` + `requests`)
 - Test any endpoint with just one line of code
 
 ## Installation
@@ -26,22 +26,43 @@ Generate a test skeleton file:
 ```bash
 rapidtest init
 ```
+## Quick Start (ASGI mode)
+
+Use this when you want to test your ASGI app directly (for example FastAPI) without network overhead.
+
+```python
+from backend.main import app
+from rapidtest import ASGITest, StatusCode
+
+
+tester = ASGITest(app=app)
+
+tester.get(
+    path="/ping",
+    status=StatusCode.OK_200,
+    json={"ok": True}
+)
+```
+
+**Output:**
+```
+✅ 1. PASSED
+time: 0.01 s
+```
 
 ## Quick Start (HTTP mode)
 
 ```python
-from rapidtest import Test, StatusCode
+from rapidtest import HTTPTest, StatusCode
 
-api = Test(url="http://localhost:8000")
+api = HTTPTest(url="http://localhost:8000")
 
-# GET with status + key validation
 api.get(
     path="/health",
     status=StatusCode.OK_200,
     keys=["message"]
 )
 
-# POST with request body + expected response body
 payload = {"username": "hector", "password": "secret"}
 api.post(
     path="/login",
@@ -51,36 +72,19 @@ api.post(
 )
 ```
 
-## Quick Start (ASGI mode)
-
-Use this when you want to test your ASGI app directly (for example FastAPI) without network overhead.
-
-```python
-from fastapi import FastAPI
-from rapidtest import Test, StatusCode
-
-app = FastAPI()
-
-@app.get("/ping")
-def ping():
-    return {"ok": True}
-
-tester = Test(app=app, asgi_mode=True)
-
-tester.get(
-    path="/ping",
-    status=StatusCode.OK_200,
-    json={"ok": True}
-)
+**Output:**
 ```
-
+✅ 1. PASSED
+✅ 2. PASSED
+time: 0.05 s
+```
 
 ## Data Generation
 
 ```python
-from rapidtest import data
+from rapidtest import Data
 
-auth = data.generate_auth_user()
+auth = Data.generate_auth_user()
 
 print(auth)  # {"username": "...", "password": "..."}
 ```
@@ -89,8 +93,7 @@ Useful helpers include:
 
 - `generate_name()`
 - `generate_email()`
-- `generate_phone()`
-- `more..`
+- And more...
 
 ## Performance Testing
 
@@ -104,7 +107,10 @@ perf = Performance(
     timeout=10
 )
 
-perf.add_get_task(endpoint="/health")
+# Add multiple endpoints with different methods
+perf.add_task(endpoint="/health", method="GET")
+perf.add_task(endpoint="/login", method="POST", json={"user": "test"})
+
 results = perf.run()
 ```
 
@@ -132,5 +138,5 @@ Returned metrics:
 - Version: `0.6.0`
 - Author: Hector Rosales
 - License: MIT
-- Homepage: https://github.com/hector-dev/rapidtest
-- Issues: https://github.com/hector-dev/rapidtest/issues
+- Homepage: https://github.com/hector-2710/rapidtest
+- Issues: https://github.com/hector-2710/rapidtest/issues
