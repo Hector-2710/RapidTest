@@ -26,11 +26,9 @@ class HTTPTest:
         headers=None,
         **_,
     ):
-        qs = urlencode(params).encode() if params else b""
-        hdr_list = [
-            (k.lower().encode(), v.encode()) for k, v in (headers or {}).items()
-        ]
-        return self._exec("GET", path, status, expected_json, keys, qs, hdr_list)
+        return self._exec(
+            "GET", path, status, expected_json, keys, params, headers, None
+        )
 
     def post(
         self,
@@ -44,20 +42,19 @@ class HTTPTest:
         headers=None,
         **_,
     ):
-        qs = urlencode(params).encode() if params else b""
-        hdr_list = [
-            (k.lower().encode(), v.encode()) for k, v in (headers or {}).items()
-        ]
         body = None
+        req_headers = dict(headers) if headers else {}
         if json is not None:
             import json as _json
 
-            body = _json.dumps(json).encode()
-            hdr_list.append((b"content-type", b"application/json"))
+            body = _json.dumps(json)
+            req_headers["content-type"] = "application/json"
         elif data is not None:
-            body = urlencode(data, doseq=True).encode()
-            hdr_list.append((b"content-type", b"application/x-www-form-urlencoded"))
-        return self._exec("POST", path, status, expected_json, keys, qs, hdr_list, body)
+            body = urlencode(data, doseq=True)
+            req_headers["content-type"] = "application/x-www-form-urlencoded"
+        return self._exec(
+            "POST", path, status, expected_json, keys, params, req_headers, body
+        )
 
     def put(
         self,
@@ -71,20 +68,19 @@ class HTTPTest:
         headers=None,
         **_,
     ):
-        qs = urlencode(params).encode() if params else b""
-        hdr_list = [
-            (k.lower().encode(), v.encode()) for k, v in (headers or {}).items()
-        ]
         body = None
+        req_headers = dict(headers) if headers else {}
         if json is not None:
             import json as _json
 
-            body = _json.dumps(json).encode()
-            hdr_list.append((b"content-type", b"application/json"))
+            body = _json.dumps(json)
+            req_headers["content-type"] = "application/json"
         elif data is not None:
-            body = urlencode(data, doseq=True).encode()
-            hdr_list.append((b"content-type", b"application/x-www-form-urlencoded"))
-        return self._exec("PUT", path, status, expected_json, keys, qs, hdr_list, body)
+            body = urlencode(data, doseq=True)
+            req_headers["content-type"] = "application/x-www-form-urlencoded"
+        return self._exec(
+            "PUT", path, status, expected_json, keys, params, req_headers, body
+        )
 
     def patch(
         self,
@@ -98,21 +94,18 @@ class HTTPTest:
         headers=None,
         **_,
     ):
-        qs = urlencode(params).encode() if params else b""
-        hdr_list = [
-            (k.lower().encode(), v.encode()) for k, v in (headers or {}).items()
-        ]
         body = None
+        req_headers = dict(headers) if headers else {}
         if json is not None:
             import json as _json
 
-            body = _json.dumps(json).encode()
-            hdr_list.append((b"content-type", b"application/json"))
+            body = _json.dumps(json)
+            req_headers["content-type"] = "application/json"
         elif data is not None:
-            body = urlencode(data, doseq=True).encode()
-            hdr_list.append((b"content-type", b"application/x-www-form-urlencoded"))
+            body = urlencode(data, doseq=True)
+            req_headers["content-type"] = "application/x-www-form-urlencoded"
         return self._exec(
-            "PATCH", path, status, expected_json, keys, qs, hdr_list, body
+            "PATCH", path, status, expected_json, keys, params, req_headers, body
         )
 
     def delete(
@@ -125,22 +118,23 @@ class HTTPTest:
         headers=None,
         **_,
     ):
-        qs = urlencode(params).encode() if params else b""
-        hdr_list = [
-            (k.lower().encode(), v.encode()) for k, v in (headers or {}).items()
-        ]
-        return self._exec("DELETE", path, status, expected_json, keys, qs, hdr_list)
+        return self._exec(
+            "DELETE", path, status, expected_json, keys, params, headers, None
+        )
 
-    def _exec(self, method, path, status, expected_json, keys, qs, hdr_list, body=None):
+    def _exec(self, method, path, status, expected_json, keys, params, headers, body):
         url = f"{self.url}{path}"
         start_time = time.perf_counter()
 
         try:
             method_func = getattr(requests, method.lower())
             kwargs = {"timeout": self.timeout}
+            if params:
+                kwargs["params"] = params
+            if headers:
+                kwargs["headers"] = headers
             if body:
                 kwargs["data"] = body
-                kwargs["headers"] = dict(hdr_list) if hdr_list else {}
 
             response = method_func(url, **kwargs)
             elapsed = (time.perf_counter() - start_time) * 1000
