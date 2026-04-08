@@ -171,7 +171,7 @@ def flush_simple_report_buffer() -> None:
     for _, item in _simple_report_buffer:
         print(item)
     if _total_elapsed > 0:
-        print(f"\n{BLUE}Total time:{RESET} {_total_elapsed:.2f}ms")
+        print(f"\n{BLUE}time:{RESET} {_total_elapsed:.2f}ms")
     _simple_report_buffer.clear()
     _test_counter = 0
     _total_elapsed = 0.0
