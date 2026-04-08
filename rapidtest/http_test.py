@@ -2,11 +2,7 @@ import requests
 import time
 import atexit
 from urllib.parse import urlencode
-
-GREEN = "\033[92m"
-RED = "\033[91m"
-BOLD = "\033[1m"
-RESET = "\033[0m"
+from .utils import GREEN, RED, BOLD, RESET
 
 _total_tests: int = 0
 _total_time: float = 0.0
