@@ -1,9 +1,8 @@
-from rapidtest.test import Test
+from rapidtest.http_test import HTTPTest
 from rapidtest.data import Data
 from rapidtest.status_code import StatusCode
-from backend.main import app
 
-test = Test(app=app, asgi_mode=True, simple_report=True)
+test = HTTPTest(url="http://localhost:8000")
 new_email = Data.generate_email()
 
 # LOGIN
@@ -18,7 +17,7 @@ test.get(path="/", status=StatusCode.OK_200, keys=["message"])
 test.get(path="/me", status=StatusCode.OK_200, headers={"Authorization": "Bearer caja"})
 test.get(path="/users", status=StatusCode.OK_200, params={"email": "caja"})
 
-# #POST
+# POST
 test.post(
     path="/user",
     status=StatusCode.CREATED_201,
