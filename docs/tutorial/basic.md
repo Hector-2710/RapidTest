@@ -24,10 +24,10 @@ This is where RapidTest comes in. We're going to test each endpoint systematical
 First, point RapidTest to your API:
 
 ```python
-from rapidtest import Test
+from rapidtest import HTTPTest, Data, Performance
 
 # Point to your API server (can be local or remote)
-tester = Test(url="http://localhost:8000")
+tester = HTTPTest(url="http://localhost:8000")
 ```
 
 ### Basic Test: Is the Server Running?
@@ -36,7 +36,7 @@ The first test should always be to verify that your server responds:
 
 ```python
 # Verify that your API is running
-tester.get(endpoint="/health", status=200)
+tester.get(path="/health", status=200)
 ```
 
 If this works, you'll see: ✅ **GET /health** - Perfect! Your server is responding.
@@ -47,10 +47,10 @@ Now let's test getting data:
 
 ```python
 # Get the list of users
-tester.get(endpoint="/users", status=200)
+tester.get(path="/users", status=200)
 
 # If you have users, test getting a specific one
-tester.get(endpoint="/users/1", status=200)
+tester.get(path="/users/1", status=200)
 ```
 
 ### Test Write Endpoints (POST, PUT, DELETE)
@@ -66,7 +66,7 @@ new_user = {
 }
 
 tester.post(
-    endpoint="/users",
+    path="/users",
     json=new_user,
     status=201  
 )
@@ -85,7 +85,7 @@ expected_user = {
 }
 
 tester.get(
-    endpoint="/users/1",
+    path="/users/1",
     status=200,
     expected_json=expected_user
 )
@@ -97,12 +97,12 @@ It's crucial to test that your API handles errors correctly:
 
 ```python
 # Test that it returns 404 for users that don't exist
-tester.get(endpoint="/users/99999", status=404)
+tester.get(path="/users/99999", status=404)
 
 # Test validation of invalid data
 invalid_data = {"email": "badly-formatted-email"}
 tester.post(
-    endpoint="/users",
+    path="/users",
     json=invalid_data,
     status=400  # 400 means "invalid request"
 )
@@ -117,7 +117,7 @@ If your API requires authentication, you can include headers:
 auth_headers = {"Authorization": "Bearer your-token-here"}
 
 tester.get(
-    endpoint="/profile",
+    path="/profile",
     headers=auth_headers,
     status=200
 )
@@ -136,15 +136,15 @@ Often you need **realistic test data** to properly test your API. RapidTest incl
 ### Generating Realistic User Data
 
 ```python
-from rapidtest import data
+from rapidtest import Data
 
 # Generate a realistic user
-fake_user = generator.generate_user(name=True, email=True, age=True)
+fake_user = Data.generate_user(name=True, email=True, age=True)
 # example: {'name': 'Maria Gonzalez', 'email': 'maria.gonzalez@email.com', 'age': 28}
 
 # Now use this data in your test
 tester.post(
-    endpoint="/users",
+    path="/users",
     json=fake_user,
     status=201
 )
@@ -155,11 +155,11 @@ tester.post(
 ```python
 # Generate 10 users to test your API with volume
 for i in range(10):
-    user = data.generate_user(name=True, email=True, age=True)
+    user = Data.generate_user(name=True, email=True, age=True)
     
     # Add each user to your API
     tester.post(
-        endpoint="/users",
+        path="/users",
         json=user,
         status=201
     )
@@ -183,14 +183,14 @@ from rapidtest import Performance
 
 # Create a performance tester
 perf_tester = Performance(
-    base_url="http://localhost:8000",
+    url="http://localhost:8000",
     users=10,
     duration=20,
     timeout=5
     )
 
 # Simulate 10 concurrent users for 20 seconds
-perf_tester.add_get_task(endpoint="/")
+perf_tester.add_task(endpoint="/", method="GET")
 perf_tester.run()
 ```
 
@@ -217,10 +217,10 @@ RapidTest gives you key metrics to understand performance:
 Here's a complete example that follows the entire process:
 
 ```python
-from rapidtest import Test, data, Performance
+from rapidtest import HTTPTest, Data, Performance
 
 # 1. SETUP: Point to your API
-tester = Test(url="http://localhost:8000")
+tester = HTTPTest(url="http://localhost:8000")
 perf_tester = Performance(
     url="http://localhost:8000",
     users=10,
@@ -232,7 +232,7 @@ print("🔍 Step 1: Verifying that the API responds...")
 
 # 2. FUNCTIONAL TESTING: Verify it works
 try:
-    tester.get(endpoint="/health", expected_status=200)
+    tester.get(path="/health", status=200)
     print("✅ API is working correctly")
 except:
     print("❌ Error: API not responding")
@@ -242,9 +242,9 @@ print("\n📊 Step 2: Testing with test data...")
 
 # 3. TEST DATA: Create realistic users
 for i in range(5):
-    user = data.generate_user(name=True, email=True, age=True)
+    user = Data.generate_user(name=True, email=True, age=True)
     tester.post(
-        endpoint="/users",
+        path="/users",
         json=user,
         status=201
         )
@@ -254,7 +254,6 @@ print("✅ Test users created successfully")
 print("\n⚡ Step 3: Performance testing...")
 
 # 4. PERFORMANCE: Verify under load
-perf_tester.add_get_task(endpoint="/")
+perf_tester.add_task(endpoint="/", method="GET")
 perf_tester.run()
-
 ```

@@ -13,7 +13,7 @@ from rapidtest import Performance
 ```python
 Performance(
     *,
-    base_url: str,
+    url: str,
     users: int = 10,
     duration: int = 10,
     timeout: int = 10
@@ -24,7 +24,7 @@ Performance(
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `base_url` | str | Required | Base URL to test |
+| `url` | str | Required | Base URL to test |
 | `users` | int | 10 | Number of concurrent users to simulate |
 | `duration` | int | 10 | Test duration in seconds |
 | `timeout` | int | 10 | Max request timeout in seconds |
@@ -32,7 +32,7 @@ Performance(
 **Example:**
 ```python
 perf_test = Performance(
-    base_url="http://localhost:8000",
+    url="http://localhost:8000",
     users=50,
     duration=30,
     timeout=5
@@ -41,20 +41,53 @@ perf_test = Performance(
 
 ### Methods
 
-#### add_get_task
+#### add_task
 
 ```python
-add_get_task(*, endpoint: str)
+add_task(
+    *,
+    endpoint: str,
+    method: str = "GET",
+    params: dict | None = None,
+    headers: dict | None = None,
+    json: dict | None = None,
+    data: dict | str | None = None
+)
 ```
 
-Add a GET request task to be tested.
+Add a request task to be tested.
 
 **Parameters:**
 - `endpoint` (str): URL endpoint to test (e.g., '/api/users')
+- `method` (str): HTTP method. Default is "GET". Other options: "POST", "PUT", "PATCH", "DELETE"
+- `params` (dict | None): Query parameters to include in the request
+- `headers` (dict | None): Additional headers for the request
+- `json` (dict | None): JSON body for POST/PUT/PATCH requests
+- `data` (dict | str | None): Form data for the request
 
-**Example:**
+**Examples:**
 ```python
-perf_test.add_get_task(endpoint="/api/users")
+# Test a GET endpoint
+perf_test.add_task(endpoint="/api/users")
+
+# Test a POST endpoint
+perf_test.add_task(
+    endpoint="/api/users",
+    method="POST",
+    json={"name": "Test User", "email": "test@example.com"}
+)
+
+# Test with query parameters
+perf_test.add_task(
+    endpoint="/api/products",
+    params={"category": "electronics", "limit": 10}
+)
+
+# Test with custom headers
+perf_test.add_task(
+    endpoint="/api/protected",
+    headers={"Authorization": "Bearer token"}
+)
 ```
 
 #### run
@@ -105,14 +138,21 @@ from rapidtest import Performance
 
 # Initialize performance test
 perf_test = Performance(
-    base_url="http://localhost:8000",
+    url="http://localhost:8000",
     users=100,  # 100 concurrent users
     duration=60,  # Test for 60 seconds
     timeout=10  # 10 second timeout
 )
 
-# Add endpoint to test
-perf_test.add_get_task(endpoint="/api/health")
+# Add GET endpoint to test
+perf_test.add_task(endpoint="/api/health")
+
+# Add POST endpoint to test
+perf_test.add_task(
+    endpoint="/api/users",
+    method="POST",
+    json={"name": "Test User", "email": "test@example.com"}
+)
 
 # Run test and get results
 results = perf_test.run()

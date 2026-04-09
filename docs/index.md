@@ -6,7 +6,7 @@ A **super lightweight** and fast library to simplify REST API testing. Designed 
 
 ## ✨ Features
 
-- **Single Test class**: Use one `Test` class for both HTTP mode and ASGI direct mode.
+- **HTTPTest and ASGITest classes**: Use `HTTPTest` for HTTP mode or `ASGI` for direct ASGI testing.
 - **Simplicity**: Perform HTTP requests (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) in a single line with comprehensive response validation.
 - **Automatic Validation**: Automatically compare status codes and response bodies with detailed error reporting.
 - **Data Generator**: Integrated random data generator (using Faker) for dynamic testing with flexible user creation.

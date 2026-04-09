@@ -1,39 +1,31 @@
 # RapidTest API Reference
 
-## Test Class
+## HTTPTest Class
 
-The main class for performing REST API integration tests.
+The main class for performing REST API integration tests over HTTP.
 
 ```python
-from rapidtest import Test
+from rapidtest import HTTPTest
 ```
 
 ### Constructor
 
 ```python
-Test(
+HTTPTest(
     *, 
     url: str | None = None, 
-    app: Any | None = None, 
-    asgi_mode: bool = False, 
-    global_headers: dict[str, str] | None = None
+    timeout: int = 30
 )
 ```
 
 **Parameters:**
-- `url` (str | None): The base URL of the API (e.g., 'http://localhost:8000'). Required when `asgi_mode=False`.
-- `app` (Any | None): ASGI app instance. Required when `asgi_mode=True`.
-- `asgi_mode` (bool): Enable ASGI direct testing mode. Default is `False`.
-- `global_headers` (dict[str, str] | None): Global headers to be applied to all requests (optional).
+- `url` (str | None): The base URL of the API (e.g., 'http://localhost:8000'). Required.
+- `timeout` (int): Request timeout in seconds. Default is 30.
 
 **Example:**
 ```python
 # HTTP mode
-tester = Test(url="http://localhost:8000")
-
-# ASGI mode
-from myapp.asgi import application
-tester = Test(app=application, asgi_mode=True)
+tester = HTTPTest(url="http://localhost:8000")
 ```
 
 ### HTTP Methods
@@ -128,9 +120,64 @@ You can access properties directly:
 - `response.text`: Raw response text  
 - `response.headers`: Response headers
 
-### Global Headers Management
+---
+
+## ASGITest Class
+
+For testing ASGI applications directly without running an HTTP server.
 
 ```python
-tester.set_global_headers({"x-api-key": "secret-key"})
-tester.clear_global_headers()
+from rapidtest import ASGITest
 ```
+
+### Constructor
+
+```python
+ASGITest(
+    *, 
+    app: Any,
+    timeout: int = 30
+)
+```
+
+**Parameters:**
+- `app` (Any): ASGI app instance. Required.
+- `timeout` (int): Request timeout in seconds. Default is 30.
+
+**Example:**
+```python
+from myapp.asgi import application
+tester = ASGITest(app=application)
+```
+
+### HTTP Methods
+
+The ASGITest class has the same HTTP methods as HTTPTest (`get`, `post`, `put`, `patch`, `delete`) with the same parameters.
+
+---
+
+## StatusCode Enum
+
+Pre-defined HTTP status codes for use in tests.
+
+```python
+from rapidtest import StatusCode
+
+# Usage
+tester.get(path="/health", status=StatusCode.OK)
+tester.post(path="/users", json=data, status=StatusCode.CREATED)
+tester.delete(path="/users/1", status=StatusCode.NO_CONTENT)
+```
+
+**Available values:**
+- `StatusCode.OK` = 200
+- `StatusCode.CREATED` = 201
+- `StatusCode.NO_CONTENT` = 204
+- `StatusCode.BAD_REQUEST` = 400
+- `StatusCode.UNAUTHORIZED` = 401
+- `StatusCode.FORBIDDEN` = 403
+- `StatusCode.NOT_FOUND` = 404
+- `StatusCode.INTERNAL_SERVER_ERROR` = 500
+- `StatusCode.SERVICE_UNAVAILABLE` = 503
+
+And more standard HTTP status codes.

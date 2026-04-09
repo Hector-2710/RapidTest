@@ -7,10 +7,10 @@ This page contains practical examples demonstrating RapidTest in various scenari
 ### Simple Health Check
 
 ```python
-from rapidtest import Test
+from rapidtest import HTTPTest
 
 # Test API health endpoint
-api = Test(url="http://localhost:8000")
+api = HTTPTest(url="http://localhost:8000")
 api.get(path="/health", status=200)
 ```
 
@@ -20,18 +20,18 @@ No server required, tests run directly against the app instance.
 
 ```python
 from myapp.main import app
-from rapidtest import Test
+from rapidtest import ASGITest
 
-api = Test(app=app, asgi_mode=True)
+api = ASGITest(app=app)
 api.get(path="/health", status=200)
 ```
 
 ### CRUD Operations
 
 ```python
-from rapidtest import Test
+from rapidtest import HTTPTest
 
-api = Test(url="http://localhost:8000")
+api = HTTPTest(url="http://localhost:8000")
 
 # Create
 user_data = {"name": "John Doe", "email": "john@example.com"}
@@ -51,16 +51,16 @@ api.delete(path=f"/users/{user_id}", status=204)
 ## Using Fake Data
 
 ```python
-from rapidtest import Test, data
+from rapidtest import HTTPTest, Data
 
-api = Test(url="http://localhost:8000")
+api = HTTPTest(url="http://localhost:8000")
 
 # Generate realistic test data
 fake_user = {
-    "name": data.generate_name(),
-    "email": data.generate_email(),
-    "phone": data.generate_phone(),
-    "address": data.generate_address()
+    "name": Data.generate_name(),
+    "email": Data.generate_email(),
+    "phone": Data.generate_phone(),
+    "address": Data.generate_address()
 }
 
 api.post(path="/users", json=fake_user, status=201)
@@ -69,12 +69,12 @@ api.post(path="/users", json=fake_user, status=201)
 ## Authentication Testing
 
 ```python
-from rapidtest import Test, data
+from rapidtest import HTTPTest, Data
 
-api = Test(url="http://localhost:8000")
+api = HTTPTest(url="http://localhost:8000")
 
 # Generate auth credentials
-credentials = data.generate_auth_user()
+credentials = Data.generate_auth_user()
 
 # Register
 api.post(path="/register", json=credentials, status=201)
@@ -102,13 +102,13 @@ from rapidtest import Performance
 
 # Load test an endpoint
 perf = Performance(
-    base_url="http://localhost:8000",
+    url="http://localhost:8000",
     users=100,        # 100 concurrent users
     duration=60,      # for 60 seconds
     timeout=30        # 30 second timeout
 )
 
-perf.add_get_task(path="/api/products")
+perf.add_task(endpoint="/api/products", method="GET")
 results = perf.run()
 
 print(f"Success Rate: {results['success_rate']}%")
@@ -118,9 +118,9 @@ print(f"Avg Response Time: {results['avg_response_time']}ms")
 ## Error Testing
 
 ```python
-from rapidtest import Test
+from rapidtest import HTTPTest
 
-api = Test(url="http://localhost:8000")
+api = HTTPTest(url="http://localhost:8000")
 
 # Test 404 errors
 api.get(path="/users/99999", status=404)
@@ -139,11 +139,11 @@ api.get(path="/admin/users", status=401)
 ## Real-World E-commerce API
 
 ```python
-from rapidtest import Test, data, Performance
+from rapidtest import HTTPTest, Data, Performance
 
 class EcommerceAPITest:
     def __init__(self, base_url):
-        self.api = Test(url=base_url)
+        self.api = HTTPTest(url=base_url)
         
     def test_product_catalog(self):
         """Test product listing and details."""
@@ -198,7 +198,7 @@ class EcommerceAPITest:
         # Create order
         order_data = {
             "items": [{"product_id": 123, "quantity": 1}],
-            "shipping_address": data.generate_address(),
+            "shipping_address": Data.generate_address(),
             "payment_method": "credit_card"
         }
         
@@ -248,11 +248,11 @@ Exit code 1 = at least one test failed
 """
 
 import sys
-from rapidtest import Test, data
+from rapidtest import HTTPTest, Data
 
 def run_smoke_tests():
     """Essential tests that must pass before deployment."""
-    api = Test(url="https://staging.example.com")
+    api = HTTPTest(url="https://staging.example.com")
     
     try:
         # Health check
@@ -262,7 +262,7 @@ def run_smoke_tests():
         api.get(path="/db-status", status=200)
         
         # Authentication service
-        auth_user = data.generate_auth_user()
+        auth_user = Data.generate_auth_user()
         api.post(path="/auth/validate", json=auth_user, status=200)
         
         print("✅ All smoke tests passed")
@@ -274,10 +274,10 @@ def run_smoke_tests():
 
 def run_regression_tests():
     """Extended tests for full validation."""
-    api = Test(url="https://staging.example.com")
+    api = HTTPTest(url="https://staging.example.com")
     
     test_cases = [
-        ("User Registration", "/users", {"username": data.generate_name()}),
+        ("User Registration", "/users", {"username": Data.generate_name()}),
         ("Product Creation", "/products", {"name": "Test Product", "price": 99.99}),
         ("Order Processing", "/orders", {"product_id": 1, "quantity": 2}),
     ]
@@ -312,7 +312,7 @@ if __name__ == "__main__":
 ## Microservices Testing
 
 ```python
-from rapidtest import Test
+from rapidtest import HTTPTest
 
 # Test multiple microservices
 services = {
@@ -324,7 +324,7 @@ services = {
 for service_name, service_url in services.items():
     print(f"Testing {service_name}...")
     
-    api = Test(url=service_url)
+    api = HTTPTest(url=service_url)
     
     # Health check for each service
     api.get(path="/health", status=200)

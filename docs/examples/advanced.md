@@ -5,16 +5,16 @@ This section demonstrates advanced usage patterns and real-world testing scenari
 ## Complete CRUD Testing
 
 ```python
-from rapidtest import Test, data
+from rapidtest import HTTPTest, Data
 
 # Initialize API client
-api = Test(url="http://localhost:8000")
+api = HTTPTest(url="http://localhost:8000")
 
 # Generate test data
 user_data = {
-    "username": data.generate_name().replace(" ", "_").lower(),
-    "email": data.generate_email(),
-    "password": data.generate_password()
+    "username": Data.generate_name().replace(" ", "_").lower(),
+    "email": Data.generate_email(),
+    "password": Data.generate_password()
 }
 
 print("🧪 Testing CRUD operations...")
@@ -39,7 +39,7 @@ api.get(
 )
 
 # UPDATE - Modify user
-updated_data = {"email": data.generate_email()}
+updated_data = {"email": Data.generate_email()}
 api.patch(
     path=f"/api/users/{user_id}",
     json=updated_data,
@@ -56,16 +56,16 @@ api.delete(
 ## Authentication Flow Testing
 
 ```python
-from rapidtest import Test, data
+from rapidtest import HTTPTest, Data
 
-api = Test(url="http://localhost:8000")
+api = HTTPTest(url="http://localhost:8000")
 
 # 1. Register new user
-auth_user = data.generate_auth_user()
+auth_user = Data.generate_auth_user()
 register_data = {
     "username": auth_user["username"],
     "password": auth_user["password"],
-    "email": data.generate_email()
+    "email": Data.generate_email()
 }
 
 api.post(
@@ -98,19 +98,19 @@ api.get(
 ## Testing with Dynamic Data
 
 ```python
-from rapidtest import Test, data
+from rapidtest import HTTPTest, Data
 
-api = Test(url="http://localhost:8000")
+api = HTTPTest(url="http://localhost:8000")
 
 # Test multiple users with generated data
 for i in range(5):
     user = {
-        "id": data.generate_id(),
-        "name": data.generate_name(),
-        "email": data.generate_email(),
-        "phone": data.generate_phone(),
-        "address": data.generate_address(),
-        "job": data.generate_job()
+        "id": Data.generate_id(),
+        "name": Data.generate_name(),
+        "email": Data.generate_email(),
+        "phone": Data.generate_phone(),
+        "address": Data.generate_address(),
+        "job": Data.generate_job()
     }
     
     print(f"Testing user {i+1}: {user['name']}")
@@ -126,27 +126,27 @@ for i in range(5):
 ## API Versioning Tests
 
 ```python
-from rapidtest import Test
+from rapidtest import HTTPTest
 
 # Test multiple API versions
 base_url = "http://localhost:8000"
 test_data = {"name": "Test Item"}
 
 # Version 1
-api_v1 = Test(url=f"{base_url}/api/v1")
+api_v1 = HTTPTest(url=f"{base_url}/api/v1")
 api_v1.post(path="/items", json=test_data, status=201)
 
 # Version 2  
-api_v2 = Test(url=f"{base_url}/api/v2")
+api_v2 = HTTPTest(url=f"{base_url}/api/v2")
 api_v2.post(path="/items", json=test_data, status=201)
 ```
 
 ## Error Handling and Edge Cases
 
 ```python
-from rapidtest import Test
+from rapidtest import HTTPTest
 
-api = Test(url="http://localhost:8000")
+api = HTTPTest(url="http://localhost:8000")
 
 # Test validation errors
 invalid_inputs = [
@@ -176,23 +176,23 @@ api.get(
 ## Performance Testing Integration
 
 ```python
-from rapidtest import Test, Performance, data
+from rapidtest import HTTPTest, Performance, Data
 
 # Regular functional test first
-api = Test(url="http://localhost:8000")
-test_user = data.generate_auth_user()
+api = HTTPTest(url="http://localhost:8000")
+test_user = Data.generate_auth_user()
 
 # Ensure endpoint works functionally
 api.post(path="/auth/login", json=test_user, status=200)
 
 # Then performance test the same endpoint
 perf = Performance(
-    base_url="http://localhost:8000",
+    url="http://localhost:8000",
     users=50,
     duration=30,
     timeout=10
 )
-perf.add_get_task(path="/health")
+perf.add_task(endpoint="/health", method="GET")
 results = perf.run()
 
 # Validate performance criteria
@@ -206,9 +206,9 @@ if results['avg_response_time'] > 1000:
 ## Pagination Testing
 
 ```python
-from rapidtest import Test
+from rapidtest import HTTPTest
 
-api = Test(url="http://localhost:8000")
+api = HTTPTest(url="http://localhost:8000")
 
 # Test first page
 page1 = api.get(
@@ -241,9 +241,9 @@ api.get(
 ## File Upload Testing
 
 ```python
-from rapidtest import Test
+from rapidtest import HTTPTest
 
-api = Test(url="http://localhost:8000")
+api = HTTPTest(url="http://localhost:8000")
 
 # Test file upload
 with open("test_file.txt", "w") as f:
@@ -263,11 +263,11 @@ with open("test_file.txt", "rb") as f:
 Test your FastAPI, Starlette, or any ASGI-compatible application directly without running a real HTTP server. This is faster and doesn't require port binding.
 
 ```python
-from rapidtest import Test
+from rapidtest import ASGITest
 from myapp.main import app  # Your ASGI app instance
 
 # Initialize in ASGI mode
-api = Test(app=app, asgi_mode=True)
+api = ASGITest(app=app)
 
 # Requests are made directly to the app
 api.get(path="/health", status=200)
@@ -283,7 +283,7 @@ api.post(
 
 ```python
 import os
-from rapidtest import Test
+from rapidtest import HTTPTest
 
 # Configure based on environment
 env = os.getenv("ENV", "local")
@@ -295,7 +295,7 @@ elif env == "staging":
 else:
     base_url = "https://api.example.com"
 
-api = Test(url=base_url)
+api = HTTPTest(url=base_url)
 
 # Run the same tests across environments
 api.get(path="/health", status=200)
@@ -304,12 +304,12 @@ api.get(path="/health", status=200)
 ## Custom Test Runner
 
 ```python
-from rapidtest import Test, data
+from rapidtest import HTTPTest, Data
 import sys
 
 class APITestSuite:
     def __init__(self, base_url):
-        self.api = Test(url=base_url)
+        self.api = HTTPTest(url=base_url)
         self.passed = 0
         self.failed = 0
     
@@ -325,11 +325,11 @@ class APITestSuite:
             print(f"❌ {test_name} - FAILED: {e}")
     
     def test_user_creation(self):
-        user = data.generate_auth_user()
+        user = Data.generate_auth_user()
         self.api.post(path="/users", json=user, status=201)
     
     def test_user_login(self):
-        user = data.generate_auth_user()
+        user = Data.generate_auth_user()
         self.api.post(path="/login", json=user, status=200)
     
     def execute_all(self):

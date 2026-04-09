@@ -19,10 +19,10 @@ HTTP headers provide essential metadata about requests and responses, headers ex
 
 #### Bearer Token
 ```python
-from rapidtest import Test
+from rapidtest import HTTPTest
 
 # Test with Bearer token
-test = Test(url="http://localhost:8000")
+test = HTTPTest(url="http://localhost:8000")
 response = test.get(
     path="/protected-endpoint",
     headers={"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOi..."}

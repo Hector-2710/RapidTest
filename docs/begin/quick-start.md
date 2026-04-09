@@ -5,10 +5,10 @@ Get up and running with RapidTest in just a few minutes! ⚡
 ## 1. 🔧 Initialize RapidTest
 
 ```python
-from rapidtest import Test
+from rapidtest import HTTPTest
 
 # Configure your API's base URL
-tester = Test(url="http://localhost:8000")
+tester = HTTPTest(url="http://localhost:8000")
 ```
 
 Or initialize a starter file with the CLI:
@@ -52,13 +52,13 @@ tester.patch(path="/user/1", json={"email": "new@email.com"})
 tester.delete(path="/user/1", status=204)
 ```
 
-### ⚡ ASGI mode with the same class
+### ⚡ ASGI mode
 
 ```python
-from rapidtest import Test
+from rapidtest import ASGITest
 from backend.main import app
 
-tester = Test(app=app, asgi_mode=True)
+tester = ASGITest(app=app)
 tester.get(path="/health", status=200)
 ```
 

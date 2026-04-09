@@ -20,9 +20,9 @@ Then the CLI asks for a project name and writes <name>.py with starter tests.
 
 The generated file includes examples using:
 
-- `Test` for functional API tests
+- `HTTPTest` for functional API tests
 - `StatusCode` enum values
-- `data` helpers for fake test data
+- `Data` class for fake test data
 
 ## Example workflow
 
