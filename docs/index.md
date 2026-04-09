@@ -6,13 +6,13 @@ A **super lightweight** and fast library to simplify REST API testing. Designed 
 
 ## ✨ Features
 
-- **HTTPTest and ASGITest classes**: Use `HTTPTest` for HTTP mode or `ASGI` for direct ASGI testing.
-- **Simplicity**: Perform HTTP requests (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) in a single line with comprehensive response validation.
-- **Automatic Validation**: Automatically compare status codes and response bodies with detailed error reporting.
-- **Data Generator**: Integrated random data generator (using Faker) for dynamic testing with flexible user creation.
-- **Performance Testing**: Built-in load testing with threading - no external tools needed
-- **ASGI direct mode**: for testing app instances without running an HTTP server
-- **CLI support**: Bootstrap a test file quickly with `rapidtest init`
+- **ASGI Testing** - Test FastAPI/Starlette apps directly without HTTP server
+- **HTTP Testing** - Test external APIs with `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
+- Built-in response validation (status, JSON body, required keys)
+- Fake data generation with Faker
+- Performance testing with concurrent users (`threading` + `requests`)
+- Test any endpoint with just one line of code
+
 
 ## Why RapidTest?
 
@@ -25,6 +25,7 @@ RapidTest eliminates the complexity of REST API testing by providing a simple, i
 
 !!! tip "Comprehensive"
     From simple GET requests to complex performance testing - all in one package.
+    
 
 ## Ready to Get Started?
 
