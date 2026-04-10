@@ -69,15 +69,14 @@ nav:
     - HTTP Headers: learn/http-headers.md
     - About Threads: learn/threads.md
   - Tutorial:
-    - Basic Usage: tutorial/basic.md
+    - HTTP Testing: tutorial/http-test.md
+    - ASGI Testing: tutorial/asgi-test.md
+    - Performance Testing: tutorial/performance.md
   - API Reference:
     - RapidTest Class: api/rapidtest.md
     - Performance Testing: api/performance.md
     - Data Generation: api/rapiddata.md
     - CLI: api/cli.md
-  - Examples:
-    - Basic Example: examples/basic.md
-    - Advanced Example: examples/advanced.md
 
 extra:
   social:
