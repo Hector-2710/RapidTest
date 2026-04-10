@@ -23,7 +23,7 @@ from rapidtest import HTTPTest
 
 # Test with Bearer token
 test = HTTPTest(url="http://localhost:8000")
-response = test.get(
+test.get(
     path="/protected-endpoint",
     headers={"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOi..."}
 )
@@ -45,7 +45,7 @@ response = test.get(
 ```python
 # Sending JSON data
 data = {"name": "John", "email": "john@example.com"}
-response = test.post(
+test.post(
     path="/users",
     json=data,  # RapidTest automatically sets Content-Type: application/json
     headers={"Content-Type": "application/json"}
@@ -66,7 +66,7 @@ response = test.post(
 #### Sending Cookies
 ```python
 # Test with session cookie
-response = test.get(
+test.get(
     path="/dashboard",
     headers={
         "Cookie": "session_id=abc123; user_pref=dark_mode"
