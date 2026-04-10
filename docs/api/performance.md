@@ -13,10 +13,11 @@ from rapidtest import Performance
 ```python
 Performance(
     *,
-    base_url: str,
+    base_url: str | None = None,
     users: int = 10,
     duration: int = 10,
-    timeout: int = 10
+    timeout: int = 10,
+    delay: float = 0.1
 )
 ```
 
@@ -24,10 +25,11 @@ Performance(
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `base_url` | str | Required | Base URL to test |
+| `base_url` | str | None | Base URL to test (required for run) |
 | `users` | int | 10 | Number of concurrent users to simulate |
 | `duration` | int | 10 | Test duration in seconds |
 | `timeout` | int | 10 | Max request timeout in seconds |
+| `delay` | float | 0.1 | Delay between requests in seconds |
 
 **Example:**
 ```python
@@ -35,26 +37,61 @@ perf_test = Performance(
     base_url="http://localhost:8000",
     users=50,
     duration=30,
-    timeout=5
+    timeout=5,
+    delay=0.1
 )
 ```
 
 ### Methods
 
-#### add_get_task
+#### add_task
 
 ```python
-add_get_task(*, endpoint: str)
+add_task(
+    *,
+    endpoint: str,
+    method: str = "GET",
+    params: dict | None = None,
+    headers: dict | None = None,
+    json: dict | None = None,
+    data: dict | str | None = None
+)
 ```
 
-Add a GET request task to be tested.
+Add a request task to be tested.
 
 **Parameters:**
 - `endpoint` (str): URL endpoint to test (e.g., '/api/users')
+- `method` (str): HTTP method (GET, POST, PUT, PATCH, DELETE). Default is "GET".
+- `params` (dict | None): Query parameters
+- `headers` (dict | None): HTTP headers
+- `json` (dict | None): JSON body for POST/PUT/PATCH
+- `data` (dict | str | None): Form data for POST
 
 **Example:**
 ```python
-perf_test.add_get_task(endpoint="/api/users")
+# GET request
+perf_test.add_task(endpoint="/api/users")
+
+# GET with params
+perf_test.add_task(endpoint="/api/users", params={"page": 1})
+
+# POST with JSON
+perf_test.add_task(
+    endpoint="/api/users",
+    method="POST",
+    json={"name": "John", "email": "john@example.com"}
+)
+
+# POST with form data
+perf_test.add_task(
+    endpoint="/login",
+    method="POST",
+    data={"username": "john", "password": "secret"}
+)
+
+# DELETE request
+perf_test.add_task(endpoint="/api/users/1", method="DELETE")
 ```
 
 #### run
@@ -111,8 +148,14 @@ perf_test = Performance(
     timeout=10  # 10 second timeout
 )
 
-# Add endpoint to test
-perf_test.add_get_task(endpoint="/api/health")
+# Add multiple endpoints to test
+perf_test.add_task(endpoint="/api/health", method="GET")
+perf_test.add_task(endpoint="/api/users", method="GET")
+perf_test.add_task(
+    endpoint="/api/users",
+    method="POST",
+    json={"name": "Test", "email": "test@example.com"}
+)
 
 # Run test and get results
 results = perf_test.run()
@@ -128,7 +171,7 @@ print(f"Requests per Second: {results['requests_per_second']}")
 The performance test provides real-time console output showing:
 
 - 🚀 Test configuration (URL, users, duration)
-- ⏱️ Progress indication during test execution
+- 📋 Tasks defined
 - 📊 Detailed results table with all metrics
 - 🟢 Performance indicators (excellent/good/poor)
 

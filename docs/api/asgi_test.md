@@ -1,42 +1,30 @@
-# RapidTest API Reference
+# ASGITest API Reference
 
-## Test Class
-
-The main class for performing REST API integration tests.
+Class for performing REST API integration tests directly against ASGI applications without running an HTTP server.
 
 ```python
-from rapidtest import Test
+from rapidtest import ASGITest
 ```
 
-### Constructor
+## Constructor
 
 ```python
-Test(
-    *, 
-    url: str | None = None, 
-    app: Any | None = None, 
-    asgi_mode: bool = False, 
-    global_headers: dict[str, str] | None = None
+ASGITest(
+    app: Any
 )
 ```
 
 **Parameters:**
-- `url` (str | None): The base URL of the API (e.g., 'http://localhost:8000'). Required when `asgi_mode=False`.
-- `app` (Any | None): ASGI app instance. Required when `asgi_mode=True`.
-- `asgi_mode` (bool): Enable ASGI direct testing mode. Default is `False`.
-- `global_headers` (dict[str, str] | None): Global headers to be applied to all requests (optional).
+- `app` (Any): An ASGI application instance (e.g., FastAPI app, Starlette app). Required.
 
 **Example:**
 ```python
-# HTTP mode
-tester = Test(url="http://localhost:8000")
+from myapp import app
 
-# ASGI mode
-from myapp.asgi import application
-tester = Test(app=application, asgi_mode=True)
+api = ASGITest(app=app)
 ```
 
-### HTTP Methods
+## HTTP Methods
 
 All HTTP methods share the following common parameters:
 
@@ -51,10 +39,10 @@ All HTTP methods share the following common parameters:
 | `params` | dict | None | Query parameters for the URL |
 | `headers` | dict | None | Additional HTTP headers |
 
-#### GET Request
+### GET Request
 
 ```python
-tester.get(
+api.get(
     path="/users",
     status=200,
     headers={"Authorization": "Bearer token"},
@@ -62,11 +50,11 @@ tester.get(
 )
 ```
 
-#### POST Request
+### POST Request
 
 ```python
 user_data = {"username": "john", "email": "john@example.com"}
-tester.post(
+api.post(
     path="/users",
     json=user_data,
     status=201,
@@ -74,63 +62,81 @@ tester.post(
 )
 ```
 
-#### PUT Request
+### PUT Request
 
 ```python
-tester.put(
+api.put(
     path="/users/1",
     json={"name": "Updated Name"},
     status=200
 )
 ```
 
-#### PATCH Request
+### PATCH Request
 
 ```python
-tester.patch(
+api.patch(
     path="/users/1",
     json={"email": "newemail@example.com"},
     status=200
 )
 ```
 
-#### DELETE Request
+### DELETE Request
 
 ```python
-tester.delete(
+api.delete(
     path="/users/1",
     status=204
 )
 ```
 
-### Response Validation
+## Response Validation
 
-RapidTest automatically validates:
+ASGITest automatically validates:
 
 1. **Status Code**: Compares actual vs expected status code
 2. **Response Body**: Compares actual JSON response vs `expected_json` (if provided)
 3. **Response Keys**: Validates the presence of expected keys (if `keys` is provided)
 
-### Error Handling
+## Error Handling
 
-- **Connection Errors**: Displays clear error messages for network issues
+- **ASGI Errors**: Displays clear error messages for ASGI application issues
 - **Status Code Mismatches**: Shows expected vs actual status codes
 - **Body Mismatches**: Highlights differences in response bodies
 - **JSON Parsing Errors**: Gracefully handles non-JSON responses
 
-### Return Values
+## Return Values
 
-All HTTP methods return a `Response` object on success, or `None` if a critical connection error occurred.
+All HTTP methods return `None`. The response is validated internally and results are printed to console. To access response data, you would need to modify the class to return the response object.
 
-You can access properties directly:
-- `response.status_code`: HTTP status code
-- `response.json()`: JSON response body
-- `response.text`: Raw response text  
-- `response.headers`: Response headers
+## Resource Management
 
-### Global Headers Management
+### close()
 
 ```python
-tester.set_global_headers({"x-api-key": "secret-key"})
-tester.clear_global_headers()
+api.close()
 ```
+
+Closes the event loop used by the ASGITest instance. Call this method after completing all tests to clean up resources.
+
+**Example:**
+```python
+api = ASGITest(app=app)
+
+# Run tests
+api.get(path="/health", status=200)
+
+# Clean up
+api.close()
+```
+
+## Differences from HTTPTest
+
+| Feature | HTTPTest | ASGITest |
+|---------|----------|----------|
+| Requires server | Yes | No |
+| Uses URL | Yes | No |
+| Uses app instance | No | Yes |
+| Faster execution | No | Yes |
+| Returns Response | Yes | No |
