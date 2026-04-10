@@ -14,7 +14,7 @@ Creates a starter Python test file in your current directory.
 rapidtest init
 ```
 
-Then the CLI asks for a project name and writes <name>.py with starter tests.
+Then the CLI asks for a project name and writes `<name>.py` with starter tests.
 
 ## What gets generated
 
