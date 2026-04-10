@@ -1,49 +1,49 @@
 # Tutorial: Performance Testing
 
-Aprende a realizar pruebas de carga y estrés con `Performance`. Esta clase te permite simular múltiples usuarios concurrentes para evaluar el rendimiento de tu API.
+Learn how to perform load and stress testing with `Performance`. This class allows you to simulate multiple concurrent users to evaluate your API's performance.
 
-## ¿Qué es Performance Testing?
+## What is Performance Testing?
 
-El módulo `Performance` de RapidTest te permite:
-- Simular múltiples usuarios concurrentes
-- Medir tiempos de respuesta
-- Calcular tasa de éxito
-- Evaluar throughput (requests por segundo)
+RapidTest's `Performance` module allows you to:
+- Simulate multiple concurrent users
+- Measure response times
+- Calculate success rate
+- Evaluate throughput (requests per second)
 
-## Configuración Inicial
+## Initial Setup
 
 ```python
 from rapidtest import Performance
 
-# Crear instancia
+# Create instance
 perf = Performance(
     base_url="http://localhost:8000",
-    users=10,        # Usuarios concurrentes
-    duration=10,     # Duración en segundos
-    timeout=10,     # Timeout por request
-    delay=0.1       # Delay entre requests
+    users=10,        # Concurrent users
+    duration=10,    # Duration in seconds
+    timeout=10,     # Request timeout
+    delay=0.1       # Delay between requests
 )
 ```
 
-## Parámetros del Constructor
+## Constructor Parameters
 
-| Parámetro | Tipo | Default | Descripción |
+| Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `base_url` | str | None | URL base de la API |
-| `users` | int | 10 | Número de usuarios concurrentes |
-| `duration` | int | 10 | Duración de la prueba en segundos |
-| `timeout` | int | 10 | Timeout máximo por request |
-| `delay` | float | 0.1 | Delay entre requests |
+| `base_url` | str | None | Base URL of the API |
+| `users` | int | 10 | Number of concurrent users |
+| `duration` | int | 10 | Test duration in seconds |
+| `timeout` | int | 10 | Maximum request timeout |
+| `delay` | float | 0.1 | Delay between requests |
 
-## Añadir Tareas de Prueba
+## Adding Test Tasks
 
-Usa el método `add_task()` para definir los endpoints a probar:
+Use the `add_task()` method to define endpoints to test:
 
 ```python
-# GET request simple
+# Simple GET request
 perf.add_task(endpoint="/health", method="GET")
 
-# GET con parámetros
+# GET with parameters
 perf.add_task(
     endpoint="/users",
     method="GET",
@@ -67,7 +67,7 @@ perf.add_task(
 # DELETE request
 perf.add_task(endpoint="/users/1", method="DELETE")
 
-# Con headers
+# With headers
 perf.add_task(
     endpoint="/protected",
     method="GET",
@@ -75,74 +75,74 @@ perf.add_task(
 )
 ```
 
-## Ejecutar la Prueba
+## Run the Test
 
 ```python
 results = perf.run()
 print(results)
 ```
 
-## Métricas Devueltas
+## Returned Metrics
 
-El método `run()` retorna un diccionario con:
+The `run()` method returns a dictionary with:
 
 ```python
 {
-    'total_requests': 1500,        # Total de requests realizados
-    'successful_requests': 1485,  # Requests exitosos
-    'failed_requests': 15,         # Requests fallidos
-    'success_rate': 99.0,          # Porcentaje de éxito
-    'avg_response_time': 45.2,     # Tiempo promedio en ms
-    'min_response_time': 12.1,    # Tiempo mínimo en ms
-    'max_response_time': 89.7,    # Tiempo máximo en ms
-    'requests_per_second': 150.0, # Requests por segundo
-    'duration': 10,                # Duración real en segundos
-    'users': 10                   # Usuarios concurrentes
+    'total_requests': 1500,        # Total requests made
+    'successful_requests': 1485,  # Successful requests
+    'failed_requests': 15,        # Failed requests
+    'success_rate': 99.0,         # Success percentage
+    'avg_response_time': 45.2,    # Average time in ms
+    'min_response_time': 12.1,    # Minimum time in ms
+    'max_response_time': 89.7,    # Maximum time in ms
+    'requests_per_second': 150.0, # Requests per second
+    'duration': 10,               # Actual duration in seconds
+    'users': 10                  # Concurrent users
 }
 ```
 
-## Ejemplo Completo: Prueba de Carga
+## Complete Example: Load Test
 
 ```python
 from rapidtest import Performance
 
-# Configurar prueba de carga
+# Configure load test
 perf = Performance(
     base_url="http://localhost:8000",
-    users=50,          # 50 usuarios concurrentes
-    duration=30,      # 30 segundos
-    timeout=15,       # 15 segundos de timeout
-    delay=0.2         # 200ms entre requests
+    users=50,          # 50 concurrent users
+    duration=30,       # 30 seconds
+    timeout=15,        # 15 seconds timeout
+    delay=0.2          # 200ms between requests
 )
 
-# Añadir tareas
-print("Configurando pruebas de carga...")
+# Add tasks
+print("Setting up load test...")
 
-# Prueba del endpoint de salud
+# Health endpoint test
 perf.add_task(endpoint="/health", method="GET")
 
-# Prueba de listado de usuarios
+# User list test
 perf.add_task(endpoint="/users", method="GET")
 
-# Prueba de creación de usuario
+# User creation test
 perf.add_task(
     endpoint="/users",
     method="POST",
     json={"name": "Load Test User", "email": "load@test.com"}
 )
 
-# Ejecutar prueba
-print("\n🚀 Iniciando prueba de carga...\n")
+# Run test
+print("\n🚀 Starting load test...\n")
 results = perf.run()
 
-# Analizar resultados
-print("\n📊 RESUMEN DE RESULTADOS:")
-print(f"   Éxito: {results['success_rate']}%")
+# Analyze results
+print("\n📊 RESULTS SUMMARY:")
+print(f"   Success: {results['success_rate']}%")
 print(f"   Throughput: {results['requests_per_second']} req/s")
-print(f"   Tiempo promedio: {results['avg_response_time']}ms")
+print(f"   Average time: {results['avg_response_time']}ms")
 ```
 
-## Ejemplo: Validación de Resultados
+## Example: Result Validation
 
 ```python
 from rapidtest import Performance
@@ -158,18 +158,18 @@ def run_and_validate():
     perf.add_task(endpoint="/api/health", method="GET")
     results = perf.run()
     
-    # Validaciones
-    assert results['success_rate'] >= 95, f"Tasa de éxito muy baja: {results['success_rate']}%"
-    assert results['avg_response_time'] <= 500, f"Tiempo promedio muy alto: {results['avg_response_time']}ms"
-    assert results['requests_per_second'] >= 10, f"Throughput muy bajo: {results['requests_per_second']}"
+    # Validations
+    assert results['success_rate'] >= 95, f"Success rate too low: {results['success_rate']}%"
+    assert results['avg_response_time'] <= 500, f"Average time too high: {results['avg_response_time']}ms"
+    assert results['requests_per_second'] >= 10, f"Throughput too low: {results['requests_per_second']}"
     
-    print(f"✅ Todas las validaciones pasaron!")
+    print(f"✅ All validations passed!")
     return results
 
 run_and_validate()
 ```
 
-## Ejemplo: Múltiples Escenarios
+## Example: Multiple Scenarios
 
 ```python
 from rapidtest import Performance
@@ -201,7 +201,7 @@ def test_api_endpoints():
     ]
     
     for scenario in scenarios:
-        print(f"\n🧪 Probando: {scenario['name']}")
+        print(f"\n🧪 Testing: {scenario['name']}")
         
         perf = Performance(
             base_url="http://localhost:8000",
@@ -217,35 +217,34 @@ def test_api_endpoints():
         
         results = perf.run()
         
-        # Validar contra expectativas
+        # Validate against expectations
         if results['success_rate'] < scenario['expected_success_rate']:
-            print(f"   ⚠️  Advertencia: tasa de éxito {results['success_rate']}% < {scenario['expected_success_rate']}%")
+            print(f"   ⚠️  Warning: success rate {results['success_rate']}% < {scenario['expected_success_rate']}%")
         
         if results['avg_response_time'] > scenario['max_response_time']:
-            print(f"   ⚠️  Advertencia: tiempo {results['avg_response_time']}ms > {scenario['max_response_time']}ms")
+            print(f"   ⚠️  Warning: time {results['avg_response_time']}ms > {scenario['max_response_time']}ms")
 
 test_api_endpoints()
 ```
 
-## Interpretación de Resultados
+## Results Interpretation
 
-| Indicador | Valor Ideal | Significado |
-|-----------|-------------|-------------|
-| `success_rate` | ≥ 95% | La API es estable |
-| `avg_response_time` | ≤ 500ms | Buenos tiempos de respuesta |
-| `requests_per_second` | Alto | Mayor throughput |
-| `max_response_time` | ≤ 2x promedio | Sin outliers significativos |
+| Indicator | Ideal Value | Meaning |
+|-----------|-------------|---------|
+| `success_rate` | ≥ 95% | API is stable |
+| `avg_response_time` | ≤ 500ms | Good response times |
+| `requests_per_second` | High | Higher throughput |
+| `max_response_time` | ≤ 2x average | No significant outliers |
 
-## Consejos para Pruebas Efectivas
+## Tips for Effective Testing
 
-1. **Empieza gradualmente**: Comienza con pocos usuarios y ve aumentando
-2. **Mide el baseline**: Primero establece un punto de referencia
-3. **Aísla endpoints**: Prueba un endpoint a la vez para resultados claros
-4. **Considera el delay**: Un delay muy bajo puede saturar el servidor
-5. **Monitorea el servidor**: Observa CPU, memoria y conexiones de la API
+1. **Start gradually**: Begin with few users and increase
+2. **Measure baseline**: First establish a baseline
+3. **Isolate endpoints**: Test one endpoint at a time for clear results
+4. **Consider delay**: Very low delay can saturate the server
+5. **Monitor the server**: Watch CPU, memory, and API connections
 
-## Siguiente Paso
+## Next Step
 
-¿Ya dominas las pruebas básicas? Explora más en:
-- [Advanced Examples](../examples/advanced.md)
+Mastered the basics? Explore more in:
 - [API Reference](../api/performance.md)
