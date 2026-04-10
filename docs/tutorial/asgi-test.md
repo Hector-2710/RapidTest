@@ -1,48 +1,48 @@
 # Tutorial: ASGI Testing
 
-Aprende a probar aplicaciones ASGI directamente, sin necesidad de iniciar un servidor HTTP. Esto hace que las pruebas sean más rápidas y fáciles de configurar.
+Learn how to test ASGI applications directly, without needing to start an HTTP server. This makes tests faster and easier to set up.
 
-## ¿Qué es ASGI Testing?
+## What is ASGI Testing?
 
-`ASGITest` te permite probar tu aplicación (FastAPI, Starlette, etc.) directamente ejecutándola en memoria, sin necesidad de levantar un servidor.
+`ASGITest` allows you to test your application (FastAPI, Starlette, etc.) directly by running it in memory, without needing to start a server.
 
-**Ventajas:**
-- ⚡ Más rápido - no necesita servidor
-- 🔧 Más fácil de configurar
-- 🧪 Ideal para unit tests
-- 🎯 Funciona con cualquier app ASGI
+**Advantages:**
+- ⚡ Faster - no server needed
+- 🔧 Easier to configure
+- 🧪 Ideal for unit tests
+- 🎯 Works with any ASGI app
 
-## Configuración Inicial
+## Initial Setup
 
 ```python
 from rapidtest import ASGITest
-from tu_app import app  # Tu aplicación FastAPI/Starlette
+from your_app import app  # Your FastAPI/Starlette app
 
-# Inicializar el tester con tu app
+# Initialize the tester with your app
 api = ASGITest(app=app)
 ```
 
-## Métodos HTTP Disponibles
+## Available HTTP Methods
 
-Los mismos métodos que HTTPTest están disponibles:
+The same methods as HTTPTest are available:
 
 ### GET
 
 ```python
-# Solicitud básica
+# Basic request
 api.get(path="/", status=200)
 
-# Con parámetros
+# With parameters
 api.get(path="/users", params={"page": 1}, status=200)
 
-# Con headers
+# With headers
 api.get(
     path="/health",
     headers={"X-Custom": "value"},
     status=200
 )
 
-# Validar respuesta JSON
+# Validate JSON response
 api.get(
     path="/users/1",
     expected_json={"id": 1, "name": "John"},
@@ -53,14 +53,14 @@ api.get(
 ### POST
 
 ```python
-# Enviar JSON
+# Send JSON
 api.post(
     path="/users",
     json={"name": "Jane", "email": "jane@example.com"},
     status=201
 )
 
-# Con formulario
+# With form data
 api.post(
     path="/login",
     data={"username": "john", "password": "secret"},
@@ -71,27 +71,27 @@ api.post(
 ### PUT, PATCH, DELETE
 
 ```python
-# PUT - Reemplazo completo
+# PUT - Full replacement
 api.put(
     path="/users/1",
     json={"name": "Updated", "email": "updated@example.com"},
     status=200
 )
 
-# PATCH - Actualización parcial
+# PATCH - Partial update
 api.patch(
     path="/users/1",
     json={"name": "New Name"},
     status=200
 )
 
-# DELETE - Eliminar
+# DELETE - Remove
 api.delete(path="/users/1", status=204)
 ```
 
-## Ejemplo Completo: Testing de FastAPI
+## Complete Example: FastAPI Testing
 
-### Tu aplicación (app.py)
+### Your application (app.py)
 
 ```python
 # app.py
@@ -117,14 +117,14 @@ def create_user(user: dict):
     return user
 ```
 
-### Pruebas con ASGITest
+### Tests with ASGITest
 
 ```python
 # test_app.py
 from fastapi import FastAPI
 from rapidtest import ASGITest
 
-# Crear la app
+# Create the app
 app = FastAPI()
 
 @app.get("/")
@@ -144,7 +144,7 @@ def create_user(user: dict):
     user["id"] = 1
     return user
 
-# === PRUEBAS ===
+# === TESTS ===
 
 api = ASGITest(app=app)
 
@@ -165,21 +165,21 @@ api.post(
 print("\n4. Testing root endpoint...")
 api.get(path="/", status=200, expected_json={"message": "Hello World"})
 
-# Cerrar el loop de eventos al final
+# Close the event loop at the end
 api.close()
 ```
 
-## Diferencias entre HTTPTest y ASGITest
+## Differences between HTTPTest and ASGITest
 
-| Aspecto | HTTPTest | ASGITest |
-|---------|----------|----------|
-| **Servidor** | Requiere servidor corriendo | No requiere servidor |
-| **Velocidad** | Más lento | Más rápido |
-| **Use case** | Pruebas de integración | Pruebas unitarias |
-| **Configuración** | needs URL del servidor | Solo la app |
+| Aspect | HTTPTest | ASGITest |
+|--------|----------|----------|
+| **Server** | Requires running server | No server required |
+| **Speed** | Slower | Faster |
+| **Use case** | Integration tests | Unit tests |
+| **Config** | Needs server URL | Only the app |
 | **Import** | `from rapidtest import HTTPTest` | `from rapidtest import ASGITest` |
 
-## Integración con pytest
+## Integration with pytest
 
 ```python
 # conftest.py
@@ -209,10 +209,10 @@ def test_create_user(api):
     )
 ```
 
-## Manejo de Errores
+## Error Handling
 
 ```python
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from rapidtest import ASGITest
 
 app = FastAPI()
@@ -225,18 +225,18 @@ def get_item(item_id: int):
 
 api = ASGITest(app=app)
 
-# Probar error 404
+# Test 404 error
 api.get(path="/item/404", status=404)
 ```
 
-## Notas Importantes
+## Important Notes
 
-1. **Cerrar recursos**: Al terminar las pruebas, llama `api.close()` para cerrar el event loop.
+1. **Close resources**: After finishing tests, call `api.close()` to close the event loop.
 
-2. **Scope ASGI**: El scope creado es de tipo "http" básico. Si tu app depende de WebSockets u otras características avanzadas, puede que no funcione igual.
+2. **ASGI Scope**: The created scope is basic "http" type. If your app depends on WebSockets or other advanced features, it may not work the same.
 
-3. **Headers**: Los headers se convierten a minúsculas automáticamente (según especificación ASGI).
+3. **Headers**: Headers are automatically converted to lowercase (per ASGI specification).
 
-## Siguiente Paso
+## Next Step
 
-¿Necesitas hacer pruebas de carga? Aprende sobre [Performance Testing](performance.md).
+Need to do load testing? Learn about [Performance Testing](performance.md).

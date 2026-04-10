@@ -1,51 +1,51 @@
 # Tutorial: HTTP Testing
 
-Aprende a probar APIs HTTP tradicionales con `HTTPTest`. Esta clase es ideal cuando necesitas probar un servidor que ya está corriendo.
+Learn how to test traditional HTTP APIs with `HTTPTest`. This class is ideal when you need to test a server that's already running.
 
-## Requisitos
+## Requirements
 
-- Un servidor API funcionando (local o remoto)
-- Instalar RapidTest: `pip install rapidtest`
+- A running API server (local or remote)
+- Install RapidTest: `pip install rapidtest`
 
-## Configuración Inicial
+## Initial Setup
 
 ```python
 from rapidtest import HTTPTest
 
-# Conectar a tu API
+# Connect to your API
 api = HTTPTest(url="http://localhost:8000", timeout=30)
 ```
 
-## Métodos HTTP Disponibles
+## Available HTTP Methods
 
-### GET - Obtener datos
+### GET - Retrieve data
 
 ```python
-# Solicitud básica
+# Basic request
 api.get(path="/users", status=200)
 
-# Con parámetros de consulta
+# With query parameters
 api.get(
     path="/users",
     params={"page": 1, "limit": 10},
     status=200
 )
 
-# Con headers
+# With headers
 api.get(
     path="/protected",
     headers={"Authorization": "Bearer token123"},
     status=200
 )
 
-# Validar respuesta JSON
+# Validate JSON response
 api.get(
     path="/users/1",
     expected_json={"id": 1, "name": "John"},
     status=200
 )
 
-# Validar que la respuesta contenga ciertas claves
+# Validate that response contains certain keys
 api.get(
     path="/users/1",
     keys=["id", "name", "email"],
@@ -53,10 +53,10 @@ api.get(
 )
 ```
 
-### POST - Crear recursos
+### POST - Create resources
 
 ```python
-# Enviar JSON
+# Send JSON
 new_user = {"name": "Jane", "email": "jane@example.com"}
 api.post(
     path="/users",
@@ -64,14 +64,14 @@ api.post(
     status=201
 )
 
-# Enviar datos de formulario
+# Send form data
 api.post(
     path="/login",
     data={"username": "john", "password": "secret"},
     status=200
 )
 
-# Con validación de respuesta
+# With response validation
 api.post(
     path="/users",
     json={"name": "Jane"},
@@ -80,10 +80,10 @@ api.post(
 )
 ```
 
-### PUT - Reemplazar recursos
+### PUT - Replace resources
 
 ```python
-# Actualización completa
+# Full update
 api.put(
     path="/users/1",
     json={"name": "John Updated", "email": "john@example.com"},
@@ -91,10 +91,10 @@ api.put(
 )
 ```
 
-### PATCH - Actualización parcial
+### PATCH - Partial update
 
 ```python
-# Actualización parcial
+# Partial update
 api.patch(
     path="/users/1",
     json={"email": "newemail@example.com"},
@@ -102,21 +102,21 @@ api.patch(
 )
 ```
 
-### DELETE - Eliminar recursos
+### DELETE - Delete resources
 
 ```python
-# Eliminar un recurso
+# Delete a resource
 api.delete(path="/users/1", status=204)
 ```
 
-## Ejemplo Completo: CRUD de Usuarios
+## Complete Example: User CRUD
 
 ```python
 from rapidtest import HTTPTest, Data
 
 api = HTTPTest(url="http://localhost:8000")
 
-# CREATE - Crear usuario
+# CREATE - Create user
 new_user = {
     "name": Data.generate_name(),
     "email": Data.generate_email(),
@@ -124,42 +124,42 @@ new_user = {
 }
 response = api.post(path="/users", json=new_user, status=201)
 user_id = response.json()["id"]
-print(f"Usuario creado: {user_id}")
+print(f"User created: {user_id}")
 
-# READ - Obtener usuario
+# READ - Get user
 api.get(path=f"/users/{user_id}", status=200)
 
-# UPDATE - Actualizar usuario
+# UPDATE - Update user
 api.patch(
     path=f"/users/{user_id}",
-    json={"name": "Nuevo Nombre"},
+    json={"name": "New Name"},
     status=200
 )
 
-# DELETE - Eliminar usuario
+# DELETE - Delete user
 api.delete(path=f"/users/{user_id}", status=204)
 ```
 
-## Manejo de Errores
+## Error Handling
 
 ```python
 from rapidtest import HTTPTest
 
 api = HTTPTest(url="http://localhost:8000")
 
-# Probar errores comunes
-api.get(path="/users/999999", status=404)  # No encontrado
+# Test common errors
+api.get(path="/users/999999", status=404)  # Not found
 
 api.post(
     path="/users",
-    json={"email": "invalid-email"},  # Email inválido
+    json={"email": "invalid-email"},  # Invalid email
     status=400  # Bad Request
 )
 
-api.get(path="/admin", status=401)  # No autorizado
+api.get(path="/admin", status=401)  # Unauthorized
 ```
 
-## Integración con unittest
+## Integration with unittest
 
 ```python
 import unittest
@@ -184,19 +184,19 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-## Resumen de Parámetros
+## Parameters Summary
 
-| Parámetro | Descripción | Ejemplo |
+| Parameter | Description | Example |
 |-----------|-------------|---------|
-| `path` | Endpoint de la API | `/users/1` |
-| `status` | Código de estado esperado | `200`, `201`, `404` |
-| `expected_json` | JSON exacto esperado en respuesta | `{"id": 1}` |
-| `keys` | Claves que deben existir en la respuesta | `["id", "name"]` |
-| `params` | Parámetros de consulta | `{"page": 1}` |
-| `headers` | Headers HTTP | `{"Auth": "Bearer..."}` |
-| `json` | Cuerpo JSON para POST/PUT/PATCH | `{"name": "John"}` |
-| `data` | Datos de formulario | `{"user": "john"}` |
+| `path` | API endpoint | `/users/1` |
+| `status` | Expected status code | `200`, `201`, `404` |
+| `expected_json` | Exact JSON expected in response | `{"id": 1}` |
+| `keys` | Keys that must exist in response | `["id", "name"]` |
+| `params` | Query parameters | `{"page": 1}` |
+| `headers` | HTTP headers | `{"Auth": "Bearer..."}` |
+| `json` | JSON body for POST/PUT/PATCH | `{"name": "John"}` |
+| `data` | Form data | `{"user": "john"}` |
 
-## Siguiente Paso
+## Next Step
 
-¿Necesitas probar tu app directamente sin iniciar un servidor? Aprende sobre [ASGITest](asgi-test.md).
+Need to test your app directly without starting a server? Learn about [ASGITest](asgi-test.md).
