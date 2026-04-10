@@ -9,6 +9,4 @@ rapidtest.egg-info/
 skills-lock.json
 .pytest_cache/
 .ruff_cache/
-backend/
 .opencode/
-tests
