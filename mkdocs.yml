@@ -73,7 +73,8 @@ nav:
     - ASGI Testing: tutorial/asgi-test.md
     - Performance Testing: tutorial/performance.md
   - API Reference:
-    - RapidTest Class: api/rapidtest.md
+    - HTTPTest: api/http_test.md
+    - ASGITest: api/asgi_test.md
     - Performance Testing: api/performance.md
     - Data Generation: api/rapiddata.md
     - CLI: api/cli.md
