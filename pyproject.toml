@@ -1,31 +1,45 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "rapidtest"
-version = "0.6.0"
+version = "0.7.0"
 authors = [
   { name="Hector Rosales", email="h.rosales01@ufromail.cl" },
 ]
-description = "A comprehensive testing framework for REST APIs with functional and performance testing capabilities"
+description = "A lightweight library for REST API testing with HTTP, ASGI, and performance testing"
 readme = "README.md"
 requires-python = ">=3.7"
+license = { text = "MIT" }
+keywords = ["testing", "api", "rest", "http", "fastapi", "asgi", "httptest", "performance", "load-testing"]
 dependencies = [
     "requests>=2.25.1",
     "faker>=13.0.0",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Development Status :: 4 - Beta",
+    "Topic :: Software Development :: Testing",
 ]
+
 [project.scripts]
 rapidtest = "rapidtest.cli:main"
 
 [project.urls]
-"Homepage" = "https://github.com/hector-dev/rapidtest"
-"Bug Tracker" = "https://github.com/hector-dev/rapidtest/issues"
+"Homepage" = "https://github.com/Hector-2710/rapidtest"
+"Documentation" = "https://rapidtest.readthedocs.io"
+"Bug Tracker" = "https://github.com/Hector-2710/rapidtest/issues"
+"Source Code" = "https://github.com/Hector-2710/rapidtest"
 
 [tool.setuptools]
 packages = ["rapidtest"]
