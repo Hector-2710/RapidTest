@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rapidtest"
-version = "0.6.1"
+version = "0.7.0"
 authors = [
   { name="Hector Rosales", email="h.rosales01@ufromail.cl" },
 ]
@@ -33,13 +33,6 @@ classifiers = [
     "Topic :: Software Development :: Testing",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "ruff>=0.1.0",
-    "mypy>=1.0.0",
-]
-
 [project.scripts]
 rapidtest = "rapidtest.cli:main"
 
@@ -51,11 +44,3 @@ rapidtest = "rapidtest.cli:main"
 
 [tool.setuptools]
 packages = ["rapidtest"]
-
-[tool.ruff]
-line-length = 88
-target-version = "py37"
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
