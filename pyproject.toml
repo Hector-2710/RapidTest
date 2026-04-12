@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rapidtest"
-version = "0.7.0"
+version = "0.7.1"
 authors = [
   { name="Hector Rosales", email="h.rosales01@ufromail.cl" },
 ]
 description = "A lightweight library for REST API testing with HTTP, ASGI, and performance testing"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 keywords = ["testing", "api", "rest", "http", "fastapi", "asgi", "httptest", "performance", "load-testing"]
 dependencies = [
@@ -18,10 +18,6 @@ dependencies = [
     "faker>=13.0.0",
 ]
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",

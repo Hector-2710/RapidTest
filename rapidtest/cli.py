@@ -11,9 +11,9 @@ import sys
 from pathlib import Path
 
 INIT_TEMPLATE = '''
-from rapidtest import Test, StatusCode, Data
+from rapidtest import HTTPTest, ASGITest, StatusCode, Data
 
-api = Test(url="http://localhost:8000")
+api = HTTPTest(url="http://localhost:8000")
 
 def test_example():
     """Example test demonstrating RapidTest usage."""
@@ -44,7 +44,6 @@ def test_with_auth():
 
 
 def init_command(args) -> int:
-
     project_name = (
         input("Name of project: (default my_api_tests): ").strip() or "my_tests"
     )
@@ -70,26 +69,44 @@ def run_command(args) -> int:
     tests_dir = Path("tests")
 
     if not tests_dir.exists():
-        print("No se encontró la carpeta 'tests'.")
+        print("❌ No se encontró la carpeta 'tests'.")
         return 1
+
+    cwd = Path.cwd()
+    sys.path.insert(0, str(cwd))
+
+    backend_dir = cwd / "backend"
+    if backend_dir.exists():
+        sys.path.insert(0, str(backend_dir))
+
+    test_dir = cwd / "test"
+    if test_dir.exists():
+        sys.path.insert(0, str(test_dir))
 
     test_files = sorted(tests_dir.glob("test*.py"))
 
     if not test_files:
         print(
-            "No se encontró ningún archivo que empiece con 'test' en la carpeta 'tests'."
+            "❌ No se encontró ningún archivo que empiece con 'test' en la carpeta 'tests'."
         )
         return 1
 
-    sys.path.insert(0, str(Path.cwd()))
+    tests_path = str(tests_dir)
+    print(f"📁 Ejecutando tests en: {tests_path}/")
+    print("=" * 40, flush=True)
 
     for test_file in test_files:
-        print(f"Ejecutando: {test_file.name}")
-        spec = importlib.util.spec_from_file_location("test_module", test_file)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        print(f"📂 {test_file.name}", flush=True)
+        try:
+            spec = importlib.util.spec_from_file_location("test_module", test_file)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+        except Exception as e:
+            print(f"❌ Error en {test_file.name}: {e}", flush=True)
+            return 1
 
-    print("Ejecución completada.")
+    print("=" * 40, flush=True)
+    print("✅ Ejecución completada.", flush=True)
     return 0
 
 
@@ -104,7 +121,7 @@ def main() -> int:
     sr.set_defaults(func=run_command)
 
     parser.add_argument(
-        "-v", "--version", action="version", version="RapidTest CLI 0.1.0"
+        "-v", "--version", action="version", version="RapidTest CLI 0.7.0"
     )
 
     args = parser.parse_args()
