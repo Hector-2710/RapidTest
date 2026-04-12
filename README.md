@@ -155,13 +155,13 @@ Returned metrics:
 
 ## Requirements
 
-- Python `>=3.7`
+- Python `>=3.10`
 - `requests>=2.25.1`
 - `faker>=13.0.0`
 
 ## Project Info
 
-- Version: `0.7.0`
+- Version: `0.7.1`
 - Author: Hector Rosales
 - License: MIT
 - Homepage: https://github.com/hector-2710/rapidtest
