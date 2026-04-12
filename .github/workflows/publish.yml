@@ -1,5 +1,6 @@
 name: Publish to PyPI
 
+
 on:
   release:
     types: [published]
@@ -7,7 +8,8 @@ on:
 jobs:
   build-n-publish:
     runs-on: ubuntu-latest
-    # Eliminamos 'permissions' para que use solo el token
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       
