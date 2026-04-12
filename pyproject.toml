@@ -28,7 +28,6 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Intended Audience :: Developers",
-    "Framework :: pytest",
     "Development Status :: 4 - Beta",
     "Topic :: Software Development :: Testing",
 ]
