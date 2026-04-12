@@ -4,7 +4,33 @@
 
 A lightweight library for REST API testing with ASGI/HTTP mode, fake data generation, and performance testing.
 
+[![Python Version](https://img.shields.io/pypi/pyversions/rapidtest)](https://pypi.org/project/rapidtest/)
+[![License](https://img.shields.io/pypi/l/rapidtest)](LICENSE)
+[![PyPI Version](https://img.shields.io/pypi/v/rapidtest)](https://pypi.org/project/rapidtest/)
+[![Downloads](https://img.shields.io/pypi/dm/rapidtest)](https://pypi.org/project/rapidtest/)
+
 ## Features
+
+- **ASGI Testing** - Test FastAPI/Starlette apps directly without HTTP server
+- **HTTP Testing** - Test external APIs with `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
+- Built-in response validation (status, JSON body, required keys)
+- Fake data generation with Faker
+- Performance testing with concurrent users (`threading` + `requests`)
+- Test any endpoint with just one line of code
+
+## Installation
+
+```bash
+pip install rapidtest
+```
+
+## CLI
+
+Generate a test skeleton file:
+
+```bash
+rapidtest init
+```
 
 - **ASGI Testing** - Test FastAPI/Starlette apps directly without HTTP server
 - **HTTP Testing** - Test external APIs with `GET`, `POST`, `PUT`, `PATCH`, `DELETE`
@@ -135,7 +161,7 @@ Returned metrics:
 
 ## Project Info
 
-- Version: `0.6.0`
+- Version: `0.7.0`
 - Author: Hector Rosales
 - License: MIT
 - Homepage: https://github.com/hector-2710/rapidtest
