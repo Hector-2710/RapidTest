@@ -69,7 +69,7 @@ def run_command(args) -> int:
     tests_dir = Path("tests")
 
     if not tests_dir.exists():
-        print("❌ No se encontró la carpeta 'tests'.")
+        print("No se encontró la carpeta 'tests'.")
         return 1
 
     cwd = Path.cwd()
@@ -87,13 +87,9 @@ def run_command(args) -> int:
 
     if not test_files:
         print(
-            "❌ No se encontró ningún archivo que empiece con 'test' en la carpeta 'tests'."
+            "No se encontró ningún archivo que empiece con 'test' en la carpeta 'tests'."
         )
         return 1
-
-    tests_path = str(tests_dir)
-    print(f"📁 Ejecutando tests en: {tests_path}/")
-    print("=" * 40, flush=True)
 
     for test_file in test_files:
         print(f"📂 {test_file.name}", flush=True)
@@ -105,8 +101,6 @@ def run_command(args) -> int:
             print(f"❌ Error en {test_file.name}: {e}", flush=True)
             return 1
 
-    print("=" * 40, flush=True)
-    print("✅ Ejecución completada.", flush=True)
     return 0
 
 
