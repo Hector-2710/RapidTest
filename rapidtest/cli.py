@@ -1,14 +1,21 @@
 """
-RapidTest CLI - Command line interface for RapidTest
+RapidTest CLI - Command line interface for RapidTest.
 
 Usage:
     rapidtest [options]
+    rapidtest init
+    rapidtest run
+    rapidtest scan module:app
 """
+
+from __future__ import annotations
 
 import argparse
 import importlib.util
 import sys
 from pathlib import Path
+
+from .scanner import ScanError, scan_app
 
 INIT_TEMPLATE = '''
 from rapidtest import HTTPTest, ASGITest, StatusCode, Data
@@ -44,6 +51,14 @@ def test_with_auth():
 
 
 def init_command(args) -> int:
+    """Initialize a new RapidTest project with example tests.
+
+    Args:
+        args: Command line arguments.
+
+    Returns:
+        Exit code (0 for success, 1 for error).
+    """
     project_name = (
         input("Name of project: (default my_api_tests): ").strip() or "my_tests"
     )
@@ -66,6 +81,14 @@ def init_command(args) -> int:
 
 
 def run_command(args) -> int:
+    """Run RapidTest files from the tests directory.
+
+    Args:
+        args: Command line arguments.
+
+    Returns:
+        Exit code (0 for success, 1 for error).
+    """
     tests_dir = Path("tests")
 
     if not tests_dir.exists():
@@ -104,7 +127,40 @@ def run_command(args) -> int:
     return 0
 
 
+def scan_command(args) -> int:
+    """Scan a FastAPI/Starlette app and generate ASGI tests.
+
+    Args:
+        args: Command line arguments containing 'app' in format 'module:app_name'.
+
+    Returns:
+        Exit code (0 for success, 1 for error).
+    """
+    app_string = args.app
+    output_dir = Path.cwd() / "tests"
+
+    try:
+        filename = scan_app(app_string, output_dir)
+
+        # Print success message
+        print(f"Generated test file: {filename}")
+        print("Review and customize the generated tests as needed.")
+
+        return 0
+
+    except ScanError as e:
+        print(f"Error: {e}")
+        if e.details:
+            print(f"  {e.details}")
+        return 1
+
+
 def main() -> int:
+    """Main entry point for the CLI.
+
+    Returns:
+        Exit code.
+    """
     parser = argparse.ArgumentParser(prog="rapidtest")
     subparsers = parser.add_subparsers(dest="command")
 
@@ -113,6 +169,12 @@ def main() -> int:
 
     sr = subparsers.add_parser("run", help="Run RapidTest files from tests directory")
     sr.set_defaults(func=run_command)
+
+    ss = subparsers.add_parser(
+        "scan", help="Scan a FastAPI/Starlette app and generate ASGI tests"
+    )
+    ss.add_argument("app", help="App to scan in the format module:app (e.g., main:app)")
+    ss.set_defaults(func=scan_command)
 
     parser.add_argument(
         "-v", "--version", action="version", version="RapidTest CLI 0.7.0"
