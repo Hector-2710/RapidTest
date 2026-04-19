@@ -17,68 +17,6 @@ from pathlib import Path
 
 from .scanner import ScanError, scan_app
 
-INIT_TEMPLATE = '''
-from rapidtest import HTTPTest, ASGITest, StatusCode, Data
-
-api = HTTPTest(url="http://localhost:8000")
-
-def test_example():
-    """Example test demonstrating RapidTest usage."""
-    response = api.get(
-        path="/health",
-        status=StatusCode.OK_200,
-        keys=["message"]
-    )
-
-def test_post_example():
-    """Example POST request with JSON body."""
-    response = api.post(
-        path="/users",
-        json={"name": "test", "email": Data.generate_email()},
-        status=StatusCode.CREATED_201,
-        keys=["id"]
-    )
-
-def test_with_auth():
-    """Example request with authentication headers."""
-    response = api.post(
-        path="/token",
-        data={"username": "user", "password": "pass"},
-        status=StatusCode.OK_200,
-        keys=["access_token"]
-    )
-'''
-
-
-def init_command(args) -> int:
-    """Initialize a new RapidTest project with example tests.
-
-    Args:
-        args: Command line arguments.
-
-    Returns:
-        Exit code (0 for success, 1 for error).
-    """
-    project_name = (
-        input("Name of project: (default my_api_tests): ").strip() or "my_tests"
-    )
-
-    tests_dir = Path("tests")
-    tests_dir.mkdir(exist_ok=True)
-
-    filename = tests_dir / f"{project_name}.py"
-
-    if filename.exists():
-        print(f"Error: {filename} already exists.")
-        return 1
-
-    content = INIT_TEMPLATE
-    filename.write_text(content)
-
-    print(f"Created: {filename}")
-
-    return 0
-
 
 def run_command(args) -> int:
     """Run RapidTest files from the tests directory.
