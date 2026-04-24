@@ -26,10 +26,16 @@ pip install rapidtest
 
 ## CLI
 
-Generate a test skeleton file:
+Run tests from the tests directory:
 
 ```bash
-rapidtest init
+rapidtest run
+```
+
+Scan a FastAPI/Starlette app to generate ASGI tests:
+
+```bash
+rapidtest scan module:app
 ```
 
 - **ASGI Testing** - Test FastAPI/Starlette apps directly without HTTP server
@@ -47,10 +53,16 @@ pip install rapidtest
 
 ## CLI
 
-Generate a test skeleton file:
+Run tests from the tests directory:
 
 ```bash
-rapidtest init
+rapidtest run
+```
+
+Scan a FastAPI/Starlette app to generate ASGI tests:
+
+```bash
+rapidtest scan module:app
 ```
 ## Quick Start (ASGI mode)
 

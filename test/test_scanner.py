@@ -27,7 +27,6 @@ from rapidtest.scanner import (
     get_unique_file_path,
     inspect_asgi_routes,
     parse_app_import_string,
-    scan_app,
     VALID_HTTP_METHODS,
     DEFAULT_STATUS_CODES,
 )
