@@ -5,6 +5,21 @@ All notable changes to RapidTest will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-04-23
+
+### Added
+- CLI `run` command now supports `--dir`, `--pattern`, `--fail-fast`, and `--dry-run` options
+- CLI `scan` command now supports `--output`, `--format` (text/json), and `--dry-run` options
+- Improved error handling and output formatting for both `run` and `scan` commands
+
+## [0.8.0] - 2026-04-15
+
+### Added
+-Add cli "scan" command
+
+### Removed
+- CLI `init` command (functionality replaced by enhanced `scan` command)
+
 ## [0.7.2] - 2026-04-14
 
 ### Refactor
