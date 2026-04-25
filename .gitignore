@@ -10,3 +10,5 @@ skills-lock.json
 .pytest_cache/
 .ruff_cache/
 .opencode/
+AGENTS.md
+agents_result/
