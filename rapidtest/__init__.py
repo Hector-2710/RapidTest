@@ -1,7 +1,13 @@
 """
 RapidTest: A library for simplifying REST API testing.
 
-Includes traditional HTTP testing, ASGI-level testing and Performance testing.
+Includes traditional HTTP testing, ASGI-level testing, and Performance testing.
+
+Example:
+    >>> from rapidtest import ASGITest
+    >>> api = ASGITest(app)
+    >>> api.get("/health", status=200)
+    >>> api.close()
 """
 
 from .asgi_test import ASGITest as ASGITest
