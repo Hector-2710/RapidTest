@@ -1,8 +1,23 @@
+"""
+StatusCode: HTTP status codes enum.
+
+Provides an enumeration of all standard HTTP response codes with
+helper methods for categorization and description.
+
+Example:
+    >>> from rapidtest import StatusCode, ASGITest
+    >>> api = ASGITest(app)
+    >>> api.get("/users", status=StatusCode.OK_200)
+    >>> StatusCode.NOT_FOUND_404.is_client_error()
+    True
+"""
+
 import enum
 
 
 class StatusCode(enum.IntEnum):
-    """HTTP status codes enum for API testing.
+    """
+    HTTP status codes enum for API testing.
 
     Provides categorization methods and human-readable descriptions
     for all standard HTTP response codes.
@@ -16,9 +31,12 @@ class StatusCode(enum.IntEnum):
         'Bad Request'
     """
 
+    # 1xx Informational
     CONTINUE_100 = 100
     SWITCHING_PROTOCOLS_101 = 101
     PROCESSING_102 = 102
+
+    # 2xx Success
     OK_200 = 200
     CREATED_201 = 201
     ACCEPTED_202 = 202
@@ -29,6 +47,8 @@ class StatusCode(enum.IntEnum):
     MULTI_STATUS_207 = 207
     ALREADY_REPORTED_208 = 208
     IM_USED_226 = 226
+
+    # 3xx Redirection
     MULTIPLE_CHOICES_300 = 300
     MOVED_PERMANENTLY_301 = 301
     FOUND_302 = 302
@@ -37,6 +57,8 @@ class StatusCode(enum.IntEnum):
     USE_PROXY_305 = 305
     TEMPORARY_REDIRECT_307 = 307
     PERMANENT_REDIRECT_308 = 308
+
+    # 4xx Client Error
     BAD_REQUEST_400 = 400
     UNAUTHORIZED_401 = 401
     PAYMENT_REQUIRED_402 = 402
@@ -64,6 +86,8 @@ class StatusCode(enum.IntEnum):
     TOO_MANY_REQUESTS_429 = 429
     REQUEST_HEADER_FIELDS_TOO_LARGE_431 = 431
     UNAVAILABLE_FOR_LEGAL_REASONS_451 = 451
+
+    # 5xx Server Error
     INTERNAL_SERVER_ERROR_500 = 500
     NOT_IMPLEMENTED_501 = 501
     BAD_GATEWAY_502 = 502
@@ -78,10 +102,17 @@ class StatusCode(enum.IntEnum):
 
     @property
     def reason(self) -> str:
-        """Returns the HTTP reason phrase for this status code.
+        """
+        Returns the HTTP reason phrase for this status code.
 
         Returns:
             The standard HTTP reason phrase (e.g., 'OK', 'Not Found').
+
+        Example:
+            >>> StatusCode.OK_200.reason
+            'OK'
+            >>> StatusCode.NOT_FOUND_404.reason
+            'Not Found'
         """
         reasons = {
             100: "Continue",
@@ -148,11 +179,18 @@ class StatusCode(enum.IntEnum):
 
     @property
     def category(self) -> str:
-        """Returns the category name for this status code.
+        """
+        Returns the category name for this status code.
 
         Returns:
             One of: 'Informational', 'Success', 'Redirection',
                     'Client Error', 'Server Error'.
+
+        Example:
+            >>> StatusCode.OK_200.category
+            'Success'
+            >>> StatusCode.NOT_FOUND_404.category
+            'Client Error'
         """
         if 100 <= self._value_ < 200:
             return "Informational"
@@ -167,49 +205,89 @@ class StatusCode(enum.IntEnum):
         return "Unknown"
 
     def is_informational(self) -> bool:
-        """Check if status code is 1xx (Informational).
+        """
+        Check if status code is 1xx (Informational).
 
         Returns:
             True if status is in range 100-199.
+
+        Example:
+            >>> StatusCode.CONTINUE_100.is_informational()
+            True
+            >>> StatusCode.OK_200.is_informational()
+            False
         """
         return 100 <= self._value_ < 200
 
     def is_success(self) -> bool:
-        """Check if status code is 2xx (Success).
+        """
+        Check if status code is 2xx (Success).
 
         Returns:
             True if status is in range 200-299.
+
+        Example:
+            >>> StatusCode.OK_200.is_success()
+            True
+            >>> StatusCode.CREATED_201.is_success()
+            True
         """
         return 200 <= self._value_ < 300
 
     def is_redirect(self) -> bool:
-        """Check if status code is 3xx (Redirection).
+        """
+        Check if status code is 3xx (Redirection).
 
         Returns:
             True if status is in range 300-399.
+
+        Example:
+            >>> StatusCode.FOUND_302.is_redirect()
+            True
         """
         return 300 <= self._value_ < 400
 
     def is_client_error(self) -> bool:
-        """Check if status code is 4xx (Client Error).
+        """
+        Check if status code is 4xx (Client Error).
 
         Returns:
             True if status is in range 400-499.
+
+        Example:
+            >>> StatusCode.NOT_FOUND_404.is_client_error()
+            True
+            >>> StatusCode.UNAUTHORIZED_401.is_client_error()
+            True
         """
         return 400 <= self._value_ < 500
 
     def is_server_error(self) -> bool:
-        """Check if status code is 5xx (Server Error).
+        """
+        Check if status code is 5xx (Server Error).
 
         Returns:
             True if status is in range 500-599.
+
+        Example:
+            >>> StatusCode.INTERNAL_SERVER_ERROR_500.is_server_error()
+            True
         """
         return 500 <= self._value_ < 600
 
     def is_error(self) -> bool:
-        """Check if status code is 4xx or 5xx (any error).
+        """
+        Check if status code is 4xx or 5xx (any error).
 
         Returns:
             True if status is >= 400.
+
+        Example:
+            >>> StatusCode.NOT_FOUND_404.is_error()
+            True
+            >>> StatusCode.INTERNAL_SERVER_ERROR_500.is_error()
+            True
+            >>> StatusCode.OK_200.is_error()
+            False
         """
         return self._value_ >= 400

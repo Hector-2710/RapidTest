@@ -5,6 +5,15 @@ All notable changes to RapidTest will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] - 2026-04-29
+
+### Added
+- API reference documentation in `docs/api/reference.md`
+- Documentation improvements across modules (asgi_test, data, http_test, performance, status_code)
+
+### Changed
+- Update version to 0.9.1
+
 ## [0.9.0] - 2026-04-23
 
 ### Added
