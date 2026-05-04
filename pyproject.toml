@@ -17,6 +17,7 @@ dependencies = [
     "requests>=2.25.1",
     "faker>=13.0.0",
 ]
+
 classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -37,5 +38,23 @@ rapidtest = "rapidtest.cli:main"
 "Bug Tracker" = "https://github.com/Hector-2710/rapidtest/issues"
 "Source Code" = "https://github.com/Hector-2710/rapidtest"
 
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.0",
+    "mypy>=1.0",
+    "pytest>=7.0",
+]
+
 [tool.setuptools]
 packages = ["rapidtest"]
+
+[tool.mypy]
+ignore_missing_imports = true
+disable_error_code = ["import-untyped"]
+python_version = "3.10"
+exclude = ["test/"]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+python_files = "test_*.py"
+addopts = ["-q"]
