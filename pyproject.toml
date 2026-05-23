@@ -14,7 +14,7 @@ requires-python = ">=3.10"
 license = { text = "MIT" }
 keywords = ["testing", "api", "rest", "http", "fastapi", "asgi", "httptest", "performance", "load-testing"]
 dependencies = [
-    "requests>=2.25.1",
+    "httpx>=0.24.0",
     "faker>=13.0.0",
 ]
 

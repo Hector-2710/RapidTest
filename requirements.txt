@@ -1,5 +1,4 @@
 # RapidTest - Core dependencies
-requests>=2.25.1
 faker>=13.0.0
 
 # Testing

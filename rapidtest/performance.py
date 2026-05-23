@@ -1,7 +1,7 @@
 """
 Performance: Load testing module.
 
-Provides basic load testing functionality using threading to simulate
+Provides basic load testing functionality using asyncio to simulate
 concurrent users. Tests endpoints under load and reports performance metrics.
 
 Example:
@@ -12,9 +12,9 @@ Example:
     >>> results = perf.run()
 """
 
+import asyncio
 import time
-import threading
-import requests
+import httpx
 from typing import Any, Annotated
 
 
@@ -23,7 +23,7 @@ class Performance:
     Simple performance testing module.
 
     Provides load testing by simulating multiple concurrent users making
-    requests to specified endpoints. Uses threading to simulate concurrency.
+    requests to specified endpoints. Uses asyncio to simulate concurrency.
 
     Attributes:
         base_url: Base URL of the server being tested.
@@ -68,14 +68,13 @@ class Performance:
         Example:
             >>> perf = Performance(base_url="https://api.example.com", users=20, duration=30)
         """
-        self.base_url = base_url.rstrip("/") if base_url else None
-        self.users = users
-        self.duration = duration
-        self.timeout = timeout
-        self.delay = delay
-        self.tasks = []
-        self.results = []
-        self.lock = threading.Lock()
+        self.base_url: str | None = base_url.rstrip("/") if base_url else None
+        self.users: int = users
+        self.duration: int = duration
+        self.timeout: int = timeout
+        self.delay: float = delay
+        self.tasks: list[dict[str, Any]] = []
+        self.results: list[dict[str, Any]] = []
 
     def add_task(
         self,
@@ -90,7 +89,7 @@ class Performance:
         """
         Add a request task to the performance test.
 
-        Tasks are executed in rotation by each worker thread.
+        Tasks are executed in rotation by each worker coroutine.
 
         Args:
             endpoint: URL endpoint to test (e.g., "/users", "/health").
@@ -120,9 +119,9 @@ class Performance:
         """
         Run the performance test.
 
-        Starts the specified number of worker threads, each making requests
-        for the specified duration. Results are collected and statistics
-        are calculated.
+        Spawns the specified number of concurrent coroutines, each making
+        requests for the specified duration. Results are collected and
+        statistics are calculated.
 
         Returns:
             Dictionary with performance metrics:
@@ -153,6 +152,15 @@ class Performance:
         if not self.base_url:
             raise ValueError("base_url is required for performance tests")
 
+        return asyncio.run(self._arun())
+
+    async def _arun(self) -> dict[str, Any]:
+        """
+        Async entry point for the performance test (internal).
+
+        Creates the shared httpx client, spawns worker coroutines, waits
+        for the configured duration, signals stop, and gathers results.
+        """
         print("🚀 Starting performance test")
         print(f"📍 URL: {self.base_url}")
         print(f"📋 Tasks: {len(self.tasks)}")
@@ -164,114 +172,121 @@ class Performance:
         print("-" * 50)
 
         self.results = []
-        self.start_time = time.time()
-        self.stop_test = False
+        stop_event = asyncio.Event()
+        lock = asyncio.Lock()
 
-        threads = []
-        for i in range(self.users):
-            thread = threading.Thread(target=self._worker, args=(i,))
-            threads.append(thread)
-            thread.start()
+        assert self.base_url is not None  # validated in run()
 
-        time.sleep(self.duration)
-        self.stop_test = True
-
-        for thread in threads:
-            thread.join()
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(self.timeout),
+            base_url=self.base_url,
+        ) as client:
+            tasks = [
+                asyncio.create_task(self._aworker(client, i, stop_event, lock))
+                for i in range(self.users)
+            ]
+            await asyncio.sleep(self.duration)
+            stop_event.set()
+            await asyncio.gather(*tasks)
 
         return self._calculate_results()
 
-    def _worker(self, worker_id: int) -> None:
+    async def _aworker(
+        self,
+        client: httpx.AsyncClient,
+        worker_id: int,
+        stop_event: asyncio.Event,
+        lock: asyncio.Lock,
+    ) -> None:
         """
-        Worker thread that makes HTTP requests.
+        Worker coroutine that makes HTTP requests.
 
-        Internal method that runs in each worker thread, continuously
-        making requests to the defined tasks until stop_test is True.
+        Internal method that runs as an asyncio task, continuously making
+        requests to the defined endpoints until stop_event is set.
 
         Args:
-            worker_id: Unique identifier for this worker thread.
+            client: Shared httpx.AsyncClient instance.
+            worker_id: Unique identifier for this worker.
+            stop_event: asyncio.Event to signal when to stop.
+            lock: Shared asyncio.Lock for protecting the results list.
         """
-        session = requests.Session()
         task_index = 0
 
-        while not self.stop_test:
+        while not stop_event.is_set():
             task = self.tasks[task_index % len(self.tasks)]
             task_index += 1
 
-            url = f"{self.base_url}{task['endpoint']}"
+            endpoint = task["endpoint"]
             method = task["method"]
             params = task.get("params")
             headers = task.get("headers")
             json_body = task.get("json")
             data_body = task.get("data")
 
-            start_time = time.time()
+            req_start = time.time()
             try:
                 if method == "GET":
-                    response = session.get(
-                        url, params=params, headers=headers, timeout=self.timeout
+                    response = await client.get(
+                        endpoint, params=params, headers=headers
                     )
                 elif method == "POST":
-                    response = session.post(
-                        url,
+                    response = await client.post(
+                        endpoint,
                         params=params,
                         headers=headers,
                         json=json_body,
                         data=data_body,
-                        timeout=self.timeout,
                     )
                 elif method == "PUT":
-                    response = session.put(
-                        url,
+                    response = await client.put(
+                        endpoint,
                         params=params,
                         headers=headers,
                         json=json_body,
-                        timeout=self.timeout,
                     )
                 elif method == "PATCH":
-                    response = session.patch(
-                        url,
+                    response = await client.patch(
+                        endpoint,
                         params=params,
                         headers=headers,
                         json=json_body,
-                        timeout=self.timeout,
                     )
                 elif method == "DELETE":
-                    response = session.delete(
-                        url, params=params, headers=headers, timeout=self.timeout
+                    response = await client.delete(
+                        endpoint, params=params, headers=headers
                     )
                 else:
                     continue
 
-                end_time = time.time()
-                with self.lock:
+                req_end = time.time()
+                async with lock:
                     self.results.append(
                         {
                             "worker_id": worker_id,
                             "method": method,
-                            "endpoint": task["endpoint"],
+                            "endpoint": endpoint,
                             "status_code": response.status_code,
-                            "response_time": (end_time - start_time) * 1000,
+                            "response_time": (req_end - req_start) * 1000,
                             "success": 200 <= response.status_code < 400,
                         }
                     )
 
             except Exception as e:
-                end_time = time.time()
-                with self.lock:
+                req_end = time.time()
+                async with lock:
                     self.results.append(
                         {
                             "worker_id": worker_id,
                             "method": method,
-                            "endpoint": task["endpoint"],
+                            "endpoint": endpoint,
                             "status_code": 0,
-                            "response_time": (end_time - start_time) * 1000,
+                            "response_time": (req_end - req_start) * 1000,
                             "success": False,
                             "error": str(e),
                         }
                     )
 
-            time.sleep(self.delay)
+            await asyncio.sleep(self.delay)
 
     def _calculate_results(self) -> dict[str, Any]:
         """
